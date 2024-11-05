@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1053816236843",
+    "project_id": "intermaps-52a31",
+    "storage_bucket": "intermaps-52a31.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053816236843:android:272858d580f95763ff736e",
+        "android_client_info": {
+          "package_name": "uji.es.intermaps"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlf8duL6HnMo9cDILidebcLGHt2XQEjcw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
