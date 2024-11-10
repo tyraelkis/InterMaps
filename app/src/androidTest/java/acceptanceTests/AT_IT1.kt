@@ -25,6 +25,7 @@ class AT_IT1 {
         db = DataBase
         email = "juan@ejemplo.com"
         password = "123456"
+        user = User(email, password)
     }
 
     @Test
@@ -36,10 +37,19 @@ class AT_IT1 {
     }
 
     @Test
-    fun edit_E1Valid_userDataIsEdited(){
+    fun edit_E1Valid_userDataEdited(){
         val newPassword = "contraseñaNueva"
         user.editUserData(email, newPassword)
         assertEquals(password, newPassword)
+    }
+
+    @Test
+    fun view_E1Valid_userDataViewed() {
+        val expectedEmail = "juan@ejemplo.com"
+        val expectedPassword = "123456"
+        user.viewUserData(email)
+        assertEquals(expectedEmail, email)
+        assertEquals(expectedPassword, password)
     }
 
     @Test
