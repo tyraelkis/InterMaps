@@ -25,7 +25,6 @@ class AT_IT1 {
         db = DataBase
         email = "juan@ejemplo.com"
         password = "123456"
-        user = User()
     }
 
     @Test
@@ -35,4 +34,12 @@ class AT_IT1 {
         val finalCount = db.getNumberUsers()
         assertEquals( initialCount + 1, finalCount)
     }
+
+    @Test
+    fun edit_E1Valid_userDataIsEdited(){
+        var newPassword:String = "contraseñaNueva"
+        user.editUserData(email, newPassword)
+        assertEquals(password, newPassword)
+    }
+
 }
