@@ -37,9 +37,17 @@ class AT_IT1 {
 
     @Test
     fun edit_E1Valid_userDataIsEdited(){
-        var newPassword:String = "contraseñaNueva"
+        val newPassword = "contraseñaNueva"
         user.editUserData(email, newPassword)
         assertEquals(password, newPassword)
+    }
+
+    @Test
+    fun delete_E1Valid_userIsDeleted() {
+        val initialCount = db.getNumberUsers()
+        user.deleteUser(email, password)
+        val finalCount = db.getNumberUsers()
+        assertEquals( initialCount - 1, finalCount)
     }
 
 }
