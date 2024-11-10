@@ -13,5 +13,9 @@ class User (var email: String, var password: String){
     fun viewUserData(email: String){
 
     }
+
+    fun deleteUser(email: String, password: String){
+
+    }
 }
 
