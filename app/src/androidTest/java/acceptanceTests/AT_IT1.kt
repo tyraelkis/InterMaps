@@ -9,7 +9,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uji.es.intermaps.Model.User
 import org.junit.Assert.*
+import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
+import uji.es.intermaps.Model.InterestPlace
 
 @RunWith(AndroidJUnit4::class)
 class AT_IT1 {
@@ -58,6 +60,14 @@ class AT_IT1 {
         user.deleteUser(email, password)
         val finalCount = db.getNumberUsers()
         assertEquals( initialCount - 1, finalCount)
+    }
+
+    @Test
+    fun edit_E1Valido_setAliasToAPlaceOfInterest(){
+        val coordinates = Coordinate(-18.665695,35.529562)
+        val newAlias = "Mozambiquinho"
+        val placeOfInterest = InterestPlace(coordinates,"Mozambique", "Moz")
+        assertEquals(true, placeOfInterest.setAlias(newAlias))
     }
 
 }

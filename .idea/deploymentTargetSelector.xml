@@ -8,6 +8,9 @@
       <SelectionState runConfigName="AT_IT1">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="edit_E1Valid_userDataEdited()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>
