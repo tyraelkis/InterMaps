@@ -6,15 +6,15 @@ class User (var email: String, var password: String){
 
     }
 
-    fun editUserData(email: String, newPassword:String){
+    fun editUserData(newPassword:String){
 
     }
 
-    fun viewUserData(email: String){
+    fun viewUserData(){
 
     }
 
-    fun deleteUser(email: String, password: String){
+    fun deleteUser(){
 
     }
 }

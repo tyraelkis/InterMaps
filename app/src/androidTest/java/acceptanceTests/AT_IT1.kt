@@ -39,23 +39,23 @@ class AT_IT1 {
     @Test
     fun edit_E1Valid_userDataEdited(){
         val newPassword = "contraseñaNueva"
-        user.editUserData(email, newPassword)
-        assertEquals(password, newPassword)
+        user.editUserData(newPassword)
+        assertEquals(user.password, newPassword)
     }
 
     @Test
     fun view_E1Valid_userDataViewed() {
         val expectedEmail = "juan@ejemplo.com"
         val expectedPassword = "123456"
-        user.viewUserData(email)
-        assertEquals(expectedEmail, email)
-        assertEquals(expectedPassword, password)
+        user.viewUserData()
+        assertEquals(expectedEmail, user.email)
+        assertEquals(expectedPassword, user.password)
     }
 
     @Test
     fun delete_E1Valid_userIsDeleted() {
         val initialCount = db.getNumberUsers()
-        user.deleteUser(email, password)
+        user.deleteUser()
         val finalCount = db.getNumberUsers()
         assertEquals( initialCount - 1, finalCount)
     }
