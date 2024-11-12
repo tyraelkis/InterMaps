@@ -23,8 +23,7 @@ class AT_IT1 {
     fun setUp() {
         auth = Firebase.auth
         db = DataBase
-        email = "juan@ejemplo.com"
-        password = "123456"
+        user = User ("juan@ejemplo.com", "123456")
     }
 
     @Test
@@ -38,8 +37,8 @@ class AT_IT1 {
     @Test
     fun edit_E1Valid_userDataIsEdited(){
         var newPassword:String = "contraseñaNueva"
-        user.editUserData(email, newPassword)
-        assertEquals(password, newPassword)
+        user.editUserData(newPassword)
+        assertEquals(user.password, newPassword)
     }
 
 }
