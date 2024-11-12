@@ -25,6 +25,7 @@ class AT_IT1 {
         db = DataBase
         email = "juan@ejemplo.com"
         password = "123456"
+        user = User (email, password)
     }
 
     @Test
@@ -38,14 +39,14 @@ class AT_IT1 {
     @Test
     fun edit_E1Valid_userDataIsEdited(){
         val newPassword = "contraseñaNueva"
-        user.editUserData(email, newPassword)
-        assertEquals(password, newPassword)
+        user.editUserData(newPassword)
+        assertEquals(user.password, newPassword)
     }
 
     @Test
     fun delete_E1Valid_userIsDeleted() {
         val initialCount = db.getNumberUsers()
-        user.deleteUser(email, password)
+        user.deleteUser()
         val finalCount = db.getNumberUsers()
         assertEquals( initialCount - 1, finalCount)
     }
