@@ -12,6 +12,7 @@ import org.junit.Assert.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
+import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
@@ -39,19 +40,39 @@ class AT_IT1 {
         user.createUser()
         val finalCount = db.getNumberUsers()
         assertEquals(initialCount + 1, finalCount)
-        user.deleteUser(email, password)
+        user.deleteUser()
     }
 
     @Test
-    fun create_E2Invalid_AccountAlreadyRegistredException() { //Revisar la prueba. Además mirar si asi vale o hay que usar AfterEach para revertir las pruebas
+    fun create_E2Invalid_errorOnAccountCreation() { //Revisar la prueba. Además mirar si asi vale o hay que usar AfterEach para revertir las pruebas
         user.createUser()
         try {
             user.createUser()
-            fail("Ya existe el usuario")
+            fail("No se debería poder crear el usuario")
         }catch (e: AccountAlreadyRegistredException){
             assertEquals("Ya existe el usuario", e.message)
         }
-        user.deleteUser(email, password)
+        user.deleteUser()
+    }
+
+    @Test
+    fun login_E1Valid_userIsLogged() {
+        user.createUser()
+        assertEquals(true, user.login())
+        user.deleteUser()
+    }
+
+    @Test
+    fun login_E2Invalid_errorOnLogin() { //Preguntar a Miguel
+        assertEquals(false, user.login())
+        /*
+        try {
+            user.login()
+            fail("No se debería poder iniciar sesión")
+        }catch (e: UnregistredUserException){
+            assertEquals("No existe el usuario", e.message)
+        }
+        */
     }
 
     @Test

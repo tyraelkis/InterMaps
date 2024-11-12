@@ -6,6 +6,10 @@ class User (var email: String, var password: String){
         //crea el usuario en la base de datos
     }
 
+    fun login() : Boolean{
+        return false
+    }
+
     fun editUserData(newPassword:String){
 
     }
