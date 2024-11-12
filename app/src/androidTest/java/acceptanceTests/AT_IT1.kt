@@ -92,6 +92,21 @@ class AT_IT1 {
     }
 
     @Test
+    fun signOut_E1Valid_userSignedOut() {
+        user.createUser()
+        user.login()
+        assertEquals(true, user.signOut())
+        user.deleteUser()
+    }
+
+    @Test
+    fun signOut_E1Valid_errorSigningOut() {
+        user.createUser()
+        assertEquals(false, user.signOut())
+        user.deleteUser()
+    }
+
+    @Test
     fun delete_E1Valid_userIsDeleted() {
         val initialCount = db.getNumberUsers()
         user.deleteUser()

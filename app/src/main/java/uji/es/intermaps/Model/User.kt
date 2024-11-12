@@ -10,6 +10,10 @@ class User (var email: String, var password: String){
         return false
     }
 
+    fun signOut() : Boolean{
+        return false
+    }
+
     fun editUserData(newPassword:String){
 
     }
