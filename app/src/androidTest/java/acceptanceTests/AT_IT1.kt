@@ -13,7 +13,10 @@ import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
+import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.Model.Repository
+import uji.es.intermaps.Model.UserService
 
 @RunWith(AndroidJUnit4::class)
 class AT_IT1 {
@@ -22,17 +25,23 @@ class AT_IT1 {
     private lateinit var email: String
     private lateinit var password: String
     private lateinit var user: User
+    private lateinit var userService: UserService
     private lateinit var interestPlace: InterestPlace
+    private lateinit var repository: Repository
+
 
     @BeforeAll
     fun setUp() {
         //variables base de datos
         auth = Firebase.auth
         db = DataBase
+        repository = FirebaseRepository()
         //variables usuario
         email = "prueba@uji.es"
         password = "12345"
-        user = User(email, password)
+        user = User(email)
+        userService = UserService(repository)
+
         //variables lugar de interés
         interestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
     }
@@ -81,8 +90,8 @@ class AT_IT1 {
     @Test
     fun editUserData_E1Valid_userDataEdited() {
         val newPassword = "contraseñaNueva"
-        user.editUserData(newPassword)
-        assertEquals(user.password, newPassword)
+        userService.editUserData(email, newPassword)
+        assertEquals(true, newPassword)
     }
 
     @Test
