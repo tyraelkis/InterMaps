@@ -1,5 +1,6 @@
 package acceptanceTests
 
+import Exceptions.NotValidAliasException
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -15,6 +16,7 @@ import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.Model.InterestPlaceService
 import uji.es.intermaps.Model.Repository
 import uji.es.intermaps.Model.UserService
 
@@ -27,6 +29,7 @@ class AT_IT1 {
     private lateinit var user: User
     private lateinit var userService: UserService
     private lateinit var interestPlace: InterestPlace
+    private lateinit var interestPlaceService: InterestPlaceService
     private lateinit var repository: Repository
 
 
@@ -44,6 +47,7 @@ class AT_IT1 {
 
         //variables lugar de interés
         interestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
+        interestPlaceService = InterestPlaceService(repository)
     }
 
     @Test
@@ -139,11 +143,19 @@ class AT_IT1 {
     }
 
     @Test
-    fun edit_E1Valido_setAliasToAPlaceOfInterest() {
-        val coordinates = Coordinate(-18.665695, 35.529562)
-        val newAlias = "Mozambiquinho"
-        val placeOfInterest = InterestPlace(coordinates, "Mozambique", "Moz")
-        assertEquals(true, placeOfInterest.setAlias(newAlias))
+    fun editInterestPlace_E1Valido_setAliasToAPlaceOfInterest() {
+        val result: Boolean = interestPlaceService.setAlias(interestPlace, newAlias = "Mozambiquinho")
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun editInterestPlace_E1Invalido_errorSetAliasToAPlaceOFInterest(){
+        try{
+            interestPlaceService.setAlias(interestPlace, newAlias = "@#//")
+            assert(false){"se esperaba excepción"}
+        }catch (e: NotValidAliasException){
+            assertEquals("El nuevo alias no es valido", e.message)
+        }
     }
 
 }
