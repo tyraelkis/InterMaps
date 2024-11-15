@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
+import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Exceptions.UnregistredUserException
@@ -50,6 +51,7 @@ class AT_IT1 {
         user = User(email, password)
         userService = UserService(repository)
         //variables lugar de interés
+
         interestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
         interestPlaceService = InterestPlaceService(repository)
     }
@@ -145,14 +147,16 @@ class AT_IT1 {
 
     @Test
     fun createInterestPlace_E1Valid_InterestPlaceCreated() {
-        assertEquals(true, interestPlace.createInterestPlace())
-        interestPlace.deleteInterestPlace()
+        val interestPlaceTest: InterestPlace = interestPlaceService.createInterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz")
+        assertEquals(interestPlace, interestPlaceTest)
+        interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
     }
 
     @Test
     fun createInterestPlace_E2Invalid_errorOnCreatingInterestPlace() {
-        assertEquals(false, interestPlace.createInterestPlace())
-        interestPlace.deleteInterestPlace()
+        assertThrows<NotValidCoordinatesException>{
+            interestPlaceService.createInterestPlace(Coordinate(-1800.665695,35.529562), "Mozambique", "Moz")
+        }
     }
 
     @Test
