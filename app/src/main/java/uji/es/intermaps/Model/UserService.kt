@@ -11,7 +11,7 @@ class UserService(var repository: Repository) {
         return false
     }
 
-    fun signOut() : Boolean{
+    fun signOut(email: String, pswd: String) : Boolean{
         return false
     }
 

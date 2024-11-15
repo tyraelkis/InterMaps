@@ -113,17 +113,19 @@ class AT_IT1 {
 
     @Test
     fun signOut_E1Valid_userSignedOut() {
-        user.createUser()
-        user.login()
-        assertEquals(true, user.signOut())
-        user.deleteUser()
+        val userTest: User = userService.createUser(email, password)
+        userService.login(userTest.email, userTest.password)
+        assertEquals(true, userService.signOut(userTest.email,userTest.password))
+        userService.deleteUser(userTest.email)
     }
 
     @Test
     fun signOut_E2Invalid_errorSigningOut() {
-        user.createUser()
-        assertEquals(false, user.signOut())
-        user.deleteUser()
+        val userTest: User = userService.createUser(email, password)
+        assertThrows<SessionNotStartedException>{
+            userService.signOut(userTest.email,userTest.password)
+        }
+        userService.deleteUser(userTest.email)
     }
 
     @Test
