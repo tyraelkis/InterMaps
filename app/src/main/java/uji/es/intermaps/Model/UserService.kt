@@ -23,7 +23,7 @@ class UserService(var repository: Repository) {
         return null
     }
 
-    fun deleteUser(){
+    fun deleteUser(email: String){
 
     }
 }

@@ -141,7 +141,7 @@ class AT_IT1 {
     @Test
     fun deleteUser_E1Valid_userIsDeleted() {
         val initialCount = db.getNumberUsers()
-        userService.deleteUser()
+        userService.deleteUser(email)
         val finalCount = db.getNumberUsers()
         assertEquals(initialCount - 1, finalCount)
     }
@@ -149,7 +149,7 @@ class AT_IT1 {
     @Test
     fun deleteUser_E1Invalid_userIsDeleted() {
         assertThrows<UnableToDeleteUserException>{
-            userService.deleteUser()
+            userService.deleteUser(email)
         }
     }
 
