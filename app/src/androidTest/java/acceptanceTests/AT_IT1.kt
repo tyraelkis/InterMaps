@@ -16,6 +16,7 @@ import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
+import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.FirebaseRepository
@@ -71,11 +72,14 @@ class AT_IT1 {
     fun login_E1Valid_userIsLogged() {
         val userTest: User = userService.createUser(email, password)
         assertEquals(true, userService.login(userTest.email,userTest.password))
+        userService.deleteUser(userTest.email)
     }
 
     @Test
     fun login_E2Invalid_errorOnLogin() {
-        assertEquals(false, user.login())
+        assertThrows<UnregistredUserException>{
+            userService.login(email, password)
+        }
     }
 
     @Test
