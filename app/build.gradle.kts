@@ -70,6 +70,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(project(":app"))
     testImplementation (libs.junit.jupiter.api)
+    androidTestImplementation(libs.junit.jupiter)
     testRuntimeOnly (libs.junit.jupiter.engine)
     androidTestImplementation (libs.junit.jupiter.api)
     androidTestImplementation (libs.junit.jupiter.engine)

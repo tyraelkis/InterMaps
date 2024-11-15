@@ -11,9 +11,11 @@ import org.junit.runner.RunWith
 import uji.es.intermaps.Model.User
 import org.junit.Assert.*
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
+import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.FirebaseRepository
@@ -99,14 +101,12 @@ class AT_IT1 {
     }
 
     @Test
-    fun viewUserData_E1Invalid_userDataNotViewed(){
-        try {
-            val userData: User? = userService.viewUserData(email)
-            assert(false){"Se esperaba excepción"}
-        }catch (e: SessionNotStartedException){
-            assertEquals("No se pueden mostrar los datos del usuario", e.message)
+    fun viewUserData_E1Invalid_userDataNotViewed() {
+        assertThrows<SessionNotStartedException> {
+            userService.viewUserData(email)
         }
     }
+
     @Test
     fun editUserData_E1Valid_userDataEdited() {
         val newPassword = "GuillemElMejor"
@@ -117,11 +117,8 @@ class AT_IT1 {
     @Test
     fun editUserData_E1Invalid_userDataEdited(){
         val newPassword = "J"
-        try {
+        assertThrows<IncorrectDataException>{
             userService.editUserData(email, newPassword)
-            assert(false){"Se esperaba excepción"}
-        }catch (e: IncorrectDataException){
-            assertEquals("La contraseña no cumple con los requisitos", e.message)
         }
     }
 
@@ -144,9 +141,16 @@ class AT_IT1 {
     @Test
     fun deleteUser_E1Valid_userIsDeleted() {
         val initialCount = db.getNumberUsers()
-        user.deleteUser()
+        userService.deleteUser()
         val finalCount = db.getNumberUsers()
         assertEquals(initialCount - 1, finalCount)
+    }
+
+    @Test
+    fun deleteUser_E1Invalid_userIsDeleted() {
+        assertThrows<UnableToDeleteUserException>{
+            userService.deleteUser()
+        }
     }
 
     @Test
@@ -169,11 +173,8 @@ class AT_IT1 {
 
     @Test
     fun editInterestPlace_E1Invalido_errorSetAliasToAPlaceOFInterest(){
-        try{
+        assertThrows<NotValidAliasException>{
             interestPlaceService.setAlias(interestPlace, newAlias = "@#//")
-            assert(false){"se esperaba excepción"}
-        }catch (e: NotValidAliasException){
-            assertEquals("El nuevo alias no es valido", e.message)
         }
     }
 

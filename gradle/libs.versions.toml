@@ -23,6 +23,7 @@ navigationCompose = "2.8.2"
 coil = "3.0.0-rc01"
 junitKtx = "1.2.1"
 okhttp = "4.12.0"
+junitJupiter = "5.8.1"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-junit-ktx-v115 = { module = "androidx.test.ext:junit-ktx", version.ref = "junitKtxVersion" }
@@ -52,6 +53,7 @@ junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.re
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiterEngine" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converterGson" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
