@@ -1,6 +1,7 @@
 package acceptanceTests
 
-import Exceptions.NotValidAliasException
+
+import uji.es.intermaps.Exceptions.NotValidAliasException
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -11,7 +12,7 @@ import uji.es.intermaps.Model.User
 import org.junit.Assert.*
 import org.junit.jupiter.api.BeforeAll
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
-import uji.es.intermaps.Exceptions.UnregistredUserException
+import uji.es.intermaps.Exceptions.IncorrectDataException
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.FirebaseRepository
@@ -44,7 +45,6 @@ class AT_IT1 {
         password = "12345"
         user = User(email)
         userService = UserService(repository)
-
         //variables lugar de interés
         interestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
         interestPlaceService = InterestPlaceService(repository)
@@ -92,13 +92,6 @@ class AT_IT1 {
     }
 
     @Test
-    fun editUserData_E1Valid_userDataEdited() {
-        val newPassword = "contraseñaNueva"
-        userService.editUserData(email, newPassword)
-        assertEquals(true, newPassword)
-    }
-
-    @Test
     fun viewUserData_E1Valid_userDataViewed() {
         val expectedEmail = "juan@ejemplo.com"
         val expectedPassword = "123456"
@@ -106,6 +99,25 @@ class AT_IT1 {
         assertEquals(expectedEmail, user.email)
         assertEquals(expectedPassword, user.password)
     }
+
+    @Test
+    fun editUserData_E1Valid_userDataEdited() {
+        val newPassword = "GuillemElMejor"
+        userService.editUserData(email, newPassword)
+        assertEquals(true, newPassword)
+    }
+
+    @Test
+    fun editUserData_E1Invalid_userDataEdited(){
+        val newPassword = "J"
+        try {
+            userService.editUserData(email, newPassword)
+            assert(false){"Se esperaba excepción"}
+        }catch (e: IncorrectDataException){
+            assertEquals("La contraseña no cumple con los requisitos", e.message)
+        }
+    }
+
 
     @Test
     fun signOut_E1Valid_userSignedOut() {
