@@ -19,8 +19,8 @@ class UserService(var repository: Repository) {
         return true
     }
 
-    fun viewUserData(){
-
+    fun viewUserData(email: String): User?{
+        return null
     }
 
     fun deleteUser(){

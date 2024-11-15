@@ -13,6 +13,7 @@ import org.junit.Assert.*
 import org.junit.jupiter.api.BeforeAll
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
+import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.FirebaseRepository
@@ -93,13 +94,19 @@ class AT_IT1 {
 
     @Test
     fun viewUserData_E1Valid_userDataViewed() {
-        val expectedEmail = "juan@ejemplo.com"
-        val expectedPassword = "123456"
-        user.viewUserData()
-        assertEquals(expectedEmail, user.email)
-        assertEquals(expectedPassword, user.password)
+        val userData: User? = userService.viewUserData(email)
+        assertEquals(user, userData)
     }
 
+    @Test
+    fun viewUserData_E1Invalid_userDataNotViewed(){
+        try {
+            val userData: User? = userService.viewUserData(email)
+            assert(false){"Se esperaba excepción"}
+        }catch (e: SessionNotStartedException){
+            assertEquals("No se pueden mostrar los datos del usuario", e.message)
+        }
+    }
     @Test
     fun editUserData_E1Valid_userDataEdited() {
         val newPassword = "GuillemElMejor"
