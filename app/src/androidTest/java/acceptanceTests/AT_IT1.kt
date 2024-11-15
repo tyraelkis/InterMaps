@@ -46,7 +46,7 @@ class AT_IT1 {
         //variables usuario
         email = "prueba@uji.es"
         password = "12345"
-        user = User(email)
+        user = User(email, password)
         userService = UserService(repository)
         //variables lugar de interés
         interestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
@@ -54,44 +54,28 @@ class AT_IT1 {
     }
 
     @Test
-    fun createUser_E1Valid_userIsCreated() { //Ver si es mejor que devuelva un booleano y sin excepciones o que es gestionen en el método de la clase
-        val initialCount = db.getNumberUsers()
-        user.createUser()
-        val finalCount = db.getNumberUsers()
-        assertEquals(initialCount + 1, finalCount)
-        user.deleteUser()
+    fun createUser_E1Valid_userIsCreated() {
+        val userTest: User = userService.createUser(email, password)
+        assertEquals(user,userTest)
+        userService.deleteUser(userTest.email)
     }
 
     @Test
-    fun createUser_E2Invalid_errorOnAccountCreation() { //Revisar la prueba. Además mirar si asi vale o hay que usar AfterEach para revertir las pruebas
-        user.createUser()
-        try {
-            user.createUser()
-            fail("No se debería poder crear el usuario")
-        }catch (e: AccountAlreadyRegistredException){
-            assertEquals("Ya existe el usuario", e.message)
+    fun createUser_E2Invalid_errorOnAccountCreation() {
+        assertThrows<AccountAlreadyRegistredException> {
+            userService.createUser(email, password)
         }
-        user.deleteUser()
     }
 
     @Test
     fun login_E1Valid_userIsLogged() {
-        user.createUser()
-        assertEquals(true, user.login())
-        user.deleteUser()
+        val userTest: User = userService.createUser(email, password)
+        assertEquals(true, userService.login(userTest.email,userTest.password))
     }
 
     @Test
-    fun login_E2Invalid_errorOnLogin() { //Preguntar a Miguel
+    fun login_E2Invalid_errorOnLogin() {
         assertEquals(false, user.login())
-        /*
-        try {
-            user.login()
-            fail("No se debería poder iniciar sesión")
-        }catch (e: UnregistredUserException){
-            assertEquals("No existe el usuario", e.message)
-        }
-        */
     }
 
     @Test

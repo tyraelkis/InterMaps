@@ -2,9 +2,9 @@ package uji.es.intermaps.Model
 
 class UserService(var repository: Repository) {
 
-    fun createUser(email: String, pswd:String): User? {
+    fun createUser(email: String, pswd:String): User {
         //Comprueba las reglas de negocio
-        return null;
+        return User("a","b");
     }
 
     fun login(email: String, pswd: String) : Boolean{
