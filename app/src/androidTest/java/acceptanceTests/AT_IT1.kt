@@ -2,15 +2,12 @@ package acceptanceTests
 
 
 import uji.es.intermaps.Exceptions.NotValidAliasException
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import org.junit.Test
-import org.junit.runner.RunWith
 import uji.es.intermaps.Model.User
 import org.junit.Assert.*
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
@@ -26,35 +23,16 @@ import uji.es.intermaps.Model.InterestPlaceService
 import uji.es.intermaps.Model.Repository
 import uji.es.intermaps.Model.UserService
 
-@RunWith(AndroidJUnit4::class)
 class AT_IT1 {
-    private lateinit var auth: FirebaseAuth
-    private lateinit var db: DataBase
-    private lateinit var email: String
-    private lateinit var password: String
-    private lateinit var user: User
-    private lateinit var userService: UserService
-    private lateinit var interestPlace: InterestPlace
-    private lateinit var interestPlaceService: InterestPlaceService
-    private lateinit var repository: Repository
-
-
-    @BeforeAll
-    fun setUp() {
-        //variables base de datos
-        auth = Firebase.auth
-        db = DataBase
-        repository = FirebaseRepository()
-        //variables usuario
-        email = "prueba@uji.es"
-        password = "12345"
-        user = User(email, password)
-        userService = UserService(repository)
-        //variables lugar de interés
-
-        interestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
-        interestPlaceService = InterestPlaceService(repository)
-    }
+    private var auth: FirebaseAuth = Firebase.auth
+    private var db: DataBase = DataBase
+    private var repository: Repository = FirebaseRepository()
+    private var email: String = "prueba@uji.es"
+    private var password: String = "12345"
+    private var user: User = User(email, password)
+    private var userService: UserService = UserService(repository)
+    private var interestPlace: InterestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
+    private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
 
     @Test
     fun createUser_E1Valid_userIsCreated() {

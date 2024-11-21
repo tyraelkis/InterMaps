@@ -12,6 +12,6 @@ class InterestPlaceService(repository: Repository) {
 
     fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean{
         //Cambia o asigna un nuevo alias a un lugar de interés concreto
-        return true
+        return false
     }
 }
