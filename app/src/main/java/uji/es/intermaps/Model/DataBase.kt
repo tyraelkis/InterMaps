@@ -2,6 +2,7 @@ package uji.es.intermaps.Model
 
 import android.annotation.SuppressLint
 import android.util.Log
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.crashlytics.internal.Logger.TAG
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.ktx.firestore
@@ -10,6 +11,7 @@ import com.google.firebase.ktx.Firebase
 object DataBase {
     @SuppressLint("StaticFieldLeak")
     val db = Firebase.firestore
+    val auth = Firebase.auth
 
     fun getNumberUsers(): Int {
         var count = 0
