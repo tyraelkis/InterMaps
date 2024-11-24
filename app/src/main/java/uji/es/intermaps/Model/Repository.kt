@@ -3,7 +3,7 @@ package uji.es.intermaps.Model
 interface Repository {
     fun createUser(email:String, pswd: String): User
     fun loginUser(email:String, pswd: String): Boolean
-    fun viewUserData(email: String): User?
+    fun viewUserData(email: String) : User?
     fun editUserData(email: String, newPassword:String): Boolean
     fun deleteUser(email: String): Boolean
     fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean

@@ -170,7 +170,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             border = BorderStroke(2.dp, Color.Black),
             shape = RoundedCornerShape(10.dp)
         ) {
-            Text(text = "Crear Cuenta", color = Black, fontWeight = FontWeight.Bold)
+            Text(text = "Crear Cuenta", color = Black, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(64.dp))
 
@@ -194,7 +194,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
                 colors = ButtonDefaults.buttonColors(containerColor = Black),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text(text = "Iniciar Sesión", color = White, fontWeight = FontWeight.Bold)
+                Text(text = "Iniciar Sesión", color = White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

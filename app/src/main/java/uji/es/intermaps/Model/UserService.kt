@@ -1,5 +1,7 @@
 package uji.es.intermaps.Model
 
+import com.google.firebase.auth.FirebaseAuth
+
 class UserService(var repository: Repository) {
 
     fun createUser(email: String, pswd:String): User {

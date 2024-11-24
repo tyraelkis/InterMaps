@@ -1,6 +1,15 @@
 package uji.es.intermaps.Model
 
+import android.util.Log
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import okhttp3.Callback
+
 class FirebaseRepository: Repository{
+    val db = Firebase.firestore
+    val auth = Firebase.auth
+
 
     override fun createUser(email:String, pswd: String): User{
         return User("a","b")
@@ -10,7 +19,7 @@ class FirebaseRepository: Repository{
         return false
     }
 
-    override fun viewUserData(email: String): User? {
+    override fun viewUserData(email: String): User?{
         return null
     }
 
@@ -35,3 +44,5 @@ class FirebaseRepository: Repository{
     }
 
 }
+
+
