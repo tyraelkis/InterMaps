@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,6 +47,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.firestore.FirebaseFirestore
@@ -59,11 +61,14 @@ fun UserDataScreen(){
 
     var expandedVehicles by remember { mutableStateOf(false) }
     var expandedRoutes by remember { mutableStateOf(false) }
-    val optionsVehicles = listOf("Ninguno", "Gasolina", "Diesel", "Eléctrico")
-    val optionsRoutes = listOf("Ninguno", "Rápida", "Corta", "Económica")
-    val optionsTransport = listOf("Ninguno", "Gasolina", "Diesel", "Eléctrico")
+    var expandedTransport by remember { mutableStateOf(false) }
+    val optionsVehicles = listOf("...", "Gasolina", "Diesel", "Eléctrico")
+    val optionsRoutes = listOf("...", "Rápida", "Corta", "Económica")
+    val optionsTransport = listOf("...", "En coche", "A pie", "En bicicleta")
     var selectedOptionVehicles by remember { mutableStateOf(optionsVehicles[0]) }
     var selectedOptionRoutes by remember { mutableStateOf(optionsRoutes[0]) }
+    var selectedOptionTransport by remember { mutableStateOf(optionsRoutes[0]) }
+
 
 
     Column(
@@ -103,7 +108,7 @@ fun UserDataScreen(){
 
         Box(
             modifier = Modifier
-                .height(55.dp)
+                .height(45.dp)
                 .width(350.dp)
                 .background(Color(0XFF808080), shape = RoundedCornerShape(10.dp))
                 .clip(RoundedCornerShape(10.dp))
@@ -138,7 +143,7 @@ fun UserDataScreen(){
 
         Box(
             modifier = Modifier
-                .height(55.dp)
+                .height(45.dp)
                 .width(350.dp)
                 .background(Color(0XFF808080), shape = RoundedCornerShape(10.dp))
                 .clip(RoundedCornerShape(10.dp))
@@ -169,13 +174,13 @@ fun UserDataScreen(){
             Text(text = "Cambiar Contraseña", color = White, fontSize = 14.sp)
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(64.dp))
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp),
-            horizontalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -184,7 +189,7 @@ fun UserDataScreen(){
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.width(30.dp))
+            Spacer(modifier = Modifier.weight(1f))
             ExposedDropdownMenuBox(
                 expanded = expandedVehicles,
                 onExpandedChange = { expandedVehicles = !expandedVehicles }
@@ -194,6 +199,7 @@ fun UserDataScreen(){
                     onValueChange = { },
                     readOnly = true,
                     modifier = Modifier.menuAnchor()
+                        .width(160.dp)
                         .padding(0.dp)
                         .height(48.dp)
                         .border(1.dp, Color.Black, RoundedCornerShape(8.dp)),
@@ -224,7 +230,7 @@ fun UserDataScreen(){
                             text = {
                                 Text(
                                     option,
-                                    color = if (option == selectedOptionVehicles) Color.Black else Color.White
+                                    color = if (option == selectedOptionVehicles) Color.White else Color.Black
                                 )
                             },
                             onClick = {
@@ -234,7 +240,7 @@ fun UserDataScreen(){
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    if (option == selectedOptionVehicles) Color.Gray else Color.DarkGray,
+                                    if (option == selectedOptionVehicles) Color.Gray else Color.LightGray,
                                     shape = RoundedCornerShape(8.dp)
                                 )
                         )
@@ -258,7 +264,7 @@ fun UserDataScreen(){
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.width(30.dp))
+            Spacer(modifier = Modifier.weight(1f))
             ExposedDropdownMenuBox(
                 expanded = expandedRoutes,
                 onExpandedChange = { expandedRoutes = !expandedRoutes }
@@ -268,6 +274,7 @@ fun UserDataScreen(){
                     onValueChange = { },
                     readOnly = true,
                     modifier = Modifier.menuAnchor()
+                        .width(160.dp)
                         .padding(0.dp)
                         .height(48.dp)
                         .border(1.dp, Color.Black, RoundedCornerShape(8.dp)),
@@ -298,7 +305,7 @@ fun UserDataScreen(){
                             text = {
                                 Text(
                                     option,
-                                    color = if (option == selectedOptionRoutes) Color.Black else Color.White
+                                    color = if (option == selectedOptionRoutes) Color.White else Color.Black
                                 )
                             },
                             onClick = {
@@ -308,7 +315,7 @@ fun UserDataScreen(){
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    if (option == selectedOptionRoutes) Color.Gray else Color.DarkGray,
+                                    if (option == selectedOptionRoutes) Color.Gray else Color.LightGray,
                                     shape = RoundedCornerShape(8.dp)
                                 )
                         )
@@ -316,6 +323,123 @@ fun UserDataScreen(){
                 }
             }
         }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Tipo de ruta pred.",
+                color = Color.Black,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            ExposedDropdownMenuBox(
+                expanded = expandedTransport,
+                onExpandedChange = { expandedTransport = !expandedTransport }
+            ) {
+                TextField(
+                    value = selectedOptionTransport,
+                    onValueChange = { },
+                    readOnly = true,
+                    modifier = Modifier.menuAnchor()
+                        .width(160.dp)
+                        .padding(0.dp)
+                        .height(48.dp)
+                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp)),
+                    trailingIcon = {
+                        Icon(
+                            imageVector = if (expandedTransport) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = null
+                        )
+                    },
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.Transparent,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    textStyle = androidx.compose.ui.text.TextStyle(
+                        fontSize = 16.sp,
+                        lineHeight = 20.sp,  // Ajustar el lineHeight para evitar corte, manteniendo el texto centrado
+                        textAlign = TextAlign.Center  // Asegura que el texto esté centrado verticalmente
+                    ),
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedTransport,
+                    onDismissRequest = { expandedTransport = false }
+                ) {
+                    optionsTransport.forEach { option ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    option,
+                                    color = if (option == selectedOptionTransport) Color.White else Color.Black
+                                )
+                            },
+                            onClick = {
+                                selectedOptionTransport = option
+                                expandedTransport = false
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    if (option == selectedOptionTransport) Color.Gray else Color.LightGray,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                        )
+                    }
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(64.dp))
+
+        Button(
+            onClick = {},
+            modifier = Modifier
+                .height(45.dp)
+                .width(350.dp)
+                .padding(horizontal = 32.dp, vertical = 1.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0XFF808080)),
+            shape = RoundedCornerShape(10.dp)
+        ) {
+            Text(text = "Guardar Datos", color = White, fontSize = 20.sp)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {},
+            modifier = Modifier
+                .height(45.dp)
+                .width(350.dp)
+                .padding(horizontal = 32.dp, vertical = 1.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+            shape = RoundedCornerShape(10.dp)
+        ) {
+            Text(text = "Cerrar Sesión", color = White, fontSize = 20.sp)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        Text(
+            text = "Eliminar cuenta",
+            color = Color.Black,
+            fontSize = 16.sp,
+            modifier = Modifier
+                .clickable {
+
+                }
+                .padding(vertical = 8.dp),
+            style = androidx.compose.ui.text.TextStyle(
+                textDecoration = TextDecoration.Underline,
+                textAlign = TextAlign.Center
+            )
+        )
 
     }
 
