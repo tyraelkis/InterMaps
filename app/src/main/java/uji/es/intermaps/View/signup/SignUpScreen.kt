@@ -37,11 +37,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
+import uji.es.intermaps.Model.FirebaseRepository
+import uji.es.intermaps.Model.Repository
+import uji.es.intermaps.Model.User
+import uji.es.intermaps.Model.UserService
+
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
 fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateToHome: () -> Unit) {
-
+    val repository: Repository = FirebaseRepository()
+    val user: UserService = UserService(repository)
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -152,15 +158,12 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
 
         OutlinedButton(
             onClick = {
-                auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener{
-                    if(it.isSuccessful){
-                        navigateToHome()
-                    }
-                    else{
-                        Log.i("SARA", "NO Registrado")
-                    }
+                val createUser: User = user.createUser(email, password)
+                //auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener{
+                if (createUser != null)
+                    navigateToHome()
                 }
-            },
+            ,
             modifier = Modifier
                 .height(42.dp)
                 .width(250.dp)

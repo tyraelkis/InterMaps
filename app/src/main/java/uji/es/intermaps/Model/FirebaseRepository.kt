@@ -1,18 +1,23 @@
 package uji.es.intermaps.Model
 
 import android.util.Log
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import okhttp3.Callback
+import kotlin.collections.hashMapOf as hashMapOf
 
 class FirebaseRepository: Repository{
-    val db = Firebase.firestore
+    val db = FirebaseFirestore.getInstance()
     val auth = Firebase.auth
 
 
     override fun createUser(email:String, pswd: String): User{
-        return User("a","b")
+        auth.createUserWithEmailAndPassword(email, pswd)
+        db.collection("User").add(email)
+        return User(email,pswd)
     }
 
     override fun loginUser(email:String, pswd: String): Boolean{
@@ -20,6 +25,8 @@ class FirebaseRepository: Repository{
     }
 
     override fun viewUserData(email: String): User?{
+        val firebaseUser: FirebaseUser? = auth.currentUser
+
         return null
     }
 

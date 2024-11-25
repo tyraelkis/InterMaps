@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import uji.es.intermaps.R
@@ -58,7 +59,7 @@ import java.time.format.TextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserDataScreen(navigateToUserChangeEmail: () -> Unit = {}, navigateToUserChangePassword: () -> Unit){
+fun UserDataScreen(navigateToUserChangeEmail: () -> Unit = {}, navigateToUserChangePassword: () -> Unit, auth: FirebaseAuth){
 
     var expandedVehicles by remember { mutableStateOf(false) }
     var expandedRoutes by remember { mutableStateOf(false) }
@@ -76,7 +77,7 @@ fun UserDataScreen(navigateToUserChangeEmail: () -> Unit = {}, navigateToUserCha
     var newEmail by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
 
-
+    val user = auth.currentUser
 
 
     Column(
@@ -125,14 +126,16 @@ fun UserDataScreen(navigateToUserChangeEmail: () -> Unit = {}, navigateToUserCha
             contentAlignment = Alignment.Center
         ) {
             // Texto en el fondo
-            Text(
-                text = "Correo Electrónico",
-                color = Color.White,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.Center),
-                fontWeight = FontWeight.Bold
-            )
+            if (user != null) {
+                Text(
+                    text = user.email ?: "Correo no disponible",
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.align(Alignment.Center),
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -150,7 +153,7 @@ fun UserDataScreen(navigateToUserChangeEmail: () -> Unit = {}, navigateToUserCha
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Box(
+        /*Box(
             modifier = Modifier
                 .height(45.dp)
                 .width(350.dp)
@@ -168,19 +171,20 @@ fun UserDataScreen(navigateToUserChangeEmail: () -> Unit = {}, navigateToUserCha
                 modifier = Modifier.align(Alignment.Center),
                 fontWeight = FontWeight.Bold
             )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
+        }*/
+        //Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = {showPopupPassword = true},
             modifier = Modifier
-                .height(36.dp)
+                .height(45.dp)
+                .fillMaxWidth(1f)
                 .padding(horizontal = 32.dp, vertical = 1.dp)
                 .align(AbsoluteAlignment.Right),
             colors = ButtonDefaults.buttonColors(containerColor = Black),
             shape = RoundedCornerShape(10.dp)
         ) {
-            Text(text = "Cambiar Contraseña", color = White, fontSize = 14.sp)
+            Text(text = "Cambiar Contraseña", color = White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
         }
 
         Spacer(modifier = Modifier.height(64.dp))
