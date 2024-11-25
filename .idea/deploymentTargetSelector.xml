@@ -8,7 +8,7 @@
       <SelectionState runConfigName="AT_IT1">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="All Tests">
+      <SelectionState runConfigName="Tests in 'acceptanceTests'">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

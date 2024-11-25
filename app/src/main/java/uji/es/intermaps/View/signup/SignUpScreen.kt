@@ -152,13 +152,12 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
 
         OutlinedButton(
             onClick = {
-                if(email.isEmpty() || password.isEmpty()) {
-                    auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener {
-                        if (it.isSuccessful) {
-                            navigateToHome()
-                        } else {
-                            Log.i("SARA", "NO Registrado")
-                        }
+                auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener{
+                    if(it.isSuccessful){
+                        navigateToHome()
+                    }
+                    else{
+                        Log.i("SARA", "NO Registrado")
                     }
                 }
             },

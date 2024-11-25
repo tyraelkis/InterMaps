@@ -160,15 +160,13 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
 
         Button(
             onClick = {
-                if(email.isEmpty()|| password.isEmpty()){
-                    auth.signInWithEmailAndPassword(email, password).addOnCompleteListener{
-                        if(it.isSuccessful){
-                            navigateToHome()
-                        }
-                        else{
-                            Log.i("SARA", "NO LOGIN")
-                        }
-                    }
+                auth.signInWithEmailAndPassword(email, password).addOnCompleteListener{
+                   if(it.isSuccessful){
+                       navigateToHome()
+                   }
+                    else{
+                        Log.i("SARA", "NO LOGIN")
+                   }
                 }
             },
             modifier = Modifier

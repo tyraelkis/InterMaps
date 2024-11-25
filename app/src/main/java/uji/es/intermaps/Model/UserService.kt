@@ -1,14 +1,10 @@
 package uji.es.intermaps.Model
 
-import uji.es.intermaps.Exceptions.IncorrectDataException
-
 class UserService(var repository: Repository) {
 
     fun createUser(email: String, pswd:String): User {
-        //if(email.isEmpty() || pswd.isEmpty()) throw IncorrectDataException("Los campos deben tener contenido")
-        //val user = User(email, pswd)
-        //return repository.createUser(user)
-        return User(email, pswd)
+        //Comprueba las reglas de negocio
+        return User("a","b");
     }
 
     fun login(email: String, pswd: String) : Boolean{

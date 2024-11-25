@@ -1,31 +1,24 @@
 package uji.es.intermaps.Model
 
-import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
-
 class FirebaseRepository: Repository{
-    var intermapsDB = DataBase
 
-    override fun createUser(user: User): User{ //Mirar si el return puede ser mejor devolviendo boolean y comprobar que coincide el email
-        //val result = intermapsDB.auth.createUserWithEmailAndPassword(user.email, user.password)
-        //if(result.isSuccessful){
-        //    intermapsDB.db.collection("Users").add(mapOf("email" to user.email))
-        //}
-        return user
+    override fun createUser(email:String, pswd: String): User{
+        return User("a","b")
     }
 
-    override fun loginUser(user: User): Boolean{
+    override fun loginUser(email:String, pswd: String): Boolean{
         return false
     }
 
-    override fun viewUserData(user: User): User? { //pasarle el email
+    override fun viewUserData(email: String): User? {
         return null
     }
 
-    override fun editUserData(user: User, newPassword:String): Boolean{
+    override fun editUserData(email: String, newPassword:String): Boolean{
         return true
     }
 
-    override fun deleteUser(user: User): Boolean{ //pasarle email
+    override fun deleteUser(email: String): Boolean{
         return false
     }
 
