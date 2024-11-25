@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import uji.es.intermaps.R
@@ -57,7 +58,7 @@ import java.time.format.TextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserDataScreen(){
+fun UserDataScreen(navigateToUserChangeEmail: () -> Unit = {}, navigateToUserChangePassword: () -> Unit){
 
     var expandedVehicles by remember { mutableStateOf(false) }
     var expandedRoutes by remember { mutableStateOf(false) }
@@ -68,6 +69,13 @@ fun UserDataScreen(){
     var selectedOptionVehicles by remember { mutableStateOf(optionsVehicles[0]) }
     var selectedOptionRoutes by remember { mutableStateOf(optionsRoutes[0]) }
     var selectedOptionTransport by remember { mutableStateOf(optionsRoutes[0]) }
+
+    var showPopupEmail by remember { mutableStateOf(false) }
+    var showPopupPassword by remember { mutableStateOf(false) }
+    var showPopupModifications by remember { mutableStateOf(false) }
+    var newEmail by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+
 
 
 
@@ -80,6 +88,7 @@ fun UserDataScreen(){
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(100.dp))
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -128,7 +137,7 @@ fun UserDataScreen(){
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
-            onClick = {},
+            onClick = {showPopupEmail = true},
             modifier = Modifier
                 .height(36.dp)
                 .padding(horizontal = 32.dp, vertical = 1.dp)
@@ -163,7 +172,7 @@ fun UserDataScreen(){
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
-            onClick = {},
+            onClick = {showPopupPassword = true},
             modifier = Modifier
                 .height(36.dp)
                 .padding(horizontal = 32.dp, vertical = 1.dp)
@@ -217,8 +226,8 @@ fun UserDataScreen(){
                     ),
                     textStyle = androidx.compose.ui.text.TextStyle(
                         fontSize = 16.sp,
-                        lineHeight = 20.sp,  // Ajustar el lineHeight para evitar corte, manteniendo el texto centrado
-                        textAlign = TextAlign.Center  // Asegura que el texto esté centrado verticalmente
+                        lineHeight = 20.sp,
+                        textAlign = TextAlign.Center
                     ),
                 )
                 ExposedDropdownMenu(
@@ -442,6 +451,319 @@ fun UserDataScreen(){
         )
 
     }
+    if (showPopupEmail) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp)
+                .background(Color(0x80FFFFFF))
+                .clickable { showPopupEmail = false},
+            contentAlignment = Alignment.Center
+        ) {
+            // Popup con el contenido de edición de correo
+            Box(
+                modifier = Modifier
+                    .height(450.dp)
+                    .width(395.dp)
+                    .background(Color(0XFF007E70), shape = RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(10.dp))
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Cambio de correo electrónico",
+                        color = Color.White,
+                        fontSize = 26.sp,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
 
+                    // Nuevo correo electrónico
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Text(
+                            text = "Nuevo correo electrónico",
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Left,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        TextField(
+                            value = newEmail,
+                            onValueChange = { newEmail = it },
+                            modifier = Modifier
+                                .height(52.dp)
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
+                            placeholder = { Text("Introduce el nuevo correo electrónico") },
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color(0xFF80BEB7),
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    // Confirmación de correo electrónico
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Text(
+                            text = "Confirmación de correo electrónico",
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Left,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        TextField(
+                            value = newEmail,
+                            onValueChange = { newEmail = it },
+                            modifier = Modifier
+                                .height(52.dp)
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
+                            placeholder = { Text("Confirma el nuevo correo electrónico") },
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color(0xFF80BEB7),
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(50.dp))
+
+                    // Botones de aceptar y cancelar
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            onClick = {
+                                showPopupEmail = false
+                                showPopupModifications = true
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Black
+                            )
+                        ) {
+                            Text(
+                                text = "Aceptar",
+                                fontSize = 16.sp,
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                showPopupEmail = false
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Black
+                            )
+                        ) {
+                            Text(
+                                text = "Cancelar",
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showPopupPassword) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp)
+                .background(Color(0x80FFFFFF))
+                .clickable { showPopupPassword = false },
+            contentAlignment = Alignment.Center
+        ) {
+            // Popup con el contenido de edición de correo
+            Box(
+                modifier = Modifier
+                    .height(450.dp)
+                    .width(395.dp)
+                    .background(Color(0XFF007E70), shape = RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(10.dp))
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Cambio de contraseña",
+                        color = Color.White,
+                        fontSize = 26.sp,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Text(
+                            text = "Nueva contraseña",
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Left,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        TextField(
+                            value = newPassword,
+                            onValueChange = { newPassword = it },
+                            modifier = Modifier
+                                .height(52.dp)
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, RoundedCornerShape(10.dp)),
+                            placeholder = { Text("Introduce la nueva contraseña") },
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color(0xFF80BEB7),
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Text(
+                            text = "Confirmación de contraseña",
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Left,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        TextField(
+                            value = newPassword,
+                            onValueChange = { newPassword = it },
+                            modifier = Modifier
+                                .height(52.dp)
+                                .fillMaxWidth()
+                                .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
+                            placeholder = { Text("Confirma la nueva contraseña") },
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color(0xFF80BEB7),
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(50.dp))
+
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            onClick = {
+                                showPopupPassword = false
+                                showPopupModifications = true
+                             },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Black
+                            )
+                        ) {
+                            Text(
+                                text = "Aceptar",
+                                fontSize = 16.sp,
+                            )
+                        }
+
+                        Button(
+                            onClick = { showPopupPassword = false },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Black
+                            )
+                        ) {
+                            Text(
+                                text = "Cancelar",
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    if (showPopupModifications) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp)
+                .background(Color(0x80FFFFFF))
+                .clickable { showPopupPassword = false },
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(200.dp)
+                    .width(350.dp)
+                    .background(Color(0XFF007E70), shape = RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(10.dp))
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Se han modificado los datos correctamente",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold,
+                        style = androidx.compose.ui.text.TextStyle(
+                            lineHeight = 28.sp
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Button(
+                        onClick = { showPopupModifications = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(
+                            text = "Aceptar",
+                            fontSize = 16.sp,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+        }
+    }
 
 }
