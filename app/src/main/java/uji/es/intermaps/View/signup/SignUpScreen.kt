@@ -37,6 +37,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.Repository
 import uji.es.intermaps.Model.User
@@ -47,9 +52,11 @@ import uji.es.intermaps.Model.UserService
 @Composable
 fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateToHome: () -> Unit) {
     val repository: Repository = FirebaseRepository()
-    val user: UserService = UserService(repository)
+    val userService = UserService(repository)
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
 
     Column(
         modifier = Modifier
@@ -156,14 +163,19 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
 
         Spacer(modifier = Modifier.height(64.dp))
 
-        OutlinedButton(
+                OutlinedButton(
             onClick = {
-                val createUser: User = user.createUser(email, password)
-                //auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener{
-                if (createUser != null)
-                    navigateToHome()
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        userService.createUser(email, password)
+                        withContext(Dispatchers.Main) { navigateToHome() }
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) {
+                            errorMessage = e.message
+                        }
+                    }
                 }
-            ,
+            },
             modifier = Modifier
                 .height(42.dp)
                 .width(250.dp)

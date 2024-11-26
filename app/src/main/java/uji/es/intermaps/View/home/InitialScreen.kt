@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,15 +39,15 @@ fun InitialScreen (navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Uni
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(150.dp))
+        Spacer(modifier = Modifier.weight(1f))
         Image(painter = painterResource(
             id = R.drawable.logogrande),
             contentDescription = "",
             modifier = Modifier
-                .width(320.dp) // Ancho específico
-                .height(270.dp)
+                .fillMaxWidth(0.8f) // Ancho proporcional al 80% de la pantalla
+                .aspectRatio(1.2f)
         )
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.weight(0.5f))
         Text(text = "¿Ya eres usuario de InterMaps?",
             color = Color.DarkGray,
             modifier = Modifier
@@ -66,7 +67,7 @@ fun InitialScreen (navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Uni
             Text(text = "Iniciar Sesión", color = White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.weight(0.25f))
         Text(text = "¿Eres nuevo?",
             color = Color.DarkGray,
             modifier = Modifier
@@ -86,20 +87,22 @@ fun InitialScreen (navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Uni
         ) {
             Text(text = "Crear Cuenta", color = Black, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.weight(0.5f))
         Text(text = "Descubre tu futuro lugar favorito...",
             color = Black, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.weight(0.5f))
 
-        Button(
+
+        /*Button(
             onClick = { navigateToUserDataScreen() },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .height(42.dp)
                 .padding(horizontal = 32.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Black),
             shape = RoundedCornerShape(10.dp)
         ) {
             Text(text = "Pantalla datos usuario", color = White, fontWeight = FontWeight.Bold)
-        }
+        }*/
     }
 }

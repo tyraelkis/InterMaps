@@ -24,6 +24,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseFirestore.setLoggingEnabled(true)
         auth = Firebase.auth
         enableEdgeToEdge()
         setContent {

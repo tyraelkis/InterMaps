@@ -7,6 +7,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import okhttp3.Callback
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 import kotlin.collections.hashMapOf as hashMapOf
 
 class FirebaseRepository: Repository{
@@ -14,11 +17,29 @@ class FirebaseRepository: Repository{
     val auth = Firebase.auth
 
 
-    override fun createUser(email:String, pswd: String): User{
-        auth.createUserWithEmailAndPassword(email, pswd)
-        db.collection("User").add(email)
-        return User(email,pswd)
+    override suspend fun createUser(email: String, pswd: String): User {
+        return suspendCoroutine { continuation ->
+            auth.createUserWithEmailAndPassword(email, pswd)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val newUser = User(email, pswd)
+                        //db.collection("Users").add(mapOf("email" to email))
+                        db.collection("Users").add("email" to email)
+                            .addOnSuccessListener { documentReference ->
+                                continuation.resume(newUser)
+                            }
+                            .addOnFailureListener { e ->
+                                continuation.resumeWithException(e)
+                            }
+                    } else {
+                        continuation.resumeWithException(
+                            task.exception ?: Exception("Error desconocido al crear el usuario.")
+                        )
+                    }
+                }
+        }
     }
+
 
     override fun loginUser(email:String, pswd: String): Boolean{
         return false
