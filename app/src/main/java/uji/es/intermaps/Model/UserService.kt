@@ -48,8 +48,8 @@ class UserService(var repository: Repository) {
         return repository.loginUser(email,pswd)
     }
 
-    fun signOut(email: String, pswd: String) : Boolean{
-        return false
+    suspend fun signOut() : Boolean{
+        return repository.signOut()
     }
 
     fun editUserData(email: String, newPassword:String): Boolean{

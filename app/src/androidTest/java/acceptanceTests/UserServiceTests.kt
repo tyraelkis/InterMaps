@@ -27,7 +27,7 @@ class UserServiceTests {
     private var password: String = "123456AA" // Cambiar en las pruebas de aceptacion para que cumpla los requisitos de las contraseñas
     private var user: User = User(email, password)
     private var userService: UserService = UserService(repository)
-    /*
+
     @Test
     fun createUser_E1Valid_userIsCreated() = runBlocking {
         val userTest: User = userService.createUser(email, password)
@@ -42,7 +42,7 @@ class UserServiceTests {
             userService.createUser(email, password)
         }
     }
-*/
+
     @Test
     fun login_E1Valid_userIsLogged() = runBlocking{
         val userTest: User = userService.createUser(email, password)
@@ -56,7 +56,7 @@ class UserServiceTests {
             userService.login(email, password)
         }
     }
-/*
+
     @Test
     fun viewUserData_E1Valid_userDataViewed() {
         val userData: User? = userService.viewUserData(email)
@@ -90,7 +90,7 @@ class UserServiceTests {
     fun signOut_E1Valid_userSignedOut() = runBlocking{
         val userTest: User = userService.createUser(email, password)
         userService.login(userTest.email, userTest.password)
-        assertEquals(true, userService.signOut(userTest.email,userTest.password))
+        assertEquals(true, userService.signOut())
         userService.deleteUser(userTest.email)
     }
 
@@ -98,7 +98,7 @@ class UserServiceTests {
     fun signOut_E2Invalid_errorSigningOut() = runBlocking{
         val userTest: User = userService.createUser(email, password)
         assertThrows<SessionNotStartedException>{
-            userService.signOut(userTest.email,userTest.password)
+            userService.signOut()
         }
         userService.deleteUser(userTest.email)
     }
@@ -116,5 +116,5 @@ class UserServiceTests {
         assertThrows<UnableToDeleteUserException>{
             userService.deleteUser(email)
         }
-    }*/
+    }
 }

@@ -7,6 +7,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
+import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -63,6 +64,15 @@ class FirebaseRepository: Repository{
                         }
                     }
                 }
+        }
+    }
+
+    override suspend fun signOut() : Boolean{
+        if (auth.currentUser != null) {
+            auth.signOut()
+            return true
+        } else {
+            throw SessionNotStartedException("No hay ninguna sesión iniciada")
         }
     }
 
