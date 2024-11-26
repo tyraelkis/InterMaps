@@ -1,39 +1,30 @@
 package acceptanceTests
 
-
-import uji.es.intermaps.Exceptions.NotValidAliasException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
 import org.junit.Test
-import uji.es.intermaps.Model.User
-import org.junit.Assert.*
 import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
-import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Exceptions.UnregistredUserException
-import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.FirebaseRepository
-import uji.es.intermaps.Model.InterestPlace
-import uji.es.intermaps.Model.InterestPlaceService
 import uji.es.intermaps.Model.Repository
+import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.UserService
 
-class AT_IT1 {
-    private var auth: FirebaseAuth = Firebase.auth
+class UserServiceTests {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
     private var email: String = "prueba@uji.es"
     private var password: String = "123456AA" // Cambiar en las pruebas de aceptacion para que cumpla los requisitos de las contraseñas
     private var user: User = User(email, password)
     private var userService: UserService = UserService(repository)
-    private var interestPlace: InterestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
-    private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
 
     @Test
     fun createUser_E1Valid_userIsCreated() = runBlocking{
@@ -123,32 +114,4 @@ class AT_IT1 {
             userService.deleteUser(email)
         }
     }
-
-    @Test
-    fun createInterestPlace_E1Valid_InterestPlaceCreated() {
-        val interestPlaceTest: InterestPlace = interestPlaceService.createInterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz")
-        assertEquals(interestPlace, interestPlaceTest)
-        interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
-    }
-
-    @Test
-    fun createInterestPlace_E2Invalid_errorOnCreatingInterestPlace() {
-        assertThrows<NotValidCoordinatesException>{
-            interestPlaceService.createInterestPlace(Coordinate(-1800.665695,35.529562), "Mozambique", "Moz")
-        }
-    }
-
-    @Test
-    fun editInterestPlace_E1Valido_setAliasToAPlaceOfInterest() {
-        val result: Boolean = interestPlaceService.setAlias(interestPlace, newAlias = "Mozambiquinho")
-        assertEquals(true, result)
-    }
-
-    @Test
-    fun editInterestPlace_E1Invalido_errorSetAliasToAPlaceOFInterest(){
-        assertThrows<NotValidAliasException>{
-            interestPlaceService.setAlias(interestPlace, newAlias = "@#//")
-        }
-    }
-
 }
