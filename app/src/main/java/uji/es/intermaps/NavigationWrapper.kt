@@ -10,6 +10,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import uji.es.intermaps.View.home.HomeSreen
 import uji.es.intermaps.View.home.InitialScreen
+import uji.es.intermaps.View.interestPlace.InterestPlaceList
 import uji.es.intermaps.View.interestPlace.InterestPlaceSetAlias
 import uji.es.intermaps.View.login.LoginScreen
 import uji.es.intermaps.View.signup.SignUpScreen
@@ -18,7 +19,7 @@ import uji.es.intermaps.View.user.UserDataScreen
 
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth){
-    NavHost(navController = navHostController, startDestination = "interestPlaceSetAlias") {
+    NavHost(navController = navHostController, startDestination = "interestPlaceList") {
         composable("initial"){
             InitialScreen(
                 navigateToLogin = {navHostController.navigate("logIn")},
@@ -57,6 +58,10 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth){
             UserAcceptModifications(
                 navigateToUserDataScreen = {navHostController.navigate("userDataScreen")}
             )
+        }
+
+        composable("interestPlaceList"){
+            InterestPlaceList(navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")}, auth)
         }
 
         composable("interestPlaceSetAlias"){

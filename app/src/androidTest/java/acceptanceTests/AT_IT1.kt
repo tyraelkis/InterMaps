@@ -4,6 +4,7 @@ package acceptanceTests
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.ktx.Firebase
 import org.junit.Test
 import uji.es.intermaps.Model.User
@@ -15,7 +16,6 @@ import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Exceptions.UnregistredUserException
-import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
@@ -31,7 +31,7 @@ class AT_IT1 {
     private var password: String = "12345"
     private var user: User = User(email, password)
     private var userService: UserService = UserService(repository)
-    private var interestPlace: InterestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
+    private var interestPlace: InterestPlace = InterestPlace(GeoPoint(-18.665695, 35.529562), "Mozambique", "Moz", false)
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
 
     @Test
@@ -125,7 +125,7 @@ class AT_IT1 {
 
     @Test
     fun createInterestPlace_E1Valid_InterestPlaceCreated() {
-        val interestPlaceTest: InterestPlace = interestPlaceService.createInterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz")
+        val interestPlaceTest: InterestPlace = interestPlaceService.createInterestPlace(GeoPoint(-18.665695, 35.529562), "Mozambique", "Moz")
         assertEquals(interestPlace, interestPlaceTest)
         interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
     }
@@ -133,7 +133,7 @@ class AT_IT1 {
     @Test
     fun createInterestPlace_E2Invalid_errorOnCreatingInterestPlace() {
         assertThrows<NotValidCoordinatesException>{
-            interestPlaceService.createInterestPlace(Coordinate(-1800.665695,35.529562), "Mozambique", "Moz")
+            interestPlaceService.createInterestPlace(GeoPoint(-1800.665695,35.529562), "Mozambique", "Moz")
         }
     }
 

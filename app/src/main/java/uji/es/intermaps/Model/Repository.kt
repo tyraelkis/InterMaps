@@ -1,5 +1,6 @@
 package uji.es.intermaps.Model
 
+import com.google.firebase.firestore.GeoPoint
 import okhttp3.Callback
 
 interface Repository {
@@ -9,6 +10,8 @@ interface Repository {
     fun editUserData(email: String, newPassword:String): Boolean
     fun deleteUser(email: String): Boolean
     fun setAlias(interestPlace: InterestPlace, newAlias : String, callback: (Boolean) -> Unit)
-    fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String, fav: Boolean)
-    fun deleteInterestPlace(coordinate: Coordinate): Boolean
+    fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String, fav: Boolean)
+    fun deleteInterestPlace(coordinate: GeoPoint): Boolean
+    fun getFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)
+    fun getNoFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)
 }

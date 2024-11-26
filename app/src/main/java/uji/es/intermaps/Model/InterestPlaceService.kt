@@ -1,36 +1,52 @@
 package uji.es.intermaps.Model
 
 import android.util.Log
+import com.google.firebase.firestore.GeoPoint
+import kotlinx.coroutines.*
+
 
 class InterestPlaceService(private val repository: Repository) {
+    val customScope = CoroutineScope(Dispatchers.Main)
 
-    fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace{
-        return InterestPlace(Coordinate(0.0,0.0),"","",false)
+    fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String): InterestPlace{
+        return InterestPlace(GeoPoint(0.0,0.0),"","",false)
     }
 
-    fun deleteInterestPlace(coordinate: Coordinate): Boolean{
+    fun deleteInterestPlace(coordinate: GeoPoint): Boolean{
         //elimina el lugar de interés de la base de datos
         return false
     }
 
-    fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean{
-        if (newAlias.length < 2)
-            return false;
+    fun setAlias(interestPlace: InterestPlace, newAlias : String, callback: (Boolean) -> Unit){
+        if (newAlias.length < 2 || interestPlace.alias.equals(newAlias))
+            callback(false)
         for (char in newAlias){
             if (!char.isLetter() && char != ' '){
-                return false;
+                callback(true)
             }
         }
-        var result = false
+
         repository.setAlias(interestPlace, newAlias) {success ->
             if (success){
                 interestPlace.alias = newAlias;
-                result = true
-                Log.i("Funciona", "el metodo funciona")
-            }else{
-                Log.i("No Funciona", "el metodo no funciona")
+                callback(true)
             }
         }
-        return result
+    }
+
+    fun getFavList(callback: (List<InterestPlace>) -> Unit){
+        var result = false;
+        var favListFinal = mutableListOf<InterestPlace>()
+        repository.getFavList{ success, favList ->
+            if (success){
+                callback(favList)
+            }else{
+                callback(emptyList())
+            }
+        }
+    }
+
+    fun getNoFavList(callback: (List<InterestPlace>) -> Unit){
+
     }
 }

@@ -43,7 +43,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.firestore.FirebaseFirestore
-import uji.es.intermaps.Model.Coordinate
+import com.google.firebase.firestore.GeoPoint
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.InterestPlaceService
@@ -54,7 +54,7 @@ import uji.es.intermaps.R
 @Composable
 fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
     var db = FirebaseFirestore.getInstance()
-    val coordinate = Coordinate(-18.665695,35.529562)
+    val coordinate = GeoPoint(-18.665695,35.529562)
     var interestPlace = InterestPlace(coordinate, "Mozambique", "moz", false)
     var showPopupAliasCorrecto by remember { mutableStateOf(false) }
     var showPopupAliasIncorrecto by remember { mutableStateOf(false) }
@@ -191,11 +191,13 @@ fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
 
         Button(
             onClick = {
-                if (interestPlaceService.setAlias(interestPlace,newAlias)) {
-                    showPopupAliasCorrecto = true
-                }else{
-                    showPopupAliasIncorrecto = true
-                }
+               interestPlaceService.setAlias(interestPlace, newAlias){ success ->
+                   if(success){
+                       showPopupAliasCorrecto = true
+                   }else{
+                       showPopupAliasIncorrecto = true
+                   }
+               }
             } ,
             modifier = Modifier
                 .height(36.dp)

@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 import okhttp3.Callback
 
 class FirebaseRepository: Repository{
@@ -34,11 +35,9 @@ class FirebaseRepository: Repository{
     }
 
     override fun setAlias(interestPlace: InterestPlace, newAlias : String, callback: (Boolean) -> Unit){
-        val latitude = interestPlace.coordinate.latitude
-        val longitude = interestPlace.coordinate.longitude
-        val geoPoint = GeoPoint(latitude, longitude)
+        val geoPoint = interestPlace.coordinate
         db.collection("InterestPlace")
-            .whereEqualTo("coordiante", geoPoint)
+            .whereEqualTo("coordinate", geoPoint)
             .get()
             .addOnSuccessListener { documents ->
                 if(documents.isEmpty()){
@@ -53,6 +52,7 @@ class FirebaseRepository: Repository{
                         .addOnSuccessListener {
                             callback(true)
                         }
+
                         .addOnFailureListener{ e ->
                             callback(false)
                         }
@@ -65,12 +65,53 @@ class FirebaseRepository: Repository{
 
     }
 
-    override fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String, fav: Boolean) {
+    override fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String, fav: Boolean) {
 
     }
 
-    override fun deleteInterestPlace(coordinate: Coordinate): Boolean {
+    override fun deleteInterestPlace(coordinate: GeoPoint): Boolean {
         return false
+    }
+
+    override fun getFavList(callback:  ((Boolean),(List<InterestPlace>)) -> Unit){
+        db.collection("InterestPlace")
+            .whereEqualTo("fav", true)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty){
+                    val favList = mutableListOf<InterestPlace>()
+                    for (document in documents){
+                        val interestPlace = document.toObject(InterestPlace::class.java)
+                        favList.add(interestPlace)
+                    }
+                    callback(true, favList)
+                }else{
+                    callback(false,emptyList())
+                }
+            }
+            .addOnFailureListener { e ->
+                callback(false, emptyList())
+            }
+    }
+    override fun getNoFavList(callback:  ((Boolean),(List<InterestPlace>)) -> Unit){
+        db.collection("InterestPlace")
+            .whereEqualTo("fav", false)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty){
+                    val noFavList = mutableListOf<InterestPlace>()
+                    for (document in documents){
+                        val interestPlace = document.toObject(InterestPlace::class.java)
+                        noFavList.add(interestPlace)
+                    }
+                    callback(true, noFavList)
+                }else{
+                    callback(false,emptyList())
+                }
+            }
+            .addOnFailureListener{ e ->
+                callback(false, emptyList())
+            }
     }
 
 }
