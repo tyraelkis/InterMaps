@@ -8,7 +8,7 @@ import uji.es.intermaps.Exceptions.NotValidUserData
 
 class UserService(var repository: Repository) {
 
-    suspend fun createUser(email: String, pswd: String): User {
+    suspend fun createUser(email: String, pswd: String, vehicle: String): User {
         // Validación local
         if (email.isBlank() || pswd.isBlank()) {
             throw NotValidUserData("El correo electrónico y la contraseña no pueden estar vacíos.")
@@ -24,9 +24,7 @@ class UserService(var repository: Repository) {
         if (!pswd.matches(pswdRegex)) {
             throw IllegalArgumentException("La contraseña no tiene un formato válido.")
         }
-
-        // Delegar la creación al repositorio
-        return repository.createUser(email, pswd)
+        return repository.createUser(email, pswd, vehicle)
     }
 
     suspend fun login(email: String, pswd: String) : Boolean{
@@ -52,33 +50,40 @@ class UserService(var repository: Repository) {
         return repository.signOut()
     }
 
-    fun editUserData(email: String, newPassword:String): Boolean{
+    /*suspend fun editUserEmail(newEmail: String) : Boolean{
+        if (newEmail.isBlank()) {
+            throw NotValidUserData("El correo electrónico y la contraseña no pueden estar vacíos.")
+            return false
+        }
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        if (!newEmail.matches(emailRegex)) {
+            throw IllegalArgumentException("El correo electrónico no tiene un formato válido.")
+            return false
+        }
+        repository.editUserEmail(newEmail)
+        return true
+    }*/
+
+    fun editUserPassword(newPassword:String): Boolean{
+        if (newPassword.isBlank()) {
+            throw NotValidUserData("El correo electrónico y la contraseña no pueden estar vacíos.")
+            return false
+        }
+        if (newPassword.length < 8) {
+            throw IllegalArgumentException("La contraseña debe tener al menos 8 caracteres.")
+            return false
+        }
+        repository.editUserPassword(newPassword)
         return true
     }
 
-    fun viewUserData(email: String): User?{
-        val user: User
-        if (email != null || email != ""){
-            user = repository.viewUserData(email)!!
-        }
-        else{
-            return null
-        }
-        return user
+    suspend fun viewUserData(email: String): User?{
+        return repository.viewUserData(email)
     }
 
-    fun deleteUser(email: String){
+    fun deleteUser(email: String, password: String): Boolean{
+        return repository.deleteUser(email, password)
 
-    }
-
-    val db = FirebaseFirestore.getInstance()
-    fun conection_db () {
-        db.collection("Test")
-            .add(mapOf("key" to "value"))
-            .addOnSuccessListener { Log.d("Firestore", "Conexión exitosa") }
-            .addOnFailureListener {
-                Log.e("Firestore", "Error al conectar", it)
-            }
     }
 
 }

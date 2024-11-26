@@ -167,7 +167,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        userService.createUser(email, password)
+                        userService.createUser(email, password, "...")
                         withContext(Dispatchers.Main) { navigateToHome() }
                     } catch (e: Exception) {
                         withContext(Dispatchers.Main) {
