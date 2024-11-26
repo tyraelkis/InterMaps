@@ -70,7 +70,6 @@ class FirebaseRepository: Repository{
     override fun deleteInterestPlace(coordinate: Coordinate): Boolean {
         return false
     }
-
 }
 
 

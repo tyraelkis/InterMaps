@@ -31,14 +31,7 @@ class UserServiceTests {
     @Test
     fun createUser_E1Valid_userIsCreated() = runBlocking {
         val userTest: User = userService.createUser(email, password)
-        db.doesUserExist(userTest.email,
-            onResult = { exists ->
-                assertTrue(exists)  
-            },
-            onError = { exception ->
-                fail("Error al verificar si el usuario existe: ${exception.message}")
-            }
-        )
+        assertEquals(true, db.doesUserExist(userTest.email))
         userService.deleteUser(userTest.email)
     }
 
