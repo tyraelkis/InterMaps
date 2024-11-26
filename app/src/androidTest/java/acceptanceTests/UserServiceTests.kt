@@ -5,6 +5,8 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
@@ -27,9 +29,16 @@ class UserServiceTests {
     private var userService: UserService = UserService(repository)
 
     @Test
-    fun createUser_E1Valid_userIsCreated() = runBlocking{
+    fun createUser_E1Valid_userIsCreated() = runBlocking {
         val userTest: User = userService.createUser(email, password)
-        assertEquals(user,userTest)
+        db.doesUserExist(userTest.email,
+            onResult = { exists ->
+                assertTrue(exists)  
+            },
+            onError = { exception ->
+                fail("Error al verificar si el usuario existe: ${exception.message}")
+            }
+        )
         userService.deleteUser(userTest.email)
     }
 

@@ -24,7 +24,7 @@ class FirebaseRepository: Repository{
                     if (task.isSuccessful) {
                         val newUser = User(email, pswd)
                         //db.collection("Users").add(mapOf("email" to email))
-                        db.collection("Users").add("email" to email)
+                        db.collection("Users").add(mapOf("email" to email))
                             .addOnSuccessListener { documentReference ->
                                 continuation.resume(newUser) //Funciona como el return de la corutina
                             }

@@ -19,6 +19,9 @@
       <SelectionState runConfigName="createUser_E1Valid_userIsCreated()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="createUser_E1Valid_userIsCreated() (1)">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>

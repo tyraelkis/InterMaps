@@ -27,5 +27,15 @@ object DataBase {
         return count
     }
 
-
+    fun doesUserExist(email: String, onResult: (Boolean) -> Unit, onError: (Exception) -> Unit) {
+        db.collection("Users")
+            .whereEqualTo("email", email)
+            .get()
+            .addOnSuccessListener { documents ->
+                onResult(!documents.isEmpty)
+            }
+            .addOnFailureListener { exception ->
+                onError(exception)
+            }
+    }
 }
