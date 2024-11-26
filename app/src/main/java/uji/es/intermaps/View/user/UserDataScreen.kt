@@ -1,6 +1,7 @@
 package uji.es.intermaps.View.user
 
 import android.util.Log
+import android.util.Log.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,14 +52,16 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import uji.es.intermaps.R
 import java.time.format.TextStyle
+import kotlin.math.log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserDataScreen(navigateToUserChangeEmail: () -> Unit = {}, navigateToUserChangePassword: () -> Unit){
+fun UserDataScreen(auth: FirebaseAuth, navigateToUserChangeEmail: () -> Unit = {}, navigateToUserChangePassword: () -> Unit){
 
     var expandedVehicles by remember { mutableStateOf(false) }
     var expandedRoutes by remember { mutableStateOf(false) }
@@ -75,6 +78,7 @@ fun UserDataScreen(navigateToUserChangeEmail: () -> Unit = {}, navigateToUserCha
     var showPopupModifications by remember { mutableStateOf(false) }
     var newEmail by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
+    var user = auth.currentUser
 
 
 
@@ -126,7 +130,7 @@ fun UserDataScreen(navigateToUserChangeEmail: () -> Unit = {}, navigateToUserCha
         ) {
             // Texto en el fondo
             Text(
-                text = "Correo Electrónico",
+                text = user?.email ?: "Correo electronico",
                 color = Color.White,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,

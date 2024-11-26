@@ -1,6 +1,9 @@
 package uji.es.intermaps.Model
 
-class InterestPlaceService(repository: Repository) {
+import android.util.Log
+
+class InterestPlaceService(private val repository: Repository) {
+
     fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace{
         return InterestPlace(Coordinate(0.0,0.0),"","",false)
     }
@@ -11,7 +14,23 @@ class InterestPlaceService(repository: Repository) {
     }
 
     fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean{
-        //Cambia o asigna un nuevo alias a un lugar de interés concreto
-        return false
+        if (newAlias.length < 2)
+            return false;
+        for (char in newAlias){
+            if (!char.isLetter() && char != ' '){
+                return false;
+            }
+        }
+        var result = false
+        repository.setAlias(interestPlace, newAlias) {success ->
+            if (success){
+                interestPlace.alias = newAlias;
+                result = true
+                Log.i("Funciona", "el metodo funciona")
+            }else{
+                Log.i("No Funciona", "el metodo no funciona")
+            }
+        }
+        return result
     }
 }
