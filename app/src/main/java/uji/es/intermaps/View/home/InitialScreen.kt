@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.sp
 import uji.es.intermaps.R
 
 @Composable
-fun InitialScreen (navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Unit = {}, navigateToUserDataScreen: () -> Unit = {}){
+fun InitialScreen (navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Unit = {}){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -93,16 +93,6 @@ fun InitialScreen (navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Uni
         Spacer(modifier = Modifier.weight(0.5f))
 
 
-        /*Button(
-            onClick = { navigateToUserDataScreen() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(42.dp)
-                .padding(horizontal = 32.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black),
-            shape = RoundedCornerShape(10.dp)
-        ) {
-            Text(text = "Pantalla datos usuario", color = White, fontWeight = FontWeight.Bold)
-        }*/
+
     }
 }
