@@ -37,6 +37,7 @@ class UserServiceTests {
 
     @Test
     fun createUser_E2Invalid_errorOnAccountCreation(): Unit = runBlocking{
+        userService.createUser(email, password)
         assertThrows<AccountAlreadyRegistredException> {
             userService.createUser(email, password)
         }

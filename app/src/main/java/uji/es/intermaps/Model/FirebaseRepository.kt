@@ -1,12 +1,15 @@
 package uji.es.intermaps.Model
 
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 import okhttp3.Callback
+import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -26,15 +29,20 @@ class FirebaseRepository: Repository{
                         //db.collection("Users").add(mapOf("email" to email))
                         db.collection("Users").add(mapOf("email" to email))
                             .addOnSuccessListener { documentReference ->
-                                continuation.resume(newUser) //Funciona como el return de la corutina
+                                continuation.resume(newUser) //Funciona como el return de la coroutine
                             }
                             .addOnFailureListener { e ->
                                 continuation.resumeWithException(e)
                             }
-                    } else {
-                        continuation.resumeWithException(
-                            task.exception ?: Exception("Error desconocido al crear el usuario.")
-                        )
+                    }else {
+                        val exception = task.exception
+                        if (exception is FirebaseAuthUserCollisionException) {
+                            continuation.resumeWithException(
+                                AccountAlreadyRegistredException("Ya existe una cuenta con este email")
+                            )
+                        } else {
+                            continuation.resumeWithException(exception ?: Exception("Error desconocido al crear el usuario."))
+                        }
                     }
                 }
         }
