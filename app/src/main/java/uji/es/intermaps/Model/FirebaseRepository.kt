@@ -94,8 +94,23 @@ class FirebaseRepository: Repository{
         return true
     }
 
-    override fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
-        return InterestPlace(Coordinate(0.0,0.0), "", "", false)
+    override suspend fun createInterestPlace(coordinate: Coordinate, toponym: String?, alias: String?): InterestPlace {
+        return suspendCoroutine { continuation ->
+            db.collection("InterestPlaces").add(
+                mapOf(
+                    "coordinate" to coordinate,
+                    "toponym" to toponym,
+                    "alias" to alias,
+                    "fav" to false
+                )
+            ).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    continuation.resume(InterestPlace(coordinate, toponym, alias, false))
+                } else {
+                    continuation.resumeWithException(task.exception ?: Exception("Error desconocido al almacenar el lugar de interés."))
+                }
+            }
+        }
     }
 
     override fun deleteInterestPlace(coordinate: Coordinate): Boolean {

@@ -8,6 +8,6 @@ interface Repository {
     fun editUserData(email: String, newPassword:String): Boolean
     fun deleteUser(email: String): Boolean
     fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean
-    fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace
+    suspend fun createInterestPlace(coordinate: Coordinate, toponym: String?, alias: String?): InterestPlace
     fun deleteInterestPlace(coordinate: Coordinate): Boolean
 }

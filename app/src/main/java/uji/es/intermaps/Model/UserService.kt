@@ -1,7 +1,6 @@
 package uji.es.intermaps.Model
 
 import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import uji.es.intermaps.Exceptions.NotValidUserData
 

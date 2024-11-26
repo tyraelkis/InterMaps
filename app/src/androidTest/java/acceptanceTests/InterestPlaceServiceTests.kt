@@ -1,5 +1,6 @@
 package acceptanceTests
 
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
@@ -19,16 +20,16 @@ class InterestPlaceServiceTests {
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
 
     @Test
-    fun createInterestPlace_E1Valid_InterestPlaceCreated() {
-        val interestPlaceTest: InterestPlace = interestPlaceService.createInterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz")
+    fun createInterestPlace_E1Valid_InterestPlaceCreated(): Unit = runBlocking{
+        val interestPlaceTest: InterestPlace = interestPlaceService.createInterestPlaceCoordinates(Coordinate(-18.665695, 35.529562))
         assertEquals(interestPlace, interestPlaceTest)
         interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
     }
 
     @Test
-    fun createInterestPlace_E2Invalid_errorOnCreatingInterestPlace() {
+    fun createInterestPlace_E2Invalid_errorOnCreatingInterestPlace(): Unit = runBlocking {
         assertThrows<NotValidCoordinatesException>{
-            interestPlaceService.createInterestPlace(Coordinate(-1800.665695,35.529562), "Mozambique", "Moz")
+            interestPlaceService.createInterestPlaceCoordinates(Coordinate(-1800.665695,35.529562))
         }
     }
 

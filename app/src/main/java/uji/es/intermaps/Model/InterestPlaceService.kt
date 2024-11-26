@@ -1,8 +1,17 @@
 package uji.es.intermaps.Model
 
-class InterestPlaceService(repository: Repository) {
-    fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace{
-        return InterestPlace(Coordinate(0.0,0.0),"","",false)
+import uji.es.intermaps.Exceptions.NotValidCoordinatesException
+
+class InterestPlaceService(var repository: Repository) {
+    suspend fun createInterestPlaceCoordinates(coordinate: Coordinate): InterestPlace{
+        if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){
+            throw NotValidCoordinatesException("Las coordenadas no son válidas")
+        }
+        //Aquí se llama a la API openrouteservice para conseguir el topónimo correspondiente con las coordenadas
+        //TODO llamar a la API openrouteservice
+        val toponym : String? = null
+
+        return repository.createInterestPlace(coordinate, toponym, null)
     }
 
     fun deleteInterestPlace(coordinate: Coordinate): Boolean{
