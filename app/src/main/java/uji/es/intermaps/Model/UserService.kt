@@ -24,7 +24,7 @@ class UserService(var repository: Repository) {
         if (!pswd.matches(pswdRegex)) {
             throw IllegalArgumentException("La contraseña no tiene un formato válido.")
         }
-        return repository.createUser(email, pswd, vehicle)
+        return repository.createUser(email, pswd)
     }
 
     suspend fun login(email: String, pswd: String) : Boolean{

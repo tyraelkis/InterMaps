@@ -26,7 +26,7 @@ class FirebaseRepository: Repository{
             auth.createUserWithEmailAndPassword(email, pswd)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        val newUser = User(email, pswd)
+                        val newUser = User(email)
                         //db.collection("Users").add(mapOf("email" to email))
                         db.collection("Users").add(mapOf("email" to email))
                             .addOnSuccessListener { documentReference ->
@@ -88,8 +88,7 @@ class FirebaseRepository: Repository{
                     if (!querySnapshot.isEmpty) {
                         val document = querySnapshot.documents[0]
                         val user = User(
-                            email = document.getString("email") ?: ""
-                        )
+                            email = document.getString("email") ?: "")
                         continuation.resume(user)
                     } else {
                         continuation.resume(null)

@@ -12,5 +12,5 @@ interface Repository {
     fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean
     fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace
     fun deleteInterestPlace(coordinate: Coordinate): Boolean
-    suspend fun createUser(email: String, pswd: String, vehicle: String): User
+    //suspend fun createUser(email: String, pswd: String, vehicle: String): User
 }
