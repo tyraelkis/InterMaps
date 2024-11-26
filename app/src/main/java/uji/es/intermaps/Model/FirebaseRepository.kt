@@ -26,7 +26,7 @@ class FirebaseRepository: Repository{
                         //db.collection("Users").add(mapOf("email" to email))
                         db.collection("Users").add("email" to email)
                             .addOnSuccessListener { documentReference ->
-                                continuation.resume(newUser)
+                                continuation.resume(newUser) //Funciona como el return de la corutina
                             }
                             .addOnFailureListener { e ->
                                 continuation.resumeWithException(e)
