@@ -37,13 +37,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import uji.es.intermaps.Model.FirebaseRepository
+import uji.es.intermaps.Model.Repository
+import uji.es.intermaps.Model.User
+import uji.es.intermaps.Model.UserService
+
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
 fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateToHome: () -> Unit) {
-
+    val repository: Repository = FirebaseRepository()
+    val userService = UserService(repository)
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
 
     Column(
         modifier = Modifier
@@ -150,14 +163,16 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
 
         Spacer(modifier = Modifier.height(64.dp))
 
-        OutlinedButton(
+                OutlinedButton(
             onClick = {
-                auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener{
-                    if(it.isSuccessful){
-                        navigateToHome()
-                    }
-                    else{
-                        Log.i("SARA", "NO Registrado")
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        userService.createUser(email, password)
+                        withContext(Dispatchers.Main) { navigateToHome() }
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) {
+                            errorMessage = e.message
+                        }
                     }
                 }
             },
@@ -170,7 +185,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             border = BorderStroke(2.dp, Color.Black),
             shape = RoundedCornerShape(10.dp)
         ) {
-            Text(text = "Crear Cuenta", color = Black, fontWeight = FontWeight.Bold)
+            Text(text = "Crear Cuenta", color = Black, fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(64.dp))
 
@@ -194,7 +209,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
                 colors = ButtonDefaults.buttonColors(containerColor = Black),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text(text = "Iniciar Sesión", color = White, fontWeight = FontWeight.Bold)
+                Text(text = "Iniciar Sesión", color = White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

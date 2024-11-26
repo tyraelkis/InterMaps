@@ -5,6 +5,7 @@ import uji.es.intermaps.Exceptions.NotValidAliasException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import uji.es.intermaps.Model.User
 import org.junit.Assert.*
@@ -28,28 +29,28 @@ class AT_IT1 {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
     private var email: String = "prueba@uji.es"
-    private var password: String = "12345"
+    private var password: String = "123456AA" // Cambiar en las pruebas de aceptacion para que cumpla los requisitos de las contraseñas
     private var user: User = User(email, password)
     private var userService: UserService = UserService(repository)
     private var interestPlace: InterestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
 
     @Test
-    fun createUser_E1Valid_userIsCreated() {
+    fun createUser_E1Valid_userIsCreated() = runBlocking{
         val userTest: User = userService.createUser(email, password)
         assertEquals(user,userTest)
         userService.deleteUser(userTest.email)
     }
 
     @Test
-    fun createUser_E2Invalid_errorOnAccountCreation() {
+    fun createUser_E2Invalid_errorOnAccountCreation(): Unit = runBlocking{
         assertThrows<AccountAlreadyRegistredException> {
             userService.createUser(email, password)
         }
     }
 
     @Test
-    fun login_E1Valid_userIsLogged() {
+    fun login_E1Valid_userIsLogged() = runBlocking{
         val userTest: User = userService.createUser(email, password)
         assertEquals(true, userService.login(userTest.email,userTest.password))
         userService.deleteUser(userTest.email)
@@ -92,7 +93,7 @@ class AT_IT1 {
 
 
     @Test
-    fun signOut_E1Valid_userSignedOut() {
+    fun signOut_E1Valid_userSignedOut() = runBlocking{
         val userTest: User = userService.createUser(email, password)
         userService.login(userTest.email, userTest.password)
         assertEquals(true, userService.signOut(userTest.email,userTest.password))
@@ -100,7 +101,7 @@ class AT_IT1 {
     }
 
     @Test
-    fun signOut_E2Invalid_errorSigningOut() {
+    fun signOut_E2Invalid_errorSigningOut() = runBlocking{
         val userTest: User = userService.createUser(email, password)
         assertThrows<SessionNotStartedException>{
             userService.signOut(userTest.email,userTest.password)

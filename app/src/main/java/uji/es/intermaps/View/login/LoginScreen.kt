@@ -145,16 +145,6 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
                 unfocusedIndicatorColor = Color.Transparent // Eliminar el indicador cuando no está enfocado
             )
         )
-        Text(
-            text = "Aquí no hace falta poner nada",
-            color = Color.LightGray,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            textAlign = TextAlign.Left
-        )
 
         Spacer(modifier = Modifier.height(64.dp))
 
@@ -177,7 +167,7 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
             colors = ButtonDefaults.buttonColors(containerColor = Black),
             shape = RoundedCornerShape(10.dp)
         ) {
-            Text(text = "Iniciar Sesión", color = White, fontWeight = FontWeight.Bold)
+            Text(text = "Iniciar Sesión", color = White,fontSize = 18.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(64.dp))
 
@@ -202,7 +192,7 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
                 border = BorderStroke(2.dp, Color.Black),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text(text = "Crear Cuenta", color = Black, fontWeight = FontWeight.Bold)
+                Text(text = "Crear Cuenta", color = Black, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
