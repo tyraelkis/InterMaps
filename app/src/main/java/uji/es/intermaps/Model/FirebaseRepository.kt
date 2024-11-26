@@ -1,19 +1,16 @@
 package uji.es.intermaps.Model
 
-import android.util.Log
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.tasks.await
-import okhttp3.Callback
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
+import uji.es.intermaps.Exceptions.UnregistredUserException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
-import kotlin.collections.hashMapOf as hashMapOf
 
 class FirebaseRepository: Repository{
     val db = FirebaseFirestore.getInstance()
@@ -49,8 +46,24 @@ class FirebaseRepository: Repository{
     }
 
 
-    override fun loginUser(email:String, pswd: String): Boolean{
-        return false
+    override suspend fun loginUser(email:String, pswd: String): Boolean{
+        return suspendCoroutine { continuation ->
+            auth.signInWithEmailAndPassword(email, pswd)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        continuation.resume(true) //Funciona como el return de la coroutine
+                    } else {
+                        val exception = task.exception
+                        if (exception is FirebaseAuthInvalidCredentialsException) {
+                            continuation.resumeWithException(
+                                UnregistredUserException("No existe un usuario con este correo electrónico")
+                            )
+                        } else {
+                            continuation.resumeWithException(exception ?: Exception("Error desconocido al iniciar sesión."))
+                        }
+                    }
+                }
+        }
     }
 
     override fun viewUserData(email: String): User?{

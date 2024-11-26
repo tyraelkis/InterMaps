@@ -17,16 +17,35 @@ class UserService(var repository: Repository) {
         if (!email.matches(emailRegex)) {
             throw IllegalArgumentException("El correo electrónico no tiene un formato válido.")
         }
-        if (pswd.length < 8) {
-            throw IllegalArgumentException("La contraseña debe tener al menos 8 caracteres.")
+        if (pswd.length < 6) {
+            throw IllegalArgumentException("La contraseña debe tener al menos 6 caracteres.")
+        }
+        val pswdRegex = "^[A-Za-z0-9]+$".toRegex()
+        if (!pswd.matches(pswdRegex)) {
+            throw IllegalArgumentException("La contraseña no tiene un formato válido.")
         }
 
         // Delegar la creación al repositorio
         return repository.createUser(email, pswd)
     }
 
-    fun login(email: String, pswd: String) : Boolean{
-        return false
+    suspend fun login(email: String, pswd: String) : Boolean{
+        if (email.isBlank() || pswd.isBlank()) {
+            throw NotValidUserData("El correo electrónico y la contraseña no pueden estar vacíos.")
+        }
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        if (!email.matches(emailRegex)) {
+            throw IllegalArgumentException("El correo electrónico no tiene un formato válido.")
+        }
+        if (pswd.length < 6) {
+            throw IllegalArgumentException("La contraseña debe tener al menos 6 caracteres.")
+        }
+        val pswdRegex = "^[A-Za-z0-9]+$".toRegex()
+        if (!pswd.matches(pswdRegex)) {
+            throw IllegalArgumentException("La contraseña no tiene un formato válido.")
+        }
+
+        return repository.loginUser(email,pswd)
     }
 
     fun signOut(email: String, pswd: String) : Boolean{
