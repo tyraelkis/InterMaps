@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.Repository
 import uji.es.intermaps.Model.UserService
@@ -721,13 +723,19 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit){
                         }
 
                         Spacer(modifier = Modifier.width(16.dp))
-
+                        val coroutineScope = rememberCoroutineScope()
                         Button(
                             onClick = {
-                                var email = user?.email.toString()
-                                // Llamar a la función de eliminar usuario
-                                showPopUpDelete = userService.deleteUser(email, password)
-                                navigateToInitialScreen()
+                                coroutineScope.launch {
+                                    val email = user?.email.toString()
+                                    val result = userService.deleteUser(email, password)
+                                    showPopUpDelete = result
+                                    if (result) {
+                                        navigateToInitialScreen()
+                                    } else {
+                                        Log.e("DeleteUser", "No se pudo eliminar el usuario.")
+                                    }
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                             modifier = Modifier.weight(1f),

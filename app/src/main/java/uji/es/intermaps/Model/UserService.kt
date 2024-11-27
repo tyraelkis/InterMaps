@@ -1,6 +1,9 @@
 package uji.es.intermaps.Model
 
+import uji.es.intermaps.Exceptions.IncorrectDataException
 import uji.es.intermaps.Exceptions.NotValidUserData
+import uji.es.intermaps.Exceptions.SessionNotStartedException
+import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 
 
 class UserService(var repository: Repository) {
@@ -53,21 +56,25 @@ class UserService(var repository: Repository) {
             return false
         }
         if (newPassword.length < 8) {
-            throw IllegalArgumentException("La contraseña debe tener al menos 8 caracteres.")
-            return false
+            throw IncorrectDataException()
         }
         repository.editUserData(newPassword)
         return true
     }
 
     suspend fun viewUserData(email: String): Boolean{
-        return repository.viewUserData(email)
+        if (repository.viewUserData(email))
+            return true
+        throw SessionNotStartedException()
+
 
     }
 
-    fun deleteUser(email: String, password: String): Boolean{
-        return repository.deleteUser(email, password)
-
+    suspend fun deleteUser(email: String, password: String): Boolean{
+       if (repository.deleteUser(email,password)) {
+           return true
+       }
+        throw UnableToDeleteUserException()
     }
 
 }
