@@ -1,12 +1,7 @@
 package acceptanceTests
 
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
@@ -29,10 +24,10 @@ class UserServiceTests {
     private var userService: UserService = UserService(repository)
 
     @Test
-    fun createUser_E1Valid_userIsCreated() = runBlocking {
+    fun createUser_E1Valid_userIsCreated(): Unit = runBlocking {
         val userTest: User = userService.createUser(email, password)
         assertEquals(true, db.doesUserExist(userTest.email))
-        userService.deleteUser(userTest.email)
+        userService.deleteUser(userTest.email, password)
     }
 
     @Test
@@ -44,10 +39,10 @@ class UserServiceTests {
     }
 
     @Test
-    fun login_E1Valid_userIsLogged() = runBlocking{
+    fun login_E1Valid_userIsLogged(): Unit = runBlocking{
         val userTest: User = userService.createUser(email, password)
-        assertEquals(true, userService.login(userTest.email,userTest.password))
-        userService.deleteUser(userTest.email)
+        assertEquals(true, userService.login(userTest.email, password))
+        userService.deleteUser(userTest.email, password)
     }
 
     @Test
@@ -58,22 +53,23 @@ class UserServiceTests {
     }
 
     @Test
-    fun viewUserData_E1Valid_userDataViewed() {
-        val userData: User? = userService.viewUserData(email)
-        assertEquals(user, userData)
+    fun viewUserData_E1Valid_userDataViewed(): Unit = runBlocking {
+        val userData: Boolean = userService.viewUserData(email)
+        assertEquals(true, userData)
     }
 
     @Test
-    fun viewUserData_E1Invalid_userDataNotViewed() {
+    fun viewUserData_E1Invalid_userDataNotViewed(): Unit = runBlocking {
+        val emailError = "noexiste@gmail.com"
         assertThrows<SessionNotStartedException> {
-            userService.viewUserData(email)
+            userService.viewUserData(emailError)
         }
     }
 
     @Test
     fun editUserData_E1Valid_userDataEdited() {
         val newPassword = "GuillemElMejor"
-        userService.editUserData(email, newPassword)
+        userService.editUserData(newPassword)
         assertEquals(true, newPassword)
     }
 
@@ -81,40 +77,42 @@ class UserServiceTests {
     fun editUserData_E1Invalid_userDataEdited(){
         val newPassword = "J"
         assertThrows<IncorrectDataException>{
-            userService.editUserData(email, newPassword)
+            userService.editUserData(newPassword)
         }
     }
 
 
     @Test
-    fun signOut_E1Valid_userSignedOut() = runBlocking{
+    fun signOut_E1Valid_userSignedOut(): Unit = runBlocking{
         val userTest: User = userService.createUser(email, password)
-        userService.login(userTest.email, userTest.password)
+        userService.login(userTest.email, password)
         assertEquals(true, userService.signOut())
-        userService.deleteUser(userTest.email)
+        userService.deleteUser(userTest.email, password)
     }
 
     @Test
-    fun signOut_E2Invalid_errorSigningOut() = runBlocking{
+    fun signOut_E2Invalid_errorSigningOut(): Unit = runBlocking{
         val userTest: User = userService.createUser(email, password)
         assertThrows<SessionNotStartedException>{
             userService.signOut()
         }
-        userService.deleteUser(userTest.email)
+        userService.deleteUser(userTest.email, password)
     }
 
     @Test
-    fun deleteUser_E1Valid_userIsDeleted() {
+    fun deleteUser_E1Valid_userIsDeleted(): Unit = runBlocking {
+        val userTest: User = userService.createUser(email, password)
         val initialCount = db.getNumberUsers()
-        userService.deleteUser(email)
+        userService.deleteUser(email, password)
         val finalCount = db.getNumberUsers()
         assertEquals(initialCount - 1, finalCount)
     }
 
     @Test
-    fun deleteUser_E1Invalid_userIsDeleted() {
+    fun deleteUser_E1Invalid_userIsDeleted(): Unit = runBlocking {
+        val userTest: User = userService.createUser(email, password)
         assertThrows<UnableToDeleteUserException>{
-            userService.deleteUser(email)
+            userService.deleteUser(userTest.email, password)
         }
     }
 }

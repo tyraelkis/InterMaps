@@ -1,9 +1,6 @@
 package uji.es.intermaps.Model
 
-import android.util.Log
-import com.google.firebase.firestore.FirebaseFirestore
 import uji.es.intermaps.Exceptions.NotValidUserData
-
 
 class UserService(var repository: Repository) {
 
@@ -23,8 +20,6 @@ class UserService(var repository: Repository) {
         if (!pswd.matches(pswdRegex)) {
             throw IllegalArgumentException("La contraseña no tiene un formato válido.")
         }
-
-        // Delegar la creación al repositorio
         return repository.createUser(email, pswd)
     }
 
@@ -51,33 +46,25 @@ class UserService(var repository: Repository) {
         return repository.signOut()
     }
 
-    fun editUserData(email: String, newPassword:String): Boolean{
+    fun editUserData(newPassword:String): Boolean{
+        if (newPassword.isBlank()) {
+            throw NotValidUserData("El correo electrónico y la contraseña no pueden estar vacíos.")
+        }
+        if (newPassword.length < 8) {
+            throw IllegalArgumentException("La contraseña debe tener al menos 8 caracteres.")
+        }
+        repository.editUserData(newPassword)
         return true
     }
 
-    fun viewUserData(email: String): User?{
-        val user: User
-        if (email != null || email != ""){
-            user = repository.viewUserData(email)!!
-        }
-        else{
-            return null
-        }
-        return user
-    }
-
-    fun deleteUser(email: String){
+    suspend fun viewUserData(email: String): Boolean{
+        return repository.viewUserData(email)
 
     }
 
-    val db = FirebaseFirestore.getInstance()
-    fun conection_db () {
-        db.collection("Test")
-            .add(mapOf("key" to "value"))
-            .addOnSuccessListener { Log.d("Firestore", "Conexión exitosa") }
-            .addOnFailureListener {
-                Log.e("Firestore", "Error al conectar", it)
-            }
+    fun deleteUser(email: String, password: String): Boolean{
+        return repository.deleteUser(email, password)
+
     }
 
 }
