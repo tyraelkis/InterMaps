@@ -5,16 +5,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import uji.es.intermaps.View.home.HomeSreen
 import uji.es.intermaps.View.home.InitialScreen
-import uji.es.intermaps.View.interestPlace.InterestPlaceList
-import uji.es.intermaps.View.interestPlace.InterestPlaceSetAlias
 import uji.es.intermaps.View.login.LoginScreen
 import uji.es.intermaps.View.signup.SignUpScreen
-import uji.es.intermaps.View.user.UserAcceptModifications
 import uji.es.intermaps.View.user.UserDataScreen
 
 @Composable
@@ -23,9 +17,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth){
         composable("initial"){
             InitialScreen(
                 navigateToLogin = {navHostController.navigate("logIn")},
-                navigateToSignUp = {navHostController.navigate("signUp")},
-                navigateToUserDataScreen = {navHostController.navigate("userDataScreen")}
-
+                navigateToSignUp = {navHostController.navigate("signUp")}
             )
         }
         composable("logIn"){
@@ -44,17 +36,24 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth){
             )
         }
         composable("home"){
-            HomeSreen()
+            HomeSreen(
+                navigateToUserDataScreen = {navHostController.navigate("userDataScreen")}
+            )
         }
         composable("userDataScreen"){
             UserDataScreen(
-                navigateToUserChangeEmail = {navHostController.navigate("userChangeEmail")},
-                navigateToUserChangePassword = {navHostController.navigate("userChangePassword")}
+                auth,
+                navigateToInitialScreen = {navHostController.navigate("initial")}
             )
         }
-        composable("userAcceptModifications"){
-            UserAcceptModifications(
-                navigateToUserDataScreen = {navHostController.navigate("userDataScreen")}
+
+        composable("interestPlaceList"){
+            InterestPlaceList(navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")}, auth)
+        }
+
+        composable("interestPlaceSetAlias"){
+            InterestPlaceSetAlias(
+                navigateToInterestPlaceSetAlias = {navHostController.navigate("interestPlaceSetAlias")}
             )
         }
     }

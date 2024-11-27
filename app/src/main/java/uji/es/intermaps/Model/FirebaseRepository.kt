@@ -1,8 +1,12 @@
 package uji.es.intermaps.Model
 
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
@@ -12,7 +16,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.collections.hashMapOf as hashMapOf
 
-class FirebaseRepository: Repository{
+class FirebaseRepository: Repository {
     val db = FirebaseFirestore.getInstance()
     val auth = Firebase.auth
 
@@ -22,7 +26,7 @@ class FirebaseRepository: Repository{
             auth.createUserWithEmailAndPassword(email, pswd)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        val newUser = User(email)
+                        val newUser = User(email, pswd)
                         //db.collection("Users").add(mapOf("email" to email))
                         db.collection("Users").add(mapOf("email" to email))
                             .addOnSuccessListener { documentReference ->
@@ -75,98 +79,26 @@ class FirebaseRepository: Repository{
         }
     }
 
-    override suspend fun viewUserData(email: String): User?{
+    override suspend fun viewUserData(email: String): Boolean {
         return suspendCoroutine { continuation ->
-            db.collection("User")
+            db.collection("Users")
                 .whereEqualTo("email", email)
                 .get()
                 .addOnSuccessListener { querySnapshot ->
                     if (!querySnapshot.isEmpty) {
-                        val document = querySnapshot.documents[0]
-                        val user = User(
-                            email = document.getString("email") ?: "")
-                        continuation.resume(user)
+                        continuation.resume(true) // El correo existe
                     } else {
-                        continuation.resume(null)
+                        continuation.resume(false) // El correo no existe
                     }
                 }
                 .addOnFailureListener { exception ->
+                    Log.e("Firestore", "Error al verificar el correo: ${exception.message}", exception)
                     continuation.resumeWithException(exception)
                 }
         }
     }
 
-    /*override fun editUserEmail(newEmail: String): Boolean {
-        val user = auth.currentUser
-        if (user == null) {
-            Log.e("FirebaseAuth", "No hay un usuario autenticado")
-            return false
-        }
-
-    override fun setAlias(interestPlace: InterestPlace, newAlias : String, callback: (Boolean) -> Unit){
-        val geoPoint = interestPlace.coordinate
-        db.collection("InterestPlace")
-            .whereEqualTo("coordinate", geoPoint)
-            .get()
-            .addOnSuccessListener { documents ->
-                if(documents.isEmpty()){
-                    callback(false)
-                }else{
-                    val document = documents.documents[0]
-                    val documentId = document.id
-
-                    db.collection("InterestPlace")
-                        .document(documentId)
-                        .update("alias", newAlias)
-                        .addOnSuccessListener {
-                            callback(true)
-                        }
-
-                        .addOnFailureListener{ e ->
-                            callback(false)
-                        }
-                }
-            }
-            .addOnFailureListener{e ->
-                callback(false)
-            }
-        var result = false
-        // Actualizar el correo electrónico en Firebase Authentication
-        user.updateEmail(newEmail)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d("FirebaseAuth", "Email cambiado exitosamente en Auth")
-
-                    // Una vez actualizado en Auth, también lo actualizamos en Firestore
-                    val db = FirebaseFirestore.getInstance()
-                    val userRef = db.collection("users").document(user.uid)
-
-                    // Actualizamos el correo electrónico en Firestore
-                    userRef.update("email", newEmail)
-                        .addOnCompleteListener { firestoreTask ->
-                            if (firestoreTask.isSuccessful) {
-                                Log.d("Firestore", "Email actualizado exitosamente en Firestore")
-                                result = true
-                            } else {
-                                Log.e("Firestore", "Error al actualizar el email en Firestore", firestoreTask.exception)
-                                result = false
-                            }
-                        }
-                } else {
-                    Log.e("FirebaseAuth", "Error al cambiar el email en Auth", task.exception)
-                    result = false
-                }
-            }
-
-        // Al estar realizando operaciones asíncronas, se debe esperar que el resultado se obtenga después de los callbacks.
-        // Se recomienda manejar la respuesta después de completar ambos procesos (auth y firestore).
-
-        return result
-    }*/
-
-
-
-    override fun editUserPassword(newPassword: String): Boolean {
+    override fun editUserData(newPassword: String): Boolean {
         val user = auth.currentUser
         if (user == null) {
             Log.e("FirebaseAuth", "No hay un usuario autenticado")
@@ -230,15 +162,42 @@ class FirebaseRepository: Repository{
         return res
     }
 
-    override fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean{
-        return true
+    override fun setAlias(interestPlace: InterestPlace, newAlias : String, callback: (Boolean) -> Unit){
+        val geoPoint = interestPlace.coordinate
+        db.collection("InterestPlace")
+            .whereEqualTo("coordinate", geoPoint)
+            .get()
+            .addOnSuccessListener { documents ->
+                if(documents.isEmpty()){
+                    callback(false)
+                }else{
+                    val document = documents.documents[0]
+                    val documentId = document.id
+
+                    db.collection("InterestPlace")
+                        .document(documentId)
+                        .update("alias", newAlias)
+                        .addOnSuccessListener {
+                            callback(true)
+                        }
+
+                        .addOnFailureListener{ e ->
+                            callback(false)
+                        }
+                }
+            }
+            .addOnFailureListener{e ->
+                callback(false)
+            }
+        }
+
+
+
+    override fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String, fav: Boolean) {
+
     }
 
-    override fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
-        return InterestPlace(Coordinate(0.0,0.0), "", "", false)
-    }
-
-    override fun deleteInterestPlace(coordinate: Coordinate): Boolean {
+    override fun deleteInterestPlace(coordinate: GeoPoint): Boolean {
         return false
     }
 
