@@ -21,11 +21,12 @@ class UserServiceTests {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
     private var email: String = "prueba@uji.es"
-    private var password: String = "123456AA" // Cambiar en las pruebas de aceptacion para que cumpla los requisitos de las contraseñas
+    private var password: String =
+        "123456AA" // Cambiar en las pruebas de aceptacion para que cumpla los requisitos de las contraseñas
     private var userService: UserService = UserService(repository)
 
 
-   @Test
+    @Test
     fun createUser_E1Valid_userIsCreated(): Unit = runBlocking {
         val userTest: User = userService.createUser(email, password)
         val res = db.doesUserExist(userTest.email)
@@ -34,8 +35,8 @@ class UserServiceTests {
 
     }
 
-   @Test
-    fun createUser_E2Invalid_errorOnAccountCreation(): Unit = runBlocking{
+    @Test
+    fun createUser_E2Invalid_errorOnAccountCreation(): Unit = runBlocking {
         userService.createUser(email, password)
         assertThrows<AccountAlreadyRegistredException> {
             userService.createUser(email, password)
@@ -44,7 +45,7 @@ class UserServiceTests {
     }
 
     @Test
-    fun login_E1Valid_userIsLogged(): Unit = runBlocking{
+    fun login_E1Valid_userIsLogged(): Unit = runBlocking {
         userService.createUser(email, password)
         val res = userService.login(email, password)
         userService.deleteUser(email, password)
@@ -53,7 +54,7 @@ class UserServiceTests {
 
     @Test
     fun login_E2Invalid_errorOnLogin(): Unit = runBlocking {
-        assertThrows<UnregistredUserException>{
+        assertThrows<UnregistredUserException> {
             userService.login(email, password)
         }
     }
@@ -84,16 +85,16 @@ class UserServiceTests {
     }
 
     @Test
-    fun editUserData_E1Invalid_userDataEdited(): Unit = runBlocking{
+    fun editUserData_E1Invalid_userDataEdited(): Unit = runBlocking {
         val newPassword = "J"
-        assertThrows<IncorrectDataException>{
+        assertThrows<IncorrectDataException> {
             userService.editUserData(newPassword)
         }
     }
 
 
     @Test
-    fun signOut_E1Valid_userSignedOut(): Unit = runBlocking{
+    fun signOut_E1Valid_userSignedOut(): Unit = runBlocking {
         userService.createUser(email, password)
         val res = userService.signOut()
         userService.login(email, password)
@@ -102,8 +103,8 @@ class UserServiceTests {
     }
 
     @Test
-    fun signOut_E2Invalid_errorSigningOut(): Unit = runBlocking{
-        assertThrows<SessionNotStartedException>{
+    fun signOut_E2Invalid_errorSigningOut(): Unit = runBlocking {
+        assertThrows<SessionNotStartedException> {
             userService.signOut()
         }
     }
@@ -111,12 +112,12 @@ class UserServiceTests {
     @Test
     fun deleteUser_E1Valid_userIsDeleted(): Unit = runBlocking {
         userService.createUser(email, password)
-        assertEquals(true, userService.deleteUser(email,password))
+        assertEquals(true, userService.deleteUser(email, password))
     }
 
     @Test
     fun deleteUser_E1Invalid_userIsDeleted(): Unit = runBlocking {
-        assertThrows<UnableToDeleteUserException>{
+        assertThrows<UnableToDeleteUserException> {
             userService.deleteUser(email, password)
         }
     }

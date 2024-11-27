@@ -53,6 +53,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.Repository
 import uji.es.intermaps.Model.UserService
@@ -427,7 +428,31 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit){
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = {},
+            onClick = {
+                CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val success = userService.signOut()
+                    withContext(Dispatchers.Main) {
+                        if (success) {
+                            navigateToInitialScreen() // Navega a la pantalla inicial tras cerrar sesión
+                        } else {
+                            errorMessage = "Error al cerrar sesión."
+                            Log.e("SignOut", "No se pudo cerrar la sesión.")
+                        }
+                    }
+                } catch (e: SessionNotStartedException) {
+                    withContext(Dispatchers.Main) {
+                        errorMessage = "No hay ninguna sesión iniciada."
+                        Log.e("SignOut", e.message.toString())
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        errorMessage = "Ocurrió un error inesperado: ${e.message}"
+                        Log.e("SignOut", e.message.toString(), e)
+                    }
+                }
+            }
+                      },
             modifier = Modifier
                 .height(45.dp)
                 .width(350.dp)
