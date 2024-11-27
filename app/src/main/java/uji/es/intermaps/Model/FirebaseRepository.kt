@@ -7,6 +7,7 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.suspendCancellableCoroutine
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
@@ -17,7 +18,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.collections.hashMapOf as hashMapOf
 
-class FirebaseRepository: Repository{
+class FirebaseRepository: Repository {
     val db = FirebaseFirestore.getInstance()
     val auth = Firebase.auth
 
@@ -192,9 +193,9 @@ class FirebaseRepository: Repository{
             }
         }
 
-    override fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
+    /*override fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
         return InterestPlace(Coordinate(0.0,0.0), "", "", false)
-    }
+    }*/
 
     override fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String, fav: Boolean) {
 
