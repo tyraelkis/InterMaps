@@ -1,12 +1,7 @@
 package acceptanceTests
 
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
@@ -74,7 +69,7 @@ class UserServiceTests {
     @Test
     fun editUserData_E1Valid_userDataEdited() {
         val newPassword = "GuillemElMejor"
-        userService.editUserPassword(newPassword)
+        userService.editUserData(newPassword)
         assertEquals(true, newPassword)
     }
 
@@ -82,7 +77,7 @@ class UserServiceTests {
     fun editUserData_E1Invalid_userDataEdited(){
         val newPassword = "J"
         assertThrows<IncorrectDataException>{
-            userService.editUserPassword(newPassword)
+            userService.editUserData(newPassword)
         }
     }
 

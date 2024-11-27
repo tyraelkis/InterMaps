@@ -1,12 +1,10 @@
 package uji.es.intermaps.View.user
 
 import android.util.Log
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,14 +19,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -36,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -45,7 +40,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -53,18 +47,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
-import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.launch
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.Repository
-import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.UserService
 import uji.es.intermaps.R
-import java.time.format.TextStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -159,19 +146,6 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit){
                 )
             }
         }
-        //Spacer(modifier = Modifier.height(8.dp))
-
-        /*Button(
-            onClick = {showPopupEmail = true},
-            modifier = Modifier
-                .height(36.dp)
-                .padding(horizontal = 32.dp, vertical = 1.dp)
-                .align(AbsoluteAlignment.Right),
-            colors = ButtonDefaults.buttonColors(containerColor = Black),
-            shape = RoundedCornerShape(10.dp)
-        ) {
-            Text(text = "Editar", color = White, fontSize = 14.sp)
-        }*/
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -580,7 +554,7 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit){
                             onClick = {
                                 // Verifica si las contraseñas coinciden
                                 if (newPassword == confirmPassword) {
-                                    val success = userService.editUserPassword(newPassword) // Aquí haces el cambio de contraseña
+                                    val success = userService.editUserData(newPassword) // Aquí haces el cambio de contraseña
                                     if (success) {
                                         showPopupPassword = false // Cierra el popup cuando la contraseña se cambia
                                         showPopupModifications = true // Muestra el mensaje de éxito o la siguiente vista
@@ -770,208 +744,5 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit){
             }
         }
     }
-
-    /*if (showPopUpReAuth) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0x80FFFFFF))
-                .clickable { showPopUpDelete = false },
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(350.dp)
-                    .background(Color(0XFF007E70), shape = RoundedCornerShape(10.dp))
-                    .clip(RoundedCornerShape(10.dp))
-                    .padding(16.dp)
-            ){ Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-            ){
-                TextField(
-                    value = passwordInput.value,
-                    onValueChange = { passwordInput.value = it },
-                    label = { Text("Ingresa tu contraseña actual") },
-                    visualTransformation = PasswordVisualTransformation() // Ocultar texto ingresado
-                )
-
-                Button(
-                    onClick = { showPopupModifications = true
-                        showPopUpReAuth = false
-                        val user = auth.currentUser
-                        if (user != null) {
-                            val credential =
-                                EmailAuthProvider.getCredential(user.email!!, passwordInput.value)
-                            user.reauthenticate(credential)
-                                .addOnCompleteListener { reauthenticateTask ->
-                                    if (reauthenticateTask.isSuccessful) {
-
-                                    } else {
-                                        Log.e(
-                                            "FirebaseAuth",
-                                            "Error al reautenticar al usuario",
-                                            reauthenticateTask.exception
-                                        )
-                                    }
-                                }
-                        }},
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Black
-                    ),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Text(
-                        text = "Aceptar",
-                        fontSize = 16.sp,
-                        color = Color.White
-                    )
-                }
-            }
-
-        }
-        }
-    }*/
-
-    /*if (showPopupEmail){
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp)
-            .background(Color(0x80FFFFFF))
-            .clickable { showPopupEmail = false},
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .height(450.dp)
-                .width(395.dp)
-                .background(Color(0XFF007E70), shape = RoundedCornerShape(10.dp))
-                .clip(RoundedCornerShape(10.dp))
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Cambio de correo electrónico",
-                    color = Color.White,
-                    fontSize = 26.sp,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Nuevo correo electrónico
-                Column(horizontalAlignment = Alignment.Start) {
-                    Text(
-                        text = "Nuevo correo electrónico",
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Left,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    TextField(
-                        value = newEmail,
-                        onValueChange = { newEmail = it },
-                        modifier = Modifier
-                            .height(52.dp)
-                            .fillMaxWidth()
-                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
-                        placeholder = { Text("Introduce el nuevo correo electrónico") },
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color(0xFF80BEB7),
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Confirmación de correo electrónico
-                Column(horizontalAlignment = Alignment.Start) {
-                    Text(
-                        text = "Confirmación de correo electrónico",
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Left,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    TextField(
-                        value = confirmEmail,
-                        onValueChange = { confirmEmail = it },
-                        modifier = Modifier
-                            .height(52.dp)
-                            .fillMaxWidth()
-                            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
-                        placeholder = { Text("Confirma el nuevo correo electrónico") },
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = Color(0xFF80BEB7),
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.height(50.dp))
-
-                // Botones de aceptar y cancelar
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    val coroutineScope = rememberCoroutineScope()
-
-                    Button(
-                        onClick = {
-                            coroutineScope.launch {
-                                if (newEmail == confirmEmail) {
-                                    val success = userService.editUserEmail(newEmail)
-                                    if (success) {
-                                        currentEmail = newEmail
-                                        showPopUpReAuth = true
-                                        showPopupEmail = false
-                                    } else {
-                                        errorMessage = "Error al modificar los datos"
-                                        Log.e("EmailChange", "No se pudo modificar el email")
-                                    }
-                                } else {
-                                    errorMessage = "Los correos no coinciden"
-                                }
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
-                    ) {
-                        Text(
-                            text = "Aceptar",
-                            fontSize = 16.sp,
-                        )
-                    }
-
-                    Button(
-                        onClick = { showPopupEmail = false },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
-                    ) {
-                        Text(
-                            text = "Cancelar",
-                            fontSize = 16.sp
-                        )
-                    }
-                }
-            }
-        }
-    }
-}*/
 
 }

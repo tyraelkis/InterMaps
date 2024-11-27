@@ -98,50 +98,8 @@ class FirebaseRepository: Repository{
                 }
         }
     }
-    /*override fun editUserEmail(newEmail: String): Boolean {
-        val user = auth.currentUser
-        if (user == null) {
-            Log.e("FirebaseAuth", "No hay un usuario autenticado")
-            return false
-        }
 
-        var result = false
-        // Actualizar el correo electrónico en Firebase Authentication
-        user.updateEmail(newEmail)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d("FirebaseAuth", "Email cambiado exitosamente en Auth")
-
-                    // Una vez actualizado en Auth, también lo actualizamos en Firestore
-                    val db = FirebaseFirestore.getInstance()
-                    val userRef = db.collection("users").document(user.uid)
-
-                    // Actualizamos el correo electrónico en Firestore
-                    userRef.update("email", newEmail)
-                        .addOnCompleteListener { firestoreTask ->
-                            if (firestoreTask.isSuccessful) {
-                                Log.d("Firestore", "Email actualizado exitosamente en Firestore")
-                                result = true
-                            } else {
-                                Log.e("Firestore", "Error al actualizar el email en Firestore", firestoreTask.exception)
-                                result = false
-                            }
-                        }
-                } else {
-                    Log.e("FirebaseAuth", "Error al cambiar el email en Auth", task.exception)
-                    result = false
-                }
-            }
-
-        // Al estar realizando operaciones asíncronas, se debe esperar que el resultado se obtenga después de los callbacks.
-        // Se recomienda manejar la respuesta después de completar ambos procesos (auth y firestore).
-
-        return result
-    }*/
-
-
-
-    override fun editUserPassword(newPassword: String): Boolean {
+    override fun editUserData(newPassword: String): Boolean {
         val user = auth.currentUser
         if (user == null) {
             Log.e("FirebaseAuth", "No hay un usuario autenticado")
