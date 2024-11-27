@@ -8,7 +8,7 @@ import uji.es.intermaps.Exceptions.NotValidUserData
 
 class UserService(var repository: Repository) {
 
-    suspend fun createUser(email: String, pswd: String, vehicle: String): User {
+    suspend fun createUser(email: String, pswd: String): User {
         // Validación local
         if (email.isBlank() || pswd.isBlank()) {
             throw NotValidUserData("El correo electrónico y la contraseña no pueden estar vacíos.")
@@ -77,8 +77,9 @@ class UserService(var repository: Repository) {
         return true
     }
 
-    suspend fun viewUserData(email: String): User?{
+    suspend fun viewUserData(email: String): Boolean{
         return repository.viewUserData(email)
+
     }
 
     fun deleteUser(email: String, password: String): Boolean{

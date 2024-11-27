@@ -5,7 +5,7 @@ interface Repository {
     suspend fun loginUser(email:String, pswd: String): Boolean
     suspend fun signOut(): Boolean
     //fun editUserData(email: String, newPassword:String): Boolean
-    suspend fun viewUserData(email: String) : User?
+    suspend fun viewUserData(email: String) : Boolean
     //suspend fun editUserEmail(newEmail:String): Boolean
     fun editUserPassword(newPassword:String): Boolean
     fun deleteUser(email: String, password: String): Boolean

@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.suspendCancellableCoroutine
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
@@ -26,7 +27,7 @@ class FirebaseRepository: Repository{
             auth.createUserWithEmailAndPassword(email, pswd)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        val newUser = User(email)
+                        val newUser = User(email, pswd)
                         //db.collection("Users").add(mapOf("email" to email))
                         db.collection("Users").add(mapOf("email" to email))
                             .addOnSuccessListener { documentReference ->
@@ -79,27 +80,24 @@ class FirebaseRepository: Repository{
         }
     }
 
-    override suspend fun viewUserData(email: String): User?{
+    override suspend fun viewUserData(email: String): Boolean {
         return suspendCoroutine { continuation ->
-            db.collection("User")
+            db.collection("Users")
                 .whereEqualTo("email", email)
                 .get()
                 .addOnSuccessListener { querySnapshot ->
                     if (!querySnapshot.isEmpty) {
-                        val document = querySnapshot.documents[0]
-                        val user = User(
-                            email = document.getString("email") ?: "")
-                        continuation.resume(user)
+                        continuation.resume(true) // El correo existe
                     } else {
-                        continuation.resume(null)
+                        continuation.resume(false) // El correo no existe
                     }
                 }
                 .addOnFailureListener { exception ->
+                    Log.e("Firestore", "Error al verificar el correo: ${exception.message}", exception)
                     continuation.resumeWithException(exception)
                 }
         }
     }
-
     /*override fun editUserEmail(newEmail: String): Boolean {
         val user = auth.currentUser
         if (user == null) {
