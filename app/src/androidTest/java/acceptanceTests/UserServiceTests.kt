@@ -1,23 +1,30 @@
 package acceptanceTests
 
+
+import uji.es.intermaps.Exceptions.NotValidAliasException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
+import uji.es.intermaps.Model.User
+import org.junit.Assert.*
 import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
+import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.FirebaseRepository
+import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.Model.InterestPlaceService
 import uji.es.intermaps.Model.Repository
-import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.UserService
 
 class UserServiceTests {

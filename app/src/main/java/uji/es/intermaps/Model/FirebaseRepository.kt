@@ -1,13 +1,14 @@
 package uji.es.intermaps.Model
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import android.util.Log
-import com.google.firebase.auth.EmailAuthProvider
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
@@ -16,7 +17,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.collections.hashMapOf as hashMapOf
 
-class FirebaseRepository: Repository {
+class FirebaseRepository: Repository{
     val db = FirebaseFirestore.getInstance()
     val auth = Firebase.auth
 
@@ -162,34 +163,31 @@ class FirebaseRepository: Repository {
         return res
     }
 
-    override fun setAlias(interestPlace: InterestPlace, newAlias : String, callback: (Boolean) -> Unit){
-        val geoPoint = interestPlace.coordinate
-        db.collection("InterestPlace")
-            .whereEqualTo("coordinate", geoPoint)
-            .get()
-            .addOnSuccessListener { documents ->
-                if(documents.isEmpty()){
-                    callback(false)
-                }else{
-                    val document = documents.documents[0]
-                    val documentId = document.id
+    override suspend fun setAlias(interestPlace: InterestPlace, newAlias: String):Boolean {
+        return try{
+            val geoPoint = interestPlace.coordinate
 
-                    db.collection("InterestPlace")
-                        .document(documentId)
-                        .update("alias", newAlias)
-                        .addOnSuccessListener {
-                            callback(true)
-                        }
+            val search = db.collection("InterestPlace")
+                .whereEqualTo("coordinate", geoPoint)
+                .get()
+                .await()
+            if(search.isEmpty){
+                false
+            }else{
+                val document = search.documents[0]
+                val documentId = document.id
 
-                        .addOnFailureListener{ e ->
-                            callback(false)
-                        }
-                }
+                db.collection("InterestPlace")
+                    .document(documentId)
+                    .update("alias", newAlias)
+                    .await()
+                true
             }
-            .addOnFailureListener{e ->
-                callback(false)
-            }
+        }catch (e:Exception){
+            e.printStackTrace()
+            false
         }
+    }
 
 
 

@@ -51,17 +51,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.Uri
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.toObject
+import com.google.gson.Gson
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.InterestPlaceService
 import uji.es.intermaps.Model.Repository
 import uji.es.intermaps.R
+import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: FirebaseAuth){
+fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -> Unit, viewModel: InterestPlaceViewModel) {
     var db = FirebaseFirestore.getInstance()
     var user = auth.currentUser
     var repository: Repository = FirebaseRepository()
@@ -71,8 +74,11 @@ fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: Fireba
     var noFavList by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        interestPlaceService.getFavList{places ->
+        interestPlaceService.getFavList { places ->
             favList = places
+        }
+        interestPlaceService.getNoFavList { NoFavplaces ->
+            noFavList = NoFavplaces
         }
     }
     Column(
@@ -100,7 +106,7 @@ fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: Fireba
         }
         Spacer(modifier = Modifier.height(25.dp))
 
-        Row (
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp),
@@ -120,36 +126,51 @@ fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: Fireba
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .align(Alignment.Start)
         ) {
-            if (favList.isNotEmpty()){
-                favList.forEach{place ->
-                    var isSelected = true
-                    Row (
+
+            if (favList.isNotEmpty()) {
+                favList.forEach { place ->
+
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 32.dp),
-                        horizontalArrangement = Arrangement.Center,
+                            .padding(horizontal = 15.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Estrella fav",
+                            modifier = Modifier
+                                .size(30.dp),
+                            tint = Color(color = 0XFF007E70)
+                        )
                         Text(
                             text = place.toponym,
                             fontSize = 20.sp,
                             modifier = Modifier
-                                .padding(horizontal = 32.dp)
-                        )
-                        Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "Estrella fav",
-                                modifier = Modifier
-                                    .size(30.dp)
-                                    .clickable {
-                                        isSelected = !isSelected
-                                        interestPlace.fav = isSelected
-                                    },
-                                tint = Color.White
-
+                                .weight(1f)
+                                .padding(horizontal = 15.dp)
 
                         )
+                        Button(
+                            onClick = {
+                                viewModel.setInterestPlace(place)
+                                navigateToInterestPlaceSetAlias()
+                            },
+                            modifier = Modifier
+                                .width(100.dp)
+                                .height(42.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Black
+                            )
+                        ) {
+                            Text(
+                                text = "Editar",
+                                fontSize = 16.sp,
+                            )
+                        }
+
                     }
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -165,41 +186,68 @@ fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: Fireba
                 .padding(horizontal = 32.dp),
             horizontalArrangement = Arrangement.Absolute.Left,
             verticalAlignment = Alignment.CenterVertically
+
         ) {
             Text(
-                text = "Toponym",
+                text = "Lugares de interés",
                 color = Color.Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
+                fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
             )
         }
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
-        Box(
+        Column(
             modifier = Modifier
-                .height(52.dp)
-                .width(350.dp)
-                .background(Color(0xFFFFFFF), shape = RoundedCornerShape(10.dp))
-                .border(
-                    width = 1.dp,
-                    color = Color.Black,
-                    shape = RoundedCornerShape(10.dp)
-                )
-                .clip(RoundedCornerShape(10.dp))
-                .padding(5.dp),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .align(Alignment.Start)
         ) {
-            // Texto en el fondo
-            Text(
-                text = "Mozambique",
-                color = Color.Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.CenterStart),
-            )
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-    }
+            if (noFavList.isNotEmpty()) {
+                noFavList.forEach { notFavPlace ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 15.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Estrella fav",
+                            modifier = Modifier
+                                .size(30.dp),
+                            tint = Color.Black
+                        )
+                        Text(
+                            text = notFavPlace.toponym,
+                            fontSize = 20.sp,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = 15.dp)
+                        )
+                        Button(
+                            onClick = {
+                                viewModel.setInterestPlace(notFavPlace)
+                                navigateToInterestPlaceSetAlias()
+                            },
+                            modifier = Modifier
+                                .width(100.dp)
+                                .height(42.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Black
+                            )
+                        ) {
+                            Text(
+                                text = "Editar",
+                                fontSize = 16.sp,
+                            )
+                        }
 
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                }
+            }
+        }
+
+    }
 }
