@@ -3,13 +3,10 @@ package uji.es.intermaps.Model
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
-import com.google.firebase.auth.EmailAuthProvider
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
@@ -17,7 +14,6 @@ import uji.es.intermaps.Exceptions.UnregistredUserException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
-import kotlin.collections.hashMapOf as hashMapOf
 
 class FirebaseRepository: Repository {
     val db = FirebaseFirestore.getInstance()
@@ -128,7 +124,6 @@ class FirebaseRepository: Repository {
             val user = auth.currentUser
             if (user == null) {
                 Log.e("FirebaseAuth", "No hay un usuario autenticado")
-                false
             }
             // Buscar el documento del usuario en Firestore
             val querySnapshot = FirebaseFirestore.getInstance()
@@ -139,7 +134,6 @@ class FirebaseRepository: Repository {
 
             if (querySnapshot.isEmpty) {
                 Log.d("Firestore", "No se encontró el documento del usuario.")
-                false
             }
 
             // Eliminar el documento de Firestore
@@ -188,19 +182,6 @@ class FirebaseRepository: Repository {
         }
     }
 
-
-    /*override fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
-        return InterestPlace(Coordinate(0.0,0.0), "", "", false)
-    }*/
-
-    override fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String, fav: Boolean) {
-
-    }
-
-    override fun deleteInterestPlace(coordinate: GeoPoint): Boolean {
-        return false
-    }
-
     override fun getFavList(callback:  ((Boolean),(List<InterestPlace>)) -> Unit){
         db.collection("InterestPlace")
             .whereEqualTo("fav", true)
@@ -242,6 +223,28 @@ class FirebaseRepository: Repository {
             }
     }
 
+    override suspend fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String): InterestPlace {
+        return suspendCoroutine { continuation ->
+            db.collection("InterestPlace").add(
+                mapOf(
+                    "coordinate" to coordinate,
+                    "toponym" to toponym,
+                    "alias" to alias,
+                    "fav" to false
+                )
+            ).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    continuation.resume(InterestPlace(coordinate, toponym, alias, false))
+                } else {
+                    continuation.resumeWithException(task.exception ?: Exception("Error desconocido al almacenar el lugar de interés."))
+                }
+            }
+        }
+    }
+
+    override fun deleteInterestPlace(coordinate: GeoPoint): Boolean {
+        return false
+    }
 }
 
 

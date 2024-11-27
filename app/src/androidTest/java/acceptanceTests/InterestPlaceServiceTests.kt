@@ -20,16 +20,16 @@ class InterestPlaceServiceTests {
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
 
     @Test
-    fun createInterestPlace_E1Valid_InterestPlaceCreated() {
-        val interestPlaceTest: InterestPlace = interestPlaceService.createInterestPlace(GeoPoint(-18.665695, 35.529562), "Mozambique", "Moz")
-        assertEquals(interestPlace, interestPlaceTest)
+    fun createInterestPlace_E1Valid_InterestPlaceCreated(): Unit = runBlocking{
+        val interestPlaceTest: InterestPlace = interestPlaceService.createInterestPlaceCoordinates(GeoPoint(-18.665695, 35.529562))
+        assertEquals(interestPlace.coordinate, interestPlaceTest.coordinate)
         interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
     }
 
     @Test
-    fun createInterestPlace_E2Invalid_errorOnCreatingInterestPlace() {
+    fun createInterestPlace_E2Invalid_errorOnCreatingInterestPlace(): Unit = runBlocking {
         assertThrows<NotValidCoordinatesException>{
-            interestPlaceService.createInterestPlace(GeoPoint(-1800.665695,35.529562), "Mozambique", "Moz")
+            interestPlaceService.createInterestPlaceCoordinates(GeoPoint(-1800.665695,35.529562))
         }
     }
 

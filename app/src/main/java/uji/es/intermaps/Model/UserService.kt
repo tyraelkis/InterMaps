@@ -5,7 +5,6 @@ import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 
-
 class UserService(var repository: Repository) {
 
     suspend fun createUser(email: String, pswd: String): User {
@@ -53,7 +52,6 @@ class UserService(var repository: Repository) {
     suspend fun editUserData(newPassword:String): Boolean{
         if (newPassword.isBlank()) {
             throw NotValidUserData("El correo electrónico y la contraseña no pueden estar vacíos.")
-            return false
         }
         if (newPassword.length < 8) {
             throw IncorrectDataException()
