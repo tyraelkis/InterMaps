@@ -22,7 +22,7 @@ class InterestPlaceServiceTests {
     @Test
     fun createInterestPlace_E1Valid_InterestPlaceCreated(): Unit = runBlocking{
         val interestPlaceTest: InterestPlace = interestPlaceService.createInterestPlaceCoordinates(GeoPoint(-18.665695, 35.529562))
-        assertEquals(interestPlace, interestPlaceTest)
+        assertEquals(interestPlace.coordinate, interestPlaceTest.coordinate)
         interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
     }
 

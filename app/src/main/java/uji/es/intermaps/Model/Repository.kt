@@ -10,7 +10,7 @@ interface Repository {
     fun editUserData(newPassword:String): Boolean
     fun deleteUser(email: String, password: String): Boolean
     suspend fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean
-    suspend fun createInterestPlace(coordinate: GeoPoint, toponym: String?, alias: String?): InterestPlace
+    suspend fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String): InterestPlace
     fun deleteInterestPlace(coordinate: GeoPoint): Boolean
     fun getFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)
     fun getNoFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)

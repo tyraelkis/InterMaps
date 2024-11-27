@@ -1,5 +1,6 @@
 package uji.es.intermaps.Model
 
+import android.util.Log
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.*
@@ -13,10 +14,30 @@ class InterestPlaceService(private val repository: Repository) {
             throw NotValidCoordinatesException("Las coordenadas no son válidas")
         }
         //Aquí se llama a la API openrouteservice para conseguir el topónimo correspondiente con las coordenadas
-        //TODO llamar a la API openrouteservice
-        val toponym : String? = null
+        //Clase que realizará las llamadas con sus métodos
+        val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
+        var toponym : String = ""
 
-        return repository.createInterestPlace(coordinate, toponym, null)
+        //Llamada a la API
+        val response = withContext(Dispatchers.IO) {
+            openRouteService.getToponym(
+                "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23",
+                coordinate.longitude,
+                coordinate.latitude
+            ).execute()
+        }
+        if (response.isSuccessful) {
+            response.body()?.let { ORSResponse ->
+                val respuesta = ORSResponse.features
+                if (respuesta.isNotEmpty()) {
+                    toponym = respuesta[0].properties.label
+                }
+            }
+        } else {
+            throw Exception("Error en la llamada a la API")
+        }
+
+        return repository.createInterestPlace(coordinate, toponym, "")
     }
 
     fun deleteInterestPlace(coordinate: GeoPoint): Boolean{

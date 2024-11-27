@@ -228,9 +228,9 @@ class FirebaseRepository: Repository{
             }
     }
 
-    override suspend fun createInterestPlace(coordinate: GeoPoint, toponym: String?, alias: String?): InterestPlace {
+    override suspend fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String): InterestPlace {
         return suspendCoroutine { continuation ->
-            db.collection("InterestPlaces").add(
+            db.collection("InterestPlace").add(
                 mapOf(
                     "coordinate" to coordinate,
                     "toponym" to toponym,
