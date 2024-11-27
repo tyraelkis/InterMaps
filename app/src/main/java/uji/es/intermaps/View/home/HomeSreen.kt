@@ -1,5 +1,6 @@
 package uji.es.intermaps.View.home
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,12 +29,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
+import uji.es.intermaps.Model.DataBase.auth
+import uji.es.intermaps.Model.FirebaseRepository
+import uji.es.intermaps.Model.Repository
+import uji.es.intermaps.Model.UserService
 import uji.es.intermaps.R
 
 @Composable
 fun HomeSreen (navigateToUserDataScreen: () -> Unit = {}){
 
-    var email by remember { mutableStateOf("") }
+    val user = auth.currentUser
+    val repository: Repository = FirebaseRepository()
+    val userService = UserService(repository)
+    //var email by remember { mutableStateOf("") }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,8 +77,19 @@ fun HomeSreen (navigateToUserDataScreen: () -> Unit = {}){
                 .height(270.dp)
         )
 
+        val coroutineScope = rememberCoroutineScope()
+
         Button(
-            onClick = { navigateToUserDataScreen() },
+            onClick = { navigateToUserDataScreen()
+                coroutineScope.launch {
+                    val emailExists = userService.viewUserData(user?.email.toString())
+                    if (emailExists) {
+                        navigateToUserDataScreen() // Navega si el correo existe
+                    } else {
+                        Log.d("Firestore", "El correo no está registrado.")
+                    }
+                }
+                      },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(42.dp)

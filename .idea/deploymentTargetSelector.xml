@@ -16,7 +16,13 @@
       <SelectionState runConfigName="UserServiceTests">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="edit_E1Valido_setAliasToAPlaceOfInterest()">
+      <SelectionState runConfigName="createUser_E1Valid_userIsCreated()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="createUser_E2Invalid_errorOnAccountCreation()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="login_E1Valid_userIsLogged()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
