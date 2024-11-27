@@ -7,6 +7,7 @@ import com.google.firebase.crashlytics.internal.Logger.TAG
 import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 
 object DataBase {
     @SuppressLint("StaticFieldLeak")
@@ -27,5 +28,15 @@ object DataBase {
         return count
     }
 
-
+    suspend fun doesUserExist(email: String): Boolean {
+        return try {
+            val documents = db.collection("Users")
+                .whereEqualTo("email", email)
+                .get()
+                .await()  //consulta asincrónica
+            !documents.isEmpty
+        } catch (exception: Exception) {
+            false
+        }
+    }
 }

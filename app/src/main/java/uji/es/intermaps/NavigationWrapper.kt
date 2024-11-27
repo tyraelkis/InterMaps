@@ -19,13 +19,11 @@ import uji.es.intermaps.View.user.UserDataScreen
 
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth){
-    NavHost(navController = navHostController, startDestination = "interestPlaceList") {
+    NavHost(navController = navHostController, startDestination = "userDataScreen") {
         composable("initial"){
             InitialScreen(
                 navigateToLogin = {navHostController.navigate("logIn")},
-                navigateToSignUp = {navHostController.navigate("signUp")},
-                navigateToUserDataScreen = {navHostController.navigate("userDataScreen")}
-
+                navigateToSignUp = {navHostController.navigate("signUp")}
             )
         }
         composable("logIn"){
@@ -44,19 +42,14 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth){
             )
         }
         composable("home"){
-            HomeSreen()
+            HomeSreen(
+                navigateToUserDataScreen = {navHostController.navigate("userDataScreen")}
+            )
         }
         composable("userDataScreen"){
             UserDataScreen(
                 auth,
-                navigateToUserChangeEmail = {navHostController.navigate("userChangeEmail")},
-                navigateToUserChangePassword = {navHostController.navigate("userChangePassword")}
-
-            )
-        }
-        composable("userAcceptModifications"){
-            UserAcceptModifications(
-                navigateToUserDataScreen = {navHostController.navigate("userDataScreen")}
+                navigateToInitialScreen = {navHostController.navigate("initial")}
             )
         }
 
