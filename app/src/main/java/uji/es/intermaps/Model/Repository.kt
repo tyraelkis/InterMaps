@@ -11,7 +11,7 @@ interface Repository {
     suspend fun viewUserData(email: String) : Boolean
     //suspend fun editUserEmail(newEmail:String): Boolean
     fun editUserData(newPassword:String): Boolean
-    fun deleteUser(email: String, password: String): Boolean
+    suspend fun deleteUser(email: String, password: String): Boolean
     //fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean
     //fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace
     //fun deleteInterestPlace(coordinate: Coordinate): Boolean

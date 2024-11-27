@@ -17,7 +17,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlin.collections.hashMapOf as hashMapOf
 
-class FirebaseRepository: Repository{
+class FirebaseRepository: Repository {
     val db = FirebaseFirestore.getInstance()
     val auth = Firebase.auth
 
@@ -121,46 +121,43 @@ class FirebaseRepository: Repository{
         return result
     }
 
-    override fun deleteUser(email: String, password: String): Boolean {
-        val user = auth.currentUser
-        var res = false
+    override suspend fun deleteUser(email: String, password: String): Boolean {
+        return try{
+            val user = auth.currentUser
+            if (user == null) {
+                Log.e("FirebaseAuth", "No hay un usuario autenticado")
+                false
+            }
+            // Buscar el documento del usuario en Firestore
+            val querySnapshot = FirebaseFirestore.getInstance()
+                .collection("Users")
+                .whereEqualTo("email", email)
+                .get()
+                .await()
 
-        if (user == null) {
-            Log.e("FirebaseAuth", "No hay un usuario autenticado")
-            return res
+            if (querySnapshot.isEmpty) {
+                Log.d("Firestore", "No se encontró el documento del usuario.")
+                false
+            }
+
+            // Eliminar el documento de Firestore
+            val documentId = querySnapshot.documents[0].id
+            FirebaseFirestore.getInstance()
+                .collection("Users")
+                .document(documentId)
+                .delete()
+                .await()
+            Log.d("Firestore", "Documento de usuario eliminado exitosamente.")
+
+            // Eliminar el usuario de FirebaseAuth
+            user!!.delete().await()
+            Log.d("FirebaseAuth", "Usuario eliminado exitosamente.")
+
+            true
+        } catch (e: Exception) {
+            Log.e("DeleteUser", "Error al eliminar el usuario: ${e.message}", e)
+            false
         }
-        // Eliminar los datos del usuario en Firestore
-        db.collection("Users")
-            .whereEqualTo("email", email)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                if (!querySnapshot.isEmpty) {
-                    val document = querySnapshot.documents[0]
-                    db.collection("Users").document(document.id).delete()
-                        .addOnSuccessListener {
-                            Log.d("Firestore", "Documento de usuario eliminado exitosamente.")
-                            user.delete()
-                                .addOnCompleteListener { deleteTask ->
-                                    if (deleteTask.isSuccessful) {
-                                        Log.d("FirebaseAuth", "Usuario eliminado exitosamente")
-                                        res = true
-                                    } else {
-                                        Log.e("FirebaseAuth", "Error al eliminar usuario", deleteTask.exception)
-                                    }
-                                }
-                        }
-                        .addOnFailureListener { exception ->
-                            Log.e("Firestore", "Error al eliminar documento del usuario.", exception)
-                        }
-                } else {
-                    Log.d("Firestore", "No se encontró el documento del usuario.")
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.e("Firestore", "Error al buscar documentos del usuario.", exception)
-            }
-
-        return res
     }
 
     override suspend fun setAlias(interestPlace: InterestPlace, newAlias: String):Boolean {
@@ -190,6 +187,9 @@ class FirebaseRepository: Repository{
     }
 
 
+    /*override fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
+        return InterestPlace(Coordinate(0.0,0.0), "", "", false)
+    }*/
 
     override fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String, fav: Boolean) {
 

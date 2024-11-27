@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
-
 }
 
 android {
@@ -88,8 +87,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation("androidx.compose.runtime:runtime-livedata:1.7.5")
-
-
+    testImplementation ("org.junit.jupiter:junit-jupiter:5")
 
 
 }
