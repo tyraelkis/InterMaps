@@ -180,7 +180,7 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Si ya tienes una cuenta",
+                text = "Si no tienes una cuenta",
                 color = Color.Black,
             )
             OutlinedButton(

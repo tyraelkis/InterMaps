@@ -37,7 +37,7 @@ import uji.es.intermaps.Model.UserService
 import uji.es.intermaps.R
 
 @Composable
-fun HomeSreen (navigateToUserDataScreen: () -> Unit = {}){
+fun HomeSreen (navigateToUserDataScreen: () -> Unit = {}, navigateToInterestPlaceList: () -> Unit){
 
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
@@ -98,6 +98,22 @@ fun HomeSreen (navigateToUserDataScreen: () -> Unit = {}){
             shape = RoundedCornerShape(10.dp)
         ) {
             Text(text = "Pantalla datos usuario", color = White, fontWeight = FontWeight.Bold)
+        }
+        Spacer(modifier = Modifier.height(25.dp))
+
+
+        Button(
+            onClick = {
+                navigateToInterestPlaceList()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(42.dp)
+                .padding(horizontal = 32.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Black),
+            shape = RoundedCornerShape(10.dp)
+        ) {
+            Text(text = "Pantalla lugares de interés", color = White, fontWeight = FontWeight.Bold)
         }
     }
 }

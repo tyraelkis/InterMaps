@@ -20,7 +20,7 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth,viewModel: InterestPlaceViewModel){
-    NavHost(navController = navHostController, startDestination = "interestPlaceList") {
+    NavHost(navController = navHostController, startDestination = "initial") {
         composable("initial"){
             InitialScreen(
                 navigateToLogin = {navHostController.navigate("logIn")},
@@ -44,8 +44,9 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth,v
         }
         composable("home"){
             HomeSreen(
-                navigateToUserDataScreen = {navHostController.navigate("userDataScreen")}
-            )
+                navigateToUserDataScreen = {navHostController.navigate("userDataScreen")},
+                navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")}
+                )
         }
         composable("userDataScreen"){
             UserDataScreen(
