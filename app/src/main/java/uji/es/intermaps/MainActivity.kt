@@ -24,6 +24,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseFirestore.setLoggingEnabled(true)
         auth = Firebase.auth
         enableEdgeToEdge()
         setContent {
@@ -45,7 +46,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!",
+        text = "",
         modifier = modifier
     )
 }

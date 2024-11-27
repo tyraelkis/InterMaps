@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -36,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -47,14 +49,22 @@ import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.EmailAuthProvider
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.launch
+import uji.es.intermaps.Model.FirebaseRepository
+import uji.es.intermaps.Model.Repository
+import uji.es.intermaps.Model.User
+import uji.es.intermaps.Model.UserService
 import uji.es.intermaps.R
 import java.time.format.TextStyle
 import kotlin.math.log
@@ -76,10 +86,22 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToUserChangeEmail: () -> Unit = {
     var showPopupEmail by remember { mutableStateOf(false) }
     var showPopupPassword by remember { mutableStateOf(false) }
     var showPopupModifications by remember { mutableStateOf(false) }
-    var newEmail by remember { mutableStateOf("") }
-    var newPassword by remember { mutableStateOf("") }
-    var user = auth.currentUser
+    var showPopUpDelete by remember { mutableStateOf(false) }
+    var showPopUpReAuth by remember { mutableStateOf(false) }
 
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
+    var newEmail by remember { mutableStateOf("") }
+    var confirmEmail by remember { mutableStateOf("") }
+
+    var password by remember { mutableStateOf("") }
+
+    val user = auth.currentUser
+    val repository: Repository = FirebaseRepository()
+    val userService = UserService(repository)
+    var currentEmail by remember { mutableStateOf(user?.email.toString()) }
+    val passwordInput = remember { mutableStateOf("") }
 
 
 
@@ -130,7 +152,7 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToUserChangeEmail: () -> Unit = {
         ) {
             // Texto en el fondo
             Text(
-                text = user?.email ?: "Correo electronico",
+                text = "Correo Electrónico",
                 color = Color.White,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,

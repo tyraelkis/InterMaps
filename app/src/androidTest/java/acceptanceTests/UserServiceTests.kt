@@ -6,6 +6,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 import uji.es.intermaps.Model.User
 import org.junit.Assert.*
@@ -16,47 +20,47 @@ import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Exceptions.UnregistredUserException
+import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.InterestPlaceService
 import uji.es.intermaps.Model.Repository
+import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.UserService
 
-class AT_IT1 {
-    private var auth: FirebaseAuth = Firebase.auth
+class UserServiceTests {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
     private var email: String = "prueba@uji.es"
-    private var password: String = "12345"
+    private var password: String = "123456AA" // Cambiar en las pruebas de aceptacion para que cumpla los requisitos de las contraseñas
     private var user: User = User(email, password)
     private var userService: UserService = UserService(repository)
-    private var interestPlace: InterestPlace = InterestPlace(GeoPoint(-18.665695, 35.529562), "Mozambique", "Moz", false)
-    private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
 
     @Test
-    fun createUser_E1Valid_userIsCreated() {
+    fun createUser_E1Valid_userIsCreated() = runBlocking {
         val userTest: User = userService.createUser(email, password)
-        assertEquals(user,userTest)
+        assertEquals(true, db.doesUserExist(userTest.email))
         userService.deleteUser(userTest.email)
     }
 
     @Test
-    fun createUser_E2Invalid_errorOnAccountCreation() {
+    fun createUser_E2Invalid_errorOnAccountCreation(): Unit = runBlocking{
+        userService.createUser(email, password)
         assertThrows<AccountAlreadyRegistredException> {
             userService.createUser(email, password)
         }
     }
 
     @Test
-    fun login_E1Valid_userIsLogged() {
+    fun login_E1Valid_userIsLogged() = runBlocking{
         val userTest: User = userService.createUser(email, password)
         assertEquals(true, userService.login(userTest.email,userTest.password))
         userService.deleteUser(userTest.email)
     }
 
     @Test
-    fun login_E2Invalid_errorOnLogin() {
+    fun login_E2Invalid_errorOnLogin(): Unit = runBlocking {
         assertThrows<UnregistredUserException>{
             userService.login(email, password)
         }
@@ -92,18 +96,18 @@ class AT_IT1 {
 
 
     @Test
-    fun signOut_E1Valid_userSignedOut() {
+    fun signOut_E1Valid_userSignedOut() = runBlocking{
         val userTest: User = userService.createUser(email, password)
         userService.login(userTest.email, userTest.password)
-        assertEquals(true, userService.signOut(userTest.email,userTest.password))
+        assertEquals(true, userService.signOut())
         userService.deleteUser(userTest.email)
     }
 
     @Test
-    fun signOut_E2Invalid_errorSigningOut() {
+    fun signOut_E2Invalid_errorSigningOut() = runBlocking{
         val userTest: User = userService.createUser(email, password)
         assertThrows<SessionNotStartedException>{
-            userService.signOut(userTest.email,userTest.password)
+            userService.signOut()
         }
         userService.deleteUser(userTest.email)
     }
@@ -122,32 +126,4 @@ class AT_IT1 {
             userService.deleteUser(email)
         }
     }
-
-    @Test
-    fun createInterestPlace_E1Valid_InterestPlaceCreated() {
-        val interestPlaceTest: InterestPlace = interestPlaceService.createInterestPlace(GeoPoint(-18.665695, 35.529562), "Mozambique", "Moz")
-        assertEquals(interestPlace, interestPlaceTest)
-        interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
-    }
-
-    @Test
-    fun createInterestPlace_E2Invalid_errorOnCreatingInterestPlace() {
-        assertThrows<NotValidCoordinatesException>{
-            interestPlaceService.createInterestPlace(GeoPoint(-1800.665695,35.529562), "Mozambique", "Moz")
-        }
-    }
-
-    @Test
-    fun editInterestPlace_E1Valido_setAliasToAPlaceOfInterest() {
-        val result: Boolean = interestPlaceService.setAlias(interestPlace, newAlias = "Mozambiquinho")
-        assertEquals(true, result)
-    }
-
-    @Test
-    fun editInterestPlace_E1Invalido_errorSetAliasToAPlaceOFInterest(){
-        assertThrows<NotValidAliasException>{
-            interestPlaceService.setAlias(interestPlace, newAlias = "@#//")
-        }
-    }
-
 }
