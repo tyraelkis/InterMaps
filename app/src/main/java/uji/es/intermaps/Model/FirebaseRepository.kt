@@ -101,7 +101,7 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override fun editUserData(newPassword: String): Boolean {
+    override suspend fun editUserData(newPassword: String): Boolean {
         val user = auth.currentUser
         if (user == null) {
             Log.e("FirebaseAuth", "No hay un usuario autenticado")
@@ -118,7 +118,7 @@ class FirebaseRepository: Repository {
                     Log.e("FirebaseAuth", "Error al cambiar la contraseña", task.exception)
                     result = false
                 }
-            }
+            }.await()
 
         return result
     }

@@ -50,7 +50,7 @@ class UserService(var repository: Repository) {
         return repository.signOut()
     }
 
-    fun editUserData(newPassword:String): Boolean{
+    suspend fun editUserData(newPassword:String): Boolean{
         if (newPassword.isBlank()) {
             throw NotValidUserData("El correo electrónico y la contraseña no pueden estar vacíos.")
             return false

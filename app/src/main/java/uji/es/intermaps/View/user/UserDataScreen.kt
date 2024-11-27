@@ -49,7 +49,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.Repository
 import uji.es.intermaps.Model.UserService
@@ -555,17 +558,30 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit){
                         Button(
                             onClick = {
                                 // Verifica si las contraseñas coinciden
-                                if (newPassword == confirmPassword) {
-                                    val success = userService.editUserData(newPassword) // Aquí haces el cambio de contraseña
-                                    if (success) {
-                                        showPopupPassword = false // Cierra el popup cuando la contraseña se cambia
-                                        showPopupModifications = true // Muestra el mensaje de éxito o la siguiente vista
-                                    } else {
-                                        errorMessage = "Error al modificar los datos"
-                                        Log.e("PasswordChange", "No se pudo modificar la contraseña")
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    try {
+                                        if (newPassword == confirmPassword) {
+                                            val success = userService.editUserData(newPassword)
+                                            withContext(Dispatchers.Main) {
+                                                if (success) {
+                                                    showPopupPassword = false
+                                                    showPopupModifications = true
+                                                } else {
+                                                    errorMessage = "Error al modificar los datos"
+                                                    Log.e("PasswordChange", "No se pudo modificar la contraseña")
+                                                }
+                                            }
+                                        } else {
+                                            withContext(Dispatchers.Main) {
+                                                errorMessage = "Las contraseñas no coinciden"
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        withContext(Dispatchers.Main) {
+                                            errorMessage = "Ocurrió un error inesperado: ${e.message}"
+                                            Log.e("PasswordChange", "Error: ${e.message}", e)
+                                        }
                                     }
-                                } else {
-                                    errorMessage = "Las contraseñas no coinciden"
                                 }
                             },
                             modifier = Modifier.weight(1f),
