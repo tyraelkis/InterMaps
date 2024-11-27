@@ -24,8 +24,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -42,31 +44,31 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.GeoPoint
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.InterestPlaceService
 import uji.es.intermaps.Model.Repository
 import uji.es.intermaps.R
+import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
-    var db = FirebaseFirestore.getInstance()
-    val coordinate = GeoPoint(-18.665695,35.529562)
-    var interestPlace = InterestPlace(coordinate, "Mozambique", "moz", false)
+fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel){
+    val place = viewModel.interestPlace.observeAsState().value ?:return
     var showPopupAliasCorrecto by remember { mutableStateOf(false) }
     var showPopupAliasIncorrecto by remember { mutableStateOf(false) }
     var newAlias by remember { mutableStateOf("") }
     var repository: Repository = FirebaseRepository()
     var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
-
+    val  coroutineScope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Color.White
+                White
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -79,8 +81,8 @@ fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "${coordinate.latitude.toString()}, ${coordinate.longitude.toString()}",
-                color = Color.Black,
+                text = "${place.coordinate.latitude}, ${place.coordinate.longitude}",
+                color = Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -116,7 +118,7 @@ fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
         ) {
             Text(
                 text = "Toponym",
-                color = Color.Black,
+                color = Black,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold
@@ -131,7 +133,7 @@ fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
                 .background(Color(0xFFFFFFF), shape = RoundedCornerShape(10.dp))
                 .border(
                     width = 1.dp,
-                    color = Color.Black,
+                    color = Black,
                     shape = RoundedCornerShape(10.dp) )
                 .clip(RoundedCornerShape(10.dp))
                 .padding(5.dp),
@@ -139,8 +141,8 @@ fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
         ) {
             // Texto en el fondo
             Text(
-                text = "Mozambique",
-                color = Color.Black,
+                text = "${place.toponym}",
+                color = Black,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.CenterStart),
@@ -157,7 +159,7 @@ fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
         ) {
             Text(
                 text = "Alias",
-                color = Color.Black,
+                color = Black,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
                 fontWeight = FontWeight.Bold
@@ -177,8 +179,8 @@ fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
                 modifier = Modifier
                     .height(52.dp)
                     .fillMaxWidth()
-                    .border(1.dp, Color.Black, RoundedCornerShape(10.dp)),
-                placeholder = { Text("Moz", style = TextStyle(fontSize = 20.sp)) },
+                    .border(1.dp, Black, RoundedCornerShape(10.dp)),
+                placeholder = { Text("${place.alias}", style = TextStyle(fontSize = 20.sp)) },
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = Color(0xFFFFFFF),
                     focusedIndicatorColor = Color.Transparent,
@@ -191,13 +193,17 @@ fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
 
         Button(
             onClick = {
-               interestPlaceService.setAlias(interestPlace, newAlias){ success ->
-                   if(success){
-                       showPopupAliasCorrecto = true
-                   }else{
-                       showPopupAliasIncorrecto = true
-                   }
-               }
+                coroutineScope.launch {
+                    if (interestPlaceService.setAlias(
+                            interestPlace = place,
+                            newAlias = newAlias
+                        )
+                    ) {
+                        showPopupAliasCorrecto = true
+                    } else {
+                        showPopupAliasIncorrecto = true
+                    }
+                }
             } ,
             modifier = Modifier
                 .height(36.dp)
@@ -238,7 +244,7 @@ fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "El cambio de alias se ha realizado correctamente",
-                        color = Color.White,
+                        color = White,
                         fontSize = 26.sp,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.SemiBold
@@ -256,7 +262,7 @@ fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
                             },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Black
+                                containerColor = Black
                             )
                         ) {
                             Text(
@@ -299,7 +305,7 @@ fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "El cambio de alias no se ha podido realizar correctamente",
-                        color = Color.White,
+                        color = White,
                         fontSize = 26.sp,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.SemiBold
@@ -317,7 +323,7 @@ fun InterestPlaceSetAlias(navigateToInterestPlaceSetAlias: () -> Unit = {}){
                             },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Black
+                                containerColor = Black
                             )
                         ) {
                             Text(

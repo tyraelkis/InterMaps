@@ -3,6 +3,7 @@ package uji.es.intermaps.Model
 import android.util.Log
 import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.*
+import uji.es.intermaps.Exceptions.NotValidAliasException
 
 
 class InterestPlaceService(private val repository: Repository) {
@@ -17,26 +18,22 @@ class InterestPlaceService(private val repository: Repository) {
         return false
     }
 
-    fun setAlias(interestPlace: InterestPlace, newAlias : String, callback: (Boolean) -> Unit){
+    suspend fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean{
         if (newAlias.length < 2 || interestPlace.alias.equals(newAlias))
-            callback(false)
+            throw NotValidAliasException()
         for (char in newAlias){
             if (!char.isLetter() && char != ' '){
-                callback(true)
+                throw NotValidAliasException()
             }
         }
-
-        repository.setAlias(interestPlace, newAlias) {success ->
-            if (success){
-                interestPlace.alias = newAlias;
-                callback(true)
-            }
+        if (!repository.setAlias(interestPlace, newAlias)){
+            return false
         }
+        interestPlace.alias = newAlias
+        return true
     }
 
     fun getFavList(callback: (List<InterestPlace>) -> Unit){
-        var result = false;
-        var favListFinal = mutableListOf<InterestPlace>()
         repository.getFavList{ success, favList ->
             if (success){
                 callback(favList)
@@ -47,6 +44,12 @@ class InterestPlaceService(private val repository: Repository) {
     }
 
     fun getNoFavList(callback: (List<InterestPlace>) -> Unit){
-
+        repository.getNoFavList{ success, NoFavList ->
+            if (success){
+                callback(NoFavList)
+            }else{
+                callback(emptyList())
+            }
+        }
     }
 }
