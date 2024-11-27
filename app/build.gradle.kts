@@ -46,13 +46,13 @@ android {
     }
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += setOf("/META-INF/{AL2.0,LGPL2.1}", "META-INF/LICENSE.md", "META-INF/LICENSE-notice.md")
         }
     }
 }
 
 dependencies {
-    implementation("io.coil-kt.coil3:coil-compose:3.0.0-rc01")
+    implementation(libs.coil)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -69,13 +69,20 @@ dependencies {
     implementation(libs.androidx.junit.ktx)
     testImplementation(libs.junit)
     testImplementation(project(":app"))
-    androidTestImplementation(libs.androidx.junit)
+    testImplementation (libs.junit.jupiter.api)
+    androidTestImplementation(libs.junit.jupiter)
+    testRuntimeOnly (libs.junit.jupiter.engine)
+    androidTestImplementation (libs.junit.jupiter.api)
+    androidTestImplementation (libs.junit.jupiter.engine)
+    androidTestImplementation(libs.androidx.junit.ktx.v115)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation(libs.okhttp)
+    implementation(libs.converter.gson)
+    implementation(libs.retrofit)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.crashlytics)
+    implementation(platform(libs.firebase.bom))
 }

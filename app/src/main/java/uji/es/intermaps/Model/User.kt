@@ -1,21 +1,17 @@
 package uji.es.intermaps.Model
 
-class User (var email: String, var password: String){
+class User (
+    var email: String,
+    var pswd: String
+){
 
-    fun createUser(email:String, password:String){
-
+    /*fun setVehicle (defaultVehicle: String){
+        this.defaultVehicle = defaultVehicle
     }
 
-    fun editUserData(newPassword:String){
+    fun getVehicle () : String{
+        return this.defaultVehicle
+    }*/
 
-    }
-
-    fun viewUserData(){
-
-    }
-
-    fun deleteUser(){
-
-    }
 }
 
