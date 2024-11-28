@@ -42,6 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.Repository
 import uji.es.intermaps.Model.User
@@ -55,7 +56,12 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
     val userService = UserService(repository)
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    //Variables para mensajes de debajo de los campos
+    var submesageEmail by remember { mutableStateOf("Ejemplo: usuario@ejemplo.com") }
+    var submesageEmailColor by remember { mutableStateOf(Color.LightGray) }
+    var submesagePswd by remember { mutableStateOf("Mínimo 6 carácteres") }
+    var submesagePswdColor by remember { mutableStateOf(Color.LightGray) }
 
 
     Column(
@@ -107,8 +113,8 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             )
         )
         Text(
-            text = "Ejemplo: usuario@ejemplo.com",
-            color = Color.LightGray,
+            text = submesageEmail,
+            color = submesageEmailColor,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -151,8 +157,8 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             )
         )
         Text(
-            text = "Mínimo 8 carácteres",
-            color = Color.LightGray,
+            text = submesagePswd,
+            color = submesagePswdColor,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -167,11 +173,33 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        userService.createUser(email, password)
-                        withContext(Dispatchers.Main) { navigateToHome() }
-                    } catch (e: Exception) {
+                        userService.login(email, password)
                         withContext(Dispatchers.Main) {
-                            errorMessage = e.message
+                            navigateToHome()
+                        }
+                    } catch (e: NotValidUserData) {
+                        withContext(Dispatchers.Main) {
+                            submesageEmail = e.message.toString()
+                            submesageEmailColor = Color.Red
+                            submesagePswd = e.message.toString()
+                            submesagePswdColor = Color.Red
+                        }
+                    } catch (e: IllegalArgumentException) {
+                        withContext(Dispatchers.Main) {
+                            when (e.message.toString()) {
+                                "El correo electrónico no tiene un formato válido." -> {
+                                    submesageEmail = "El correo electrónico no tiene un formato válido."
+                                    submesageEmailColor = Color.Red
+                                }
+                                "La contraseña debe tener al menos 6 caracteres." -> {
+                                    submesagePswd = "La contraseña debe tener al menos 6 caracteres."
+                                    submesagePswdColor = Color.Red
+                                }
+                                "La contraseña no tiene un formato válido." -> {
+                                    submesagePswd = "La contraseña no tiene un formato válido."
+                                    submesagePswdColor = Color.Red
+                                }
+                            }
                         }
                     }
                 }

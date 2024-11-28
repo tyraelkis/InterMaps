@@ -43,6 +43,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.NotValidUserData
+import uji.es.intermaps.Exceptions.SessionNotStartedException
+import uji.es.intermaps.Model.FirebaseRepository
+import uji.es.intermaps.Model.UserService
 import uji.es.intermaps.R
 @OptIn(ExperimentalMaterial3Api::class)
 
@@ -51,6 +59,14 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val userService = UserService(FirebaseRepository())
+
+    //Variables para mensajes de debajo de los campos
+    var submesageEmail by remember { mutableStateOf("Ejemplo: usuario@ejemplo.com") }
+    var submesageEmailColor by remember { mutableStateOf(Color.LightGray) }
+    var submesagePswd by remember { mutableStateOf("Mínimo 6 carácteres") }
+    var submesagePswdColor by remember { mutableStateOf(Color.LightGray) }
 
     Column(
         modifier = Modifier
@@ -102,8 +118,8 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
             )
         )
         Text(
-            text = "Ejemplo: usuario@ejemplo.com",
-            color = Color.LightGray,
+            text = submesageEmail,
+            color = submesageEmailColor,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -145,18 +161,52 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
                 unfocusedIndicatorColor = Color.Transparent // Eliminar el indicador cuando no está enfocado
             )
         )
+        Text(
+            text = submesagePswd,
+            color = submesagePswdColor,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            textAlign = TextAlign.Left
+        )
 
         Spacer(modifier = Modifier.height(64.dp))
 
         Button(
             onClick = {
-                auth.signInWithEmailAndPassword(email, password).addOnCompleteListener{
-                   if(it.isSuccessful){
-                       navigateToHome()
-                   }
-                    else{
-                        Log.i("SARA", "NO LOGIN")
-                   }
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        userService.login(email, password)
+                        withContext(Dispatchers.Main) {
+                            navigateToHome()
+                        }
+                    } catch (e: NotValidUserData) {
+                        withContext(Dispatchers.Main) {
+                            submesageEmail = e.message.toString()
+                            submesageEmailColor = Color.Red
+                            submesagePswd = e.message.toString()
+                            submesagePswdColor = Color.Red
+                        }
+                    } catch (e: IllegalArgumentException) {
+                        withContext(Dispatchers.Main) {
+                            when (e.message.toString()) {
+                                "El correo electrónico no tiene un formato válido." -> {
+                                    submesageEmail = "El correo electrónico no tiene un formato válido."
+                                    submesageEmailColor = Color.Red
+                                }
+                                "La contraseña debe tener al menos 6 caracteres." -> {
+                                    submesagePswd = "La contraseña debe tener al menos 6 caracteres."
+                                    submesagePswdColor = Color.Red
+                                }
+                                "La contraseña no tiene un formato válido." -> {
+                                    submesagePswd = "La contraseña no tiene un formato válido."
+                                    submesagePswdColor = Color.Red
+                                }
+                            }
+                        }
+                    }
                 }
             },
             modifier = Modifier
