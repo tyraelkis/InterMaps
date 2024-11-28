@@ -24,12 +24,13 @@ class UserServiceTests {
     private var password: String =
         "123456AA" // Cambiar en las pruebas de aceptacion para que cumpla los requisitos de las contraseñas
     private var userService: UserService = UserService(repository)
+    private var userTest: User = User("emaildeprueba@gmail.com", "123456BB")
 
 
     @Test
     fun createUser_E1Valid_userIsCreated(): Unit = runBlocking {
-        val userTest: User = userService.createUser(email, password)
-        val res = db.doesUserExist(userTest.email)
+        userService.createUser(email, password)
+        val res = db.doesUserExist(email)
         userService.deleteUser(email, password)
         assertEquals(true, res)
 
@@ -46,9 +47,7 @@ class UserServiceTests {
 
     @Test
     fun login_E1Valid_userIsLogged(): Unit = runBlocking {
-        userService.createUser(email, password)
-        val res = userService.login(email, password)
-        userService.deleteUser(email, password)
+        val res = userService.login(userTest.email, userTest.pswd)
         assertEquals(true, res)
     }
 
@@ -61,9 +60,9 @@ class UserServiceTests {
 
     @Test
     fun viewUserData_E1Valid_userDataViewed(): Unit = runBlocking {
-        userService.createUser(email, password)
-        val userData = userService.viewUserData(email)
-        userService.deleteUser(email, password)
+        userService.login(userTest.email, userTest.pswd)
+        val userData = userService.viewUserData(userTest.email)
+        userService.signOut()
         assertEquals(true, userData)
     }
 
@@ -95,10 +94,8 @@ class UserServiceTests {
 
     @Test
     fun signOut_E1Valid_userSignedOut(): Unit = runBlocking {
-        userService.createUser(email, password)
+        userService.login(userTest.email, userTest.pswd)
         val res = userService.signOut()
-        userService.login(email, password)
-        userService.deleteUser(email, password)
         assertEquals(true, res)
     }
 
