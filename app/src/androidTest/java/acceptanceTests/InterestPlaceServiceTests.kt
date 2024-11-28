@@ -18,12 +18,13 @@ class InterestPlaceServiceTests {
     private var repository: Repository = FirebaseRepository()
     private var interestPlace: InterestPlace = InterestPlace(GeoPoint(-18.665695, 35.529562), "Mozambique", "Moz", false)
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
-
+    //Crear valores por defecto para pruebas de create y delete?
     @Test
     fun createInterestPlace_E1Valid_InterestPlaceCreated(): Unit = runBlocking{
-        val interestPlaceTest: InterestPlace = interestPlaceService.createInterestPlaceCoordinates(GeoPoint(-18.665695, 35.529562))
-        assertEquals(interestPlace.coordinate, interestPlaceTest.coordinate)
+        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceCoordinates(GeoPoint(-16.665695, 36.529562))
+        val res = db.doesInteresPlaceExists(interestPlaceTest.coordinate)
         interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
+        assertEquals(true, res)
     }
 
     @Test

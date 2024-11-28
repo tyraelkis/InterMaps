@@ -43,7 +43,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlaceService
 import uji.es.intermaps.Model.Repository
@@ -189,9 +193,25 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
 
         Button(
             onClick = {
-                coroutineScope.launch{
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        interestPlaceService.createInterestPlaceCoordinates(place.coordinate)
+                        withContext(Dispatchers.Main) {
+                            showPopupCreateSucces = true
+                        }
+                    } catch (e: NotValidCoordinatesException) {
+                        withContext(Dispatchers.Main) {
+                            showPopupCreateError = true
+                            println("Error: ${e.message}")
+                        }
+                    } catch (e: Exception) {
+                        withContext(Dispatchers.Main) {
+                            showPopupCreateError = true
+                            println("Error general: ${e.message}")
+                        }
+                    }
                 }
-            } ,
+            },
             modifier = Modifier
                 .height(36.dp)
                 .padding(horizontal = 32.dp, vertical = 1.dp)
