@@ -41,14 +41,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import uji.es.intermaps.Model.FirebaseRepository
-import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.InterestPlaceService
 import uji.es.intermaps.Model.Repository
 import uji.es.intermaps.R
@@ -56,11 +52,11 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel){
+fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
     val place = viewModel.interestPlace.observeAsState().value ?:return
-    var showPopupAliasCorrecto by remember { mutableStateOf(false) }
-    var showPopupAliasIncorrecto by remember { mutableStateOf(false) }
-    var newAlias by remember { mutableStateOf("") }
+    var showPopupCreateSucces by remember { mutableStateOf(false) }
+    var showPopupCreateError by remember { mutableStateOf(false) }
+    var alias by remember { mutableStateOf("") }
     var repository: Repository = FirebaseRepository()
     var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
     val  coroutineScope = rememberCoroutineScope()
@@ -117,7 +113,7 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel){
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Toponimo",
+                text = "Toponym",
                 color = Black,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
@@ -174,13 +170,13 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel){
         ) {
             // Texto en el fondo
             TextField(
-                value = newAlias,
-                onValueChange = { newAlias= it },
+                value = alias,
+                onValueChange = { alias = it },
                 modifier = Modifier
                     .height(52.dp)
                     .fillMaxWidth()
                     .border(1.dp, Black, RoundedCornerShape(10.dp)),
-                placeholder = { Text("${place.alias}", style = TextStyle(fontSize = 20.sp)) },
+                placeholder = { Text("Añade un nuevo alias a este lugar", style = TextStyle(fontSize = 20.sp)) },
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = Color(0xFFFFFFF),
                     focusedIndicatorColor = Color.Transparent,
@@ -193,16 +189,7 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel){
 
         Button(
             onClick = {
-                coroutineScope.launch {
-                    if (interestPlaceService.setAlias(
-                            interestPlace = place,
-                            newAlias = newAlias
-                        )
-                    ) {
-                        showPopupAliasCorrecto = true
-                    } else {
-                        showPopupAliasIncorrecto = true
-                    }
+                coroutineScope.launch{
                 }
             } ,
             modifier = Modifier
@@ -212,17 +199,17 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel){
             colors = ButtonDefaults.buttonColors(containerColor = Black),
             shape = RoundedCornerShape(10.dp)
         ) {
-            Text(text = "Editar", color = White, fontSize = 14.sp)
+            Text(text = "Añadir", color = White, fontSize = 14.sp)
         }
     }
 
-    if (showPopupAliasCorrecto) {
+    if (showPopupCreateSucces) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(32.dp)
                 .background(Color(0x80FFFFFF))
-                .clickable { showPopupAliasCorrecto = false},
+                .clickable { showPopupCreateSucces = false},
             contentAlignment = Alignment.Center
         ) {
             // Popup con el contenido de edición de correo
@@ -243,7 +230,7 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel){
                 ) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "El cambio de alias se ha realizado correctamente",
+                        text = "El lugar de interés se ha añadido correctamente",
                         color = White,
                         fontSize = 26.sp,
                         textAlign = TextAlign.Center,
@@ -258,7 +245,7 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel){
                     ) {
                         Button(
                             onClick = {
-                                showPopupAliasCorrecto = false
+                                showPopupCreateSucces = false
                             },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(
@@ -277,13 +264,13 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel){
         }
     }
 
-    if (showPopupAliasIncorrecto) {
+    if (showPopupCreateError) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(32.dp)
                 .background(Color(0x80FFFFFF))
-                .clickable { showPopupAliasCorrecto = false},
+                .clickable { showPopupCreateSucces = false},
             contentAlignment = Alignment.Center
         ) {
             // Popup con el contenido de edición de correo
@@ -304,7 +291,7 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel){
                 ) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "El cambio de alias no se ha podido realizar",
+                        text = "No no se ha podido añadir el lugar de interés",
                         color = White,
                         fontSize = 26.sp,
                         textAlign = TextAlign.Center,
@@ -319,7 +306,7 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel){
                     ) {
                         Button(
                             onClick = {
-                                showPopupAliasIncorrecto = false
+                                showPopupCreateError = false
                             },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(

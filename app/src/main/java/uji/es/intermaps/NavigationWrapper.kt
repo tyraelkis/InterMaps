@@ -11,6 +11,7 @@ import com.google.gson.Gson
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.View.home.HomeSreen
 import uji.es.intermaps.View.home.InitialScreen
+import uji.es.intermaps.View.interestPlace.InterestPlaceCreation
 import uji.es.intermaps.View.interestPlace.InterestPlaceList
 import uji.es.intermaps.View.interestPlace.InterestPlaceSetAlias
 import uji.es.intermaps.View.login.LoginScreen
@@ -20,7 +21,7 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth,viewModel: InterestPlaceViewModel){
-    NavHost(navController = navHostController, startDestination = "initial") {
+    NavHost(navController = navHostController, startDestination = "interestPlaceCreation") {
         composable("initial"){
             InitialScreen(
                 navigateToLogin = {navHostController.navigate("logIn")},
@@ -59,6 +60,13 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth,v
             InterestPlaceList(navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")},
                 auth,
                 navigateToInterestPlaceSetAlias = {navHostController.navigate("interestPlaceSetAlias")},
+                navigateToInterestPlaceCreation = {navHostController.navigate("interestPlaceCreation")},
+                viewModel
+            )
+        }
+
+        composable("interestPlaceCreation"){
+            InterestPlaceCreation(
                 viewModel
             )
         }

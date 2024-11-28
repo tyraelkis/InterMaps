@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_EXPRESSION")
+
 package uji.es.intermaps.View.interestPlace
 
 import android.util.Log
@@ -64,7 +66,7 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -> Unit, viewModel: InterestPlaceViewModel) {
+fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -> Unit,navigateToInterestPlaceCreation: () -> Unit, viewModel: InterestPlaceViewModel) {
     var db = FirebaseFirestore.getInstance()
     var user = auth.currentUser
     var repository: Repository = FirebaseRepository()
@@ -243,11 +245,30 @@ fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: Fireba
                         }
 
                     }
-                    Spacer(modifier = Modifier.height(10.dp))
-
                 }
             }
         }
-
+        Spacer(modifier = Modifier.weight(1f))
+        Column(
+            modifier = Modifier.padding(bottom = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        )   {Button(
+            onClick = {
+                navigateToInterestPlaceCreation
+            },
+            modifier = Modifier
+                .width(350.dp)
+                .height(45.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Black
+            )
+        )   {
+            Text(
+                text = "Añadir lugar",
+                fontSize = 20.sp,
+            )
+        }
+        }
+        Spacer(modifier = Modifier.height(15.dp))
     }
 }
