@@ -1,6 +1,5 @@
 package uji.es.intermaps.View.signup
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,19 +32,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.Repository
-import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.UserService
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -143,6 +142,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
                 .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
+            visualTransformation = PasswordVisualTransformation(),
             placeholder = { Text(
                 text = "Ingrese su contraseña",
                 modifier = Modifier
@@ -173,7 +173,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        userService.login(email, password)
+                        userService.createUser(email, password)
                         withContext(Dispatchers.Main) {
                             navigateToHome()
                         }
@@ -200,6 +200,13 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
                                     submesagePswdColor = Color.Red
                                 }
                             }
+                        }
+                    } catch (e: AccountAlreadyRegistredException) {
+                        withContext(Dispatchers.Main) {
+                            submesageEmail = e.message.toString()
+                            submesageEmailColor = Color.Red
+                            submesagePswd = e.message.toString()
+                            submesagePswdColor = Color.Red
                         }
                     }
                 }
