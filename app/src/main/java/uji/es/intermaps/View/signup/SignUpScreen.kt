@@ -1,6 +1,5 @@
 package uji.es.intermaps.View.signup
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,18 +32,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
+import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Model.FirebaseRepository
 import uji.es.intermaps.Model.Repository
-import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.UserService
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,7 +55,12 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
     val userService = UserService(repository)
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    //Variables para mensajes de debajo de los campos
+    var submesageEmail by remember { mutableStateOf("Ejemplo: usuario@ejemplo.com") }
+    var submesageEmailColor by remember { mutableStateOf(Color.LightGray) }
+    var submesagePswd by remember { mutableStateOf("Mínimo 6 carácteres") }
+    var submesagePswdColor by remember { mutableStateOf(Color.LightGray) }
 
 
     Column(
@@ -107,8 +112,8 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             )
         )
         Text(
-            text = "Ejemplo: usuario@ejemplo.com",
-            color = Color.LightGray,
+            text = submesageEmail,
+            color = submesageEmailColor,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -137,6 +142,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
                 .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
+            visualTransformation = PasswordVisualTransformation(),
             placeholder = { Text(
                 text = "Ingrese su contraseña",
                 modifier = Modifier
@@ -151,8 +157,8 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             )
         )
         Text(
-            text = "Mínimo 8 carácteres",
-            color = Color.LightGray,
+            text = submesagePswd,
+            color = submesagePswdColor,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -168,10 +174,39 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
                         userService.createUser(email, password)
-                        withContext(Dispatchers.Main) { navigateToHome() }
-                    } catch (e: Exception) {
                         withContext(Dispatchers.Main) {
-                            errorMessage = e.message
+                            navigateToHome()
+                        }
+                    } catch (e: NotValidUserData) {
+                        withContext(Dispatchers.Main) {
+                            submesageEmail = e.message.toString()
+                            submesageEmailColor = Color.Red
+                            submesagePswd = e.message.toString()
+                            submesagePswdColor = Color.Red
+                        }
+                    } catch (e: IllegalArgumentException) {
+                        withContext(Dispatchers.Main) {
+                            when (e.message.toString()) {
+                                "El correo electrónico no tiene un formato válido." -> {
+                                    submesageEmail = "El correo electrónico no tiene un formato válido."
+                                    submesageEmailColor = Color.Red
+                                }
+                                "La contraseña debe tener al menos 6 caracteres." -> {
+                                    submesagePswd = "La contraseña debe tener al menos 6 caracteres."
+                                    submesagePswdColor = Color.Red
+                                }
+                                "La contraseña no tiene un formato válido." -> {
+                                    submesagePswd = "La contraseña no tiene un formato válido."
+                                    submesagePswdColor = Color.Red
+                                }
+                            }
+                        }
+                    } catch (e: AccountAlreadyRegistredException) {
+                        withContext(Dispatchers.Main) {
+                            submesageEmail = e.message.toString()
+                            submesageEmailColor = Color.Red
+                            submesagePswd = e.message.toString()
+                            submesagePswdColor = Color.Red
                         }
                     }
                 }
