@@ -1,6 +1,8 @@
-package uji.es.intermaps.Model
+package uji.es.intermaps.Interfaces
 
 import com.google.firebase.firestore.GeoPoint
+import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.Model.User
 
 interface Repository {
     suspend fun createUser(email:String, pswd: String): User

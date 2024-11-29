@@ -2,14 +2,10 @@ package uji.es.intermaps
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
-import com.google.gson.Gson
-import uji.es.intermaps.Model.InterestPlace
-import uji.es.intermaps.View.home.HomeSreen
+import uji.es.intermaps.View.home.HomeScreen
 import uji.es.intermaps.View.home.InitialScreen
 import uji.es.intermaps.View.interestPlace.InterestPlaceCreation
 import uji.es.intermaps.View.interestPlace.InterestPlaceList
@@ -44,7 +40,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth,v
             )
         }
         composable("home"){
-            HomeSreen(
+            HomeScreen(
                 navigateToUserDataScreen = {navHostController.navigate("userDataScreen")},
                 navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")}
                 )

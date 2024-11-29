@@ -54,9 +54,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.SessionNotStartedException
-import uji.es.intermaps.Model.FirebaseRepository
-import uji.es.intermaps.Model.Repository
-import uji.es.intermaps.Model.UserService
+import uji.es.intermaps.ViewModel.FirebaseRepository
+import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.R
 
 @OptIn(ExperimentalMaterial3Api::class)

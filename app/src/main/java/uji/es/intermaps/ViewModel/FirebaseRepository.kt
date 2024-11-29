@@ -1,4 +1,4 @@
-package uji.es.intermaps.Model
+package uji.es.intermaps.ViewModel
 
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
@@ -11,6 +11,9 @@ import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
+import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.Model.User
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine

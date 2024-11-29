@@ -1,14 +1,16 @@
-package uji.es.intermaps.Model
+package uji.es.intermaps.ViewModel
 
-import android.util.Log
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.*
 import uji.es.intermaps.Exceptions.NotValidAliasException
+import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.RetrofitConfig
 
 class InterestPlaceService(private val repository: Repository) {
 
-    suspend fun createInterestPlaceCoordinates(coordinate: GeoPoint): InterestPlace{
+    suspend fun createInterestPlaceCoordinates(coordinate: GeoPoint): InterestPlace {
         if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){
             throw NotValidCoordinatesException("Las coordenadas no son válidas")
         }

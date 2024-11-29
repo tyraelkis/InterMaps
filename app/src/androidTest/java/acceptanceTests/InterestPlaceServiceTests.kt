@@ -8,10 +8,10 @@ import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Model.DataBase
-import uji.es.intermaps.Model.FirebaseRepository
+import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
-import uji.es.intermaps.Model.InterestPlaceService
-import uji.es.intermaps.Model.Repository
+import uji.es.intermaps.ViewModel.InterestPlaceService
+import uji.es.intermaps.Interfaces.Repository
 
 class InterestPlaceServiceTests {
     private var db: DataBase = DataBase

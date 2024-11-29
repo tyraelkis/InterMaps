@@ -15,11 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,13 +27,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import uji.es.intermaps.Model.DataBase.auth
-import uji.es.intermaps.Model.FirebaseRepository
-import uji.es.intermaps.Model.Repository
-import uji.es.intermaps.Model.UserService
+import uji.es.intermaps.ViewModel.FirebaseRepository
+import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.R
 
 @Composable
-fun HomeSreen (navigateToUserDataScreen: () -> Unit = {}, navigateToInterestPlaceList: () -> Unit){
+fun HomeScreen (navigateToUserDataScreen: () -> Unit = {}, navigateToInterestPlaceList: () -> Unit){
 
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
