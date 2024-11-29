@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -48,10 +50,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.ViewModel.FirebaseRepository
@@ -93,9 +97,8 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Color.White
-            ),
+            .verticalScroll(rememberScrollState())
+            .background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(100.dp))
@@ -588,9 +591,14 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                                                     showPopupModifications = true
                                                 } else {
                                                     errorMessage = "Error al modificar los datos"
-                                                    Log.e("PasswordChange", "No se pudo modificar la contraseña")
+                                                    Log.e(
+                                                        "PasswordChange",
+                                                        "No se pudo modificar la contraseña"
+                                                    )
                                                 }
                                             }
+                                            newPassword = ""
+                                            confirmPassword = ""
                                         } else {
                                             withContext(Dispatchers.Main) {
                                                 errorMessage = "Las contraseñas no coinciden"
@@ -612,6 +620,7 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                                 fontSize = 16.sp,
                             )
                         }
+
 
                         Button(
                             onClick = { showPopupPassword = false }, // Simplemente cierra el popup si el usuario hace clic en cancelar
@@ -686,6 +695,8 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
         }
     }
 
+
+    // POP UP DEL DELETE
     if (showPopUpDelete){
         Box(
             modifier = Modifier
@@ -763,13 +774,33 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                         Button(
                             onClick = {
                                 coroutineScope.launch {
-                                    val email = user?.email.toString()
-                                    val result = userService.deleteUser(email, password)
-                                    showPopUpDelete = result
-                                    if (result) {
-                                        navigateToInitialScreen()
+                                    if (user != null) {
+                                        val email = user.email.toString()
+                                        val credential = EmailAuthProvider.getCredential(email, password) // Crear credenciales
+
+                                        try {
+                                            // Reautenticar al usuario
+                                            user.reauthenticate(credential).await()
+                                            Log.d("DeleteUser", "Reautenticación exitosa")
+
+                                            // Eliminar el usuario tras la reautenticación exitosa
+                                            val result = userService.deleteUser(email, password)
+                                            if (result) {
+                                                showPopUpDelete = false
+                                                navigateToInitialScreen()
+                                                password = ""
+                                            } else {
+                                                errorMessage = "No se pudo eliminar el usuario. Intenta de nuevo."
+                                                password = ""
+                                            }
+                                        } catch (e: Exception) {
+                                            Log.e("DeleteUser", "Error de reautenticación: ${e.message}")
+                                            errorMessage = "Contraseña incorrecta. Inténtalo de nuevo."
+                                            password = ""
+                                        }
                                     } else {
-                                        Log.e("DeleteUser", "No se pudo eliminar el usuario.")
+                                        Log.e("DeleteUser", "Usuario no autenticado")
+                                        errorMessage = "No se encontró un usuario autenticado."
                                     }
                                 }
                             },

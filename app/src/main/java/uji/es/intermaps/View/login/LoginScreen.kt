@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,7 +52,7 @@ import uji.es.intermaps.ViewModel.UserService
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
-fun LoginScreen(navigateToSignUp: () -> Unit = {}, navigateToHome:() -> Unit) {
+fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateToHome:() -> Unit) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

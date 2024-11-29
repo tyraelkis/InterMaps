@@ -1,5 +1,6 @@
 package uji.es.intermaps.Interfaces
 
+import com.google.firebase.firestore.GeoPoint
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.User
@@ -17,7 +18,7 @@ interface Repository {
     suspend fun searchInterestPlaceByToponym(toponym: String) : InterestPlace
     suspend fun viewInterestPlaceData(coordinate: Coordinate): Boolean
     fun viewInterestPlaceList(callback: (List<InterestPlace>) -> Unit)
-    fun deleteInterestPlace(coordinate: Coordinate): Boolean
+    suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean
     fun getFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)
     fun getNoFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)
     suspend fun getInterestPlaceByToponym(toponym: String, callback: (Boolean, List<InterestPlace>) -> Unit)

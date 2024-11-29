@@ -138,7 +138,6 @@ fun InterestPlaceList(
                         )
                         Button(
                             onClick = {
-                                //viewModel.putInterestPlace(place)
                                 navController.navigate("interestPlaceSetAlias/${place.toponym}")
                             },
                             modifier = Modifier
@@ -209,8 +208,8 @@ fun InterestPlaceList(
                         )
                         Button(
                             onClick = {
-                                viewModel.putInterestPlace(notFavPlace)
-                                navigateToInterestPlaceSetAlias()
+                                //viewModel.putInterestPlace(notFavPlace)
+                                navController.navigate("interestPlaceSetAlias/${notFavPlace.toponym}")
                             },
                             modifier = Modifier
                                 .width(100.dp)
@@ -235,7 +234,8 @@ fun InterestPlaceList(
             horizontalAlignment = Alignment.CenterHorizontally
         )   {Button(
             onClick = {
-                navigateToInterestPlaceCreation
+                navController.navigate("interestPlaceCreation")
+               // navigateToInterestPlaceCreation
             },
             modifier = Modifier
                 .width(350.dp)

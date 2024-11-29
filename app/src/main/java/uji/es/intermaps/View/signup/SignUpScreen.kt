@@ -55,7 +55,7 @@ import uji.es.intermaps.ViewModel.UserViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
-fun SignUpScreen(navigateToLogin: () -> Unit = {}, navigateToHome: () -> Unit) {
+fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateToHome: () -> Unit) {
     val repository: Repository = FirebaseRepository()
     val userService = UserService(repository)
     var email by remember { mutableStateOf("") }

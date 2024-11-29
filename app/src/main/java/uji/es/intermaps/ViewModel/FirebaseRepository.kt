@@ -67,7 +67,7 @@ class FirebaseRepository: Repository {
                         val exception = task.exception
                         if (exception is FirebaseAuthInvalidCredentialsException) {
                             continuation.resumeWithException(
-                                UnregistredUserException("No existe un usuario con este correo electrónico")
+                                UnregistredUserException("Usuario o contraseña incorrectos")
                             )
                         } else {
                             continuation.resumeWithException(exception ?: Exception("Error desconocido al iniciar sesión."))
@@ -250,7 +250,6 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun searchInterestPlace(coordinate: Coordinate) : InterestPlace {
 
     override suspend fun getInterestPlaceByToponym(
         toponym: String,
@@ -298,7 +297,7 @@ class FirebaseRepository: Repository {
         TODO("Not yet implemented")
     }
 
-    override fun deleteInterestPlace(coordinate: Coordinate): Boolean {
+    override suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean {
         return false
     }
 }

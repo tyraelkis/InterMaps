@@ -1,16 +1,18 @@
 package uji.es.intermaps.Model
 
+import android.os.Parcel
+import android.os.Parcelable
 import com.google.firebase.firestore.GeoPoint
 
 
 data class InterestPlace(
-    val coordinate: GeoPoint = GeoPoint(0.0, 0.0),
+    val coordinate: Coordinate = Coordinate(0.0, 0.0),
     val toponym: String = "",
     var alias: String = "",
     var fav: Boolean = false
-) :Parcelable {
+) : Parcelable {
     constructor(parcel: Parcel) : this(
-        parcel.readValue(GeoPoint::class.java.classLoader) as GeoPoint,
+        parcel.readValue(Coordinate::class.java.classLoader) as Coordinate,
         parcel.readString() ?: "",
         parcel.readString() ?: "",
         parcel.readValue(Boolean::class.java.classLoader) as Boolean

@@ -1,8 +1,10 @@
 package uji.es.intermaps.ViewModel
 
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
+import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.*
 import uji.es.intermaps.Exceptions.NotValidAliasException
+import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate

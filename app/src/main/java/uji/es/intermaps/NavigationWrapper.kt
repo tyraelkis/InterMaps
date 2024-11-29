@@ -1,5 +1,8 @@
 package uji.es.intermaps
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -15,8 +18,8 @@ import uji.es.intermaps.View.interestPlace.InterestPlaceCreation
 import uji.es.intermaps.View.interestPlace.InterestPlaceList
 import uji.es.intermaps.View.interestPlace.InterestPlaceSetAlias
 import uji.es.intermaps.View.login.LoginScreen
-import uji.es.intermaps.View.navBar.NavBar
 import uji.es.intermaps.View.signup.SignUpScreen
+import uji.es.intermaps.View.navBar.NavBar
 import uji.es.intermaps.View.user.UserDataScreen
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.UserViewModel
@@ -31,7 +34,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             // Mostrar la barra de navegación solo en ciertas pantallas
             if (currentRoute !in listOf("logIn", "signUp", "initial")) {
                 NavBar(
-                    currentRoute = currentRoute ?: "home",
+                    currentRoute = currentRoute ?: "initial",
                     onNavigate = { route ->
                         if (route != currentRoute) { // Evitar recargar la misma ruta
                             navHostController.navigate(route) {
@@ -144,7 +147,20 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         composable("signUp") {
             SignUpScreen(
                 auth,
-                navigateToInitialScreen = {navHostController.navigate("initial")}
+                navigateToLogin = {navHostController.navigate("logIn")},
+                navigateToHome = {navHostController.navigate("home")}
+
+            )
+        }
+        composable("home"){
+            HomeSreen(
+                navigateToUserDataScreen = {navHostController.navigate("userDataScreen")},
+                navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")}
+                )
+        }
+        composable("userDataScreen"){
+            UserDataScreen(
+                auth
             )
         }
 
@@ -169,8 +185,12 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             )
         }
 
-    }
+        composable("mapaScreen"){
+            MapaScreen()
+        }
+
+    }*/
 
 
-}
+
 
