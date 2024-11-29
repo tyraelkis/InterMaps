@@ -21,7 +21,7 @@ class InterestPlaceServiceTests {
     //Crear valores por defecto para pruebas de create y delete?
     @Test
     fun createInterestPlace_E1Valid_InterestPlaceCreated(): Unit = runBlocking{
-        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceCoordinates(GeoPoint(-16.665695, 36.529562))
+        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceCoordinates(GeoPoint(-16.665695, 36.529562)) //Cambiar coordenadas segun los tests
         val res = db.doesInteresPlaceExists(interestPlaceTest.coordinate)
         interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
         assertEquals(true, res)
@@ -34,6 +34,19 @@ class InterestPlaceServiceTests {
         }
     }
 
+    @Test
+    fun searchInterestPlace_E1Valid_InterestPlaceFound(): Unit = runBlocking {
+        val result: Boolean = interestPlaceService.searchInterestPlace(interestPlace.coordinate)
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun searchInterestPlace_E2Invalid_errorOnSearchingInterestPlace(): Unit = runBlocking {
+        assertThrows<NotValidCoordinatesException>{
+            interestPlaceService.searchInterestPlace(GeoPoint(-300.0,300.0))
+        }
+    }
+    
     @Test
     fun editInterestPlace_E1Valido_setAliasToAPlaceOfInterest(): Unit = runBlocking {
         val result: Boolean = interestPlaceService.setAlias(interestPlace, newAlias = "Mozambiquinho")
