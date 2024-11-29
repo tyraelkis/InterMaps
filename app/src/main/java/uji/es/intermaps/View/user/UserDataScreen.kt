@@ -57,7 +57,7 @@ import uji.es.intermaps.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit){
+fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} ){
 
     var expandedVehicles by remember { mutableStateOf(false) }
     var expandedRoutes by remember { mutableStateOf(false) }
@@ -149,7 +149,7 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit){
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(64.dp))
 
         /*Box(
             modifier = Modifier
@@ -408,7 +408,7 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit){
                 }
             }
         }
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(128.dp))
 
         Button(
             onClick = {},
