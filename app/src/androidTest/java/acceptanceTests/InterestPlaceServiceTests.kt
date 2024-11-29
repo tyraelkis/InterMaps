@@ -68,9 +68,22 @@ class InterestPlaceServiceTests {
     }
 
     @Test
-    fun editInterestPlace_E1Invalido_errorSetAliasToAPlaceOFInterest(): Unit = runBlocking{
+    fun editInterestPlace_E2Invalido_errorSetAliasToAPlaceOFInterest(): Unit = runBlocking{
         assertThrows<NotValidAliasException>{
             interestPlaceService.setAlias(interestPlace, newAlias = "@#//")
+        }
+    }
+
+    @Test
+    fun searchInterestPlaceByToponym_E1Valido_InterestPlaceFound(): Unit = runBlocking {
+        val res: Boolean = interestPlaceService.searchInterestPlaceByToponym(interestPlace.toponym)
+        assertEquals(true, res)
+    }
+
+    @Test
+    fun searchInterestPlaceByToponym_E2Invalido_errorOnSearchingInterestPlaceByToponym(): Unit = runBlocking {
+        assertThrows<NotSuchPlaceException>{
+            interestPlaceService.searchInterestPlaceByToponym("Roshar")
         }
     }
 }

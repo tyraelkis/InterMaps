@@ -253,6 +253,10 @@ class FirebaseRepository: Repository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun searchInterestPlaceByToponym(toponym: String) : InterestPlace {
+        TODO("Not yet implemented")
+    }
+
     override fun deleteInterestPlace(coordinate: GeoPoint): Boolean {
         return false
     }

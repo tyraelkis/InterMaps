@@ -69,6 +69,10 @@ class InterestPlaceService(private val repository: Repository) {
         return true
     }
 
+    suspend fun searchInterestPlaceByToponym(toponym: String) : Boolean{
+        return false
+    }
+
     fun getFavList(callback: (List<InterestPlace>) -> Unit){
         repository.getFavList{ success, favList ->
             if (success){
