@@ -1,8 +1,5 @@
 package uji.es.intermaps
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -147,20 +144,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         composable("signUp") {
             SignUpScreen(
                 auth,
-                navigateToLogin = {navHostController.navigate("logIn")},
-                navigateToHome = {navHostController.navigate("home")}
-
-            )
-        }
-        composable("home"){
-            HomeSreen(
-                navigateToUserDataScreen = {navHostController.navigate("userDataScreen")},
-                navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")}
-                )
-        }
-        composable("userDataScreen"){
-            UserDataScreen(
-                auth
+                navigateToInitialScreen = {navHostController.navigate("initial")}
             )
         }
 
@@ -185,12 +169,8 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             )
         }
 
-        composable("mapaScreen"){
-            MapaScreen()
-        }
-
-    }*/
+    }
 
 
-
+}
 

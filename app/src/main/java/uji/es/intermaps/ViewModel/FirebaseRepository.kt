@@ -5,13 +5,13 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.User
 import kotlin.coroutines.resume
@@ -43,7 +43,12 @@ class FirebaseRepository: Repository {
                             continuation.resumeWithException(
                                 AccountAlreadyRegistredException("Ya existe una cuenta con este email")
                             )
-                        } else {
+                        }
+                        else if (exception is FirebaseAuthInvalidCredentialsException){
+                            continuation.resumeWithException(
+                                IllegalArgumentException("El correo o la contraseña no tienen un formato válido")
+                            )
+                        }else {
                             continuation.resumeWithException(exception ?: Exception("Error desconocido al crear el usuario."))
                         }
                     }
@@ -226,7 +231,7 @@ class FirebaseRepository: Repository {
             }
     }
 
-    override suspend fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String): InterestPlace {
+    override suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
         return suspendCoroutine { continuation ->
             db.collection("InterestPlace").add(
                 mapOf(
@@ -245,6 +250,7 @@ class FirebaseRepository: Repository {
         }
     }
 
+    override suspend fun searchInterestPlace(coordinate: Coordinate) : InterestPlace {
 
     override suspend fun getInterestPlaceByToponym(
         toponym: String,
@@ -276,15 +282,23 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun searchInterestPlace(coordinate: GeoPoint) : InterestPlace {
+    override suspend fun searchInterestPlace(coordinate: Coordinate) : InterestPlace {
         TODO("Not yet implemented")
     }
 
-    override suspend fun viewInterestPlaceData(coordinate: GeoPoint): Boolean {
+    override suspend fun viewInterestPlaceData(coordinate: Coordinate): Boolean {
         TODO("Not yet implemented")
     }
 
-    override fun deleteInterestPlace(coordinate: GeoPoint): Boolean {
+    override suspend fun searchInterestPlaceByToponym(toponym: String) : InterestPlace {
+        TODO("Not yet implemented")
+    }
+
+    override fun viewInterestPlaceList(callback: (List<InterestPlace>) -> Unit) {
+        TODO("Not yet implemented")
+    }
+
+    override fun deleteInterestPlace(coordinate: Coordinate): Boolean {
         return false
     }
 }
