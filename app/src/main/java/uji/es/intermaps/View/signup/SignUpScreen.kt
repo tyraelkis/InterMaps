@@ -43,9 +43,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotValidUserData
-import uji.es.intermaps.Model.FirebaseRepository
-import uji.es.intermaps.Model.Repository
-import uji.es.intermaps.Model.UserService
+import uji.es.intermaps.ViewModel.FirebaseRepository
+import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.ViewModel.UserService
 
 @OptIn(ExperimentalMaterial3Api::class)
 

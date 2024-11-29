@@ -41,16 +41,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
-import uji.es.intermaps.Model.FirebaseRepository
-import uji.es.intermaps.Model.InterestPlace
-import uji.es.intermaps.Model.InterestPlaceService
-import uji.es.intermaps.Model.Repository
+import uji.es.intermaps.ViewModel.FirebaseRepository
+import uji.es.intermaps.ViewModel.InterestPlaceService
+import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
