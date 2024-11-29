@@ -25,8 +25,13 @@ junitKtx = "1.2.1"
 okhttp = "4.12.0"
 junitJupiter = "5.8.1"
 firebaseBom = "33.1.1"
+mapsCompose = "11.7.1"
+android = "11.7.1"
+
+
 
 [libraries]
+android = { module = "com.mapbox.maps:android", version.ref = "android" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-junit-ktx-v115 = { module = "androidx.test.ext:junit-ktx", version.ref = "junitKtxVersion" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
@@ -58,6 +63,10 @@ junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", vers
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converterGson" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
+
+#maps-compose = { module = "com.mapbox.maps:maps-compose", version.ref = "mapsCompose" }
+maps-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapsCompose" }
+
 
 
 [plugins]

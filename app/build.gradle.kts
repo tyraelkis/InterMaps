@@ -88,6 +88,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation("androidx.compose.runtime:runtime-livedata:1.7.5")
     testImplementation ("org.junit.jupiter:junit-jupiter:5")
+    //Mapas
+    implementation(libs.android)
+    implementation(libs.maps.compose)
 
 
 }
