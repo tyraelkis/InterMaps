@@ -13,16 +13,17 @@ import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.Coordinate
 
 class InterestPlaceServiceTests {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
-    private var interestPlace: InterestPlace = InterestPlace(GeoPoint(-18.665695, 35.529562), "Mozambique", "Moz", false)
+    private var interestPlace: InterestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
     //Crear valores por defecto para pruebas de create y delete?
     @Test
     fun createInterestPlace_E1Valid_InterestPlaceCreated(): Unit = runBlocking{
-        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceCoordinates(GeoPoint(-16.665695, 36.529562)) //Cambiar coordenadas segun los tests
+        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceCoordinates(Coordinate(-16.665695, 36.529562)) //Cambiar coordenadas segun los tests
         val res = db.doesInteresPlaceExists(interestPlaceTest.coordinate)
         interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
         assertEquals(true, res)
@@ -31,7 +32,7 @@ class InterestPlaceServiceTests {
     @Test
     fun createInterestPlace_E2Invalid_errorOnCreatingInterestPlace(): Unit = runBlocking {
         assertThrows<NotValidCoordinatesException>{
-            interestPlaceService.createInterestPlaceCoordinates(GeoPoint(-1800.665695,35.529562))
+            interestPlaceService.createInterestPlaceCoordinates(Coordinate(-1800.665695,35.529562))
         }
     }
 
@@ -44,7 +45,7 @@ class InterestPlaceServiceTests {
     @Test
     fun searchInterestPlace_E2Invalid_errorOnSearchingInterestPlace(): Unit = runBlocking {
         assertThrows<NotValidCoordinatesException>{
-            interestPlaceService.searchInterestPlace(GeoPoint(-300.0,300.0))
+            interestPlaceService.searchInterestPlace(Coordinate(-300.0,300.0))
         }
     }
 
@@ -57,7 +58,7 @@ class InterestPlaceServiceTests {
     @Test
     fun viewInterestPlaceData_E2Invalid_errorOnViewingInterestPlaceData(): Unit = runBlocking { //Busca en la lista de lugares
         assertThrows<NotSuchPlaceException>{
-            interestPlaceService.viewInterestPlaceData(GeoPoint(-19.665695,35.529562))
+            interestPlaceService.viewInterestPlaceData(Coordinate(-19.665695,35.529562))
         }
     }
     

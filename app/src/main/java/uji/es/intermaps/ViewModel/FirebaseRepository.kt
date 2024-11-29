@@ -5,13 +5,13 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.User
 import kotlin.coroutines.resume
@@ -226,7 +226,7 @@ class FirebaseRepository: Repository {
             }
     }
 
-    override suspend fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String): InterestPlace {
+    override suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
         return suspendCoroutine { continuation ->
             db.collection("InterestPlace").add(
                 mapOf(
@@ -245,11 +245,11 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun searchInterestPlace(coordinate: GeoPoint) : InterestPlace {
+    override suspend fun searchInterestPlace(coordinate: Coordinate) : InterestPlace {
         TODO("Not yet implemented")
     }
 
-    override suspend fun viewInterestPlaceData(coordinate: GeoPoint): Boolean {
+    override suspend fun viewInterestPlaceData(coordinate: Coordinate): Boolean {
         TODO("Not yet implemented")
     }
 
@@ -261,7 +261,7 @@ class FirebaseRepository: Repository {
         TODO("Not yet implemented")
     }
 
-    override fun deleteInterestPlace(coordinate: GeoPoint): Boolean {
+    override fun deleteInterestPlace(coordinate: Coordinate): Boolean {
         return false
     }
 }
