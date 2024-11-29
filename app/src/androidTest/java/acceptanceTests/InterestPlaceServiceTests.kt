@@ -73,4 +73,12 @@ class InterestPlaceServiceTests {
             interestPlaceService.setAlias(interestPlace, newAlias = "@#//")
         }
     }
+
+    @Test
+    fun  createInterestPlaceByToponym_E1Valido_InterestPlaceCreated(): Unit = runBlocking {
+        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceToponym("Mozambique", "Moz")
+        val res = db.doesInteresPlaceExists(interestPlaceTest.coordinate)
+        interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
+        assertEquals(true, res)
+    }
 }
