@@ -43,7 +43,12 @@ class FirebaseRepository: Repository {
                             continuation.resumeWithException(
                                 AccountAlreadyRegistredException("Ya existe una cuenta con este email")
                             )
-                        } else {
+                        }
+                        else if (exception is FirebaseAuthInvalidCredentialsException){
+                            continuation.resumeWithException(
+                                IllegalArgumentException("El correo o la contraseña no tienen un formato válido")
+                            )
+                        }else {
                             continuation.resumeWithException(exception ?: Exception("Error desconocido al crear el usuario."))
                         }
                     }
@@ -62,7 +67,7 @@ class FirebaseRepository: Repository {
                         val exception = task.exception
                         if (exception is FirebaseAuthInvalidCredentialsException) {
                             continuation.resumeWithException(
-                                UnregistredUserException("No existe un usuario con este correo electrónico")
+                                UnregistredUserException("Usuario o contraseña incorrectos")
                             )
                         } else {
                             continuation.resumeWithException(exception ?: Exception("Error desconocido al iniciar sesión."))

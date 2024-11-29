@@ -82,8 +82,6 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit){
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-    var newEmail by remember { mutableStateOf("") }
-    var confirmEmail by remember { mutableStateOf("") }
 
     var password by remember { mutableStateOf("") }
 
