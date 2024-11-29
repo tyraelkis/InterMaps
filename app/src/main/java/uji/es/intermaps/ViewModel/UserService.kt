@@ -67,7 +67,6 @@ class UserService(var repository: Repository) {
             return true
         throw SessionNotStartedException()
 
-
     }
 
     suspend fun deleteUser(email: String, password: String): Boolean{

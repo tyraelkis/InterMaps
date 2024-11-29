@@ -5,6 +5,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
+import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Model.DataBase
@@ -36,14 +37,27 @@ class InterestPlaceServiceTests {
 
     @Test
     fun searchInterestPlace_E1Valid_InterestPlaceFound(): Unit = runBlocking {
-        val result: Boolean = interestPlaceService.searchInterestPlace(interestPlace.coordinate)
-        assertEquals(true, result)
+        val res: Boolean = interestPlaceService.searchInterestPlace(interestPlace.coordinate)
+        assertEquals(true, res)
     }
 
     @Test
     fun searchInterestPlace_E2Invalid_errorOnSearchingInterestPlace(): Unit = runBlocking {
         assertThrows<NotValidCoordinatesException>{
             interestPlaceService.searchInterestPlace(GeoPoint(-300.0,300.0))
+        }
+    }
+
+    @Test
+    fun viewInterestPlaceData_E1Valid_InterestPlaceDataViewed(): Unit = runBlocking {
+        val res : Boolean = interestPlaceService.viewInterestPlaceData(interestPlace.coordinate)
+        assertEquals(true, res)
+    }
+
+    @Test
+    fun viewInterestPlaceData_E2Invalid_errorOnViewingInterestPlaceData(): Unit = runBlocking { //Busca en la lista de lugares
+        assertThrows<NotSuchPlaceException>{
+            interestPlaceService.viewInterestPlaceData(GeoPoint(-19.665695,35.529562))
         }
     }
     

@@ -14,6 +14,7 @@ interface Repository {
     suspend fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean
     suspend fun createInterestPlace(coordinate: GeoPoint, toponym: String, alias: String): InterestPlace
     suspend fun searchInterestPlace(coordinate: GeoPoint) : InterestPlace
+    suspend fun viewInterestPlaceData(coordinate: GeoPoint): Boolean
     fun deleteInterestPlace(coordinate: GeoPoint): Boolean
     fun getFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)
     fun getNoFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)

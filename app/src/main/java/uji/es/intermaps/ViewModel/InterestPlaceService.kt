@@ -50,6 +50,10 @@ class InterestPlaceService(private val repository: Repository) {
         return false
     }
 
+    suspend fun viewInterestPlaceData(coordinate: GeoPoint): Boolean{
+        return false
+    }
+
     suspend fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean{
         if (newAlias.length < 2 || interestPlace.alias.equals(newAlias))
             throw NotValidAliasException()

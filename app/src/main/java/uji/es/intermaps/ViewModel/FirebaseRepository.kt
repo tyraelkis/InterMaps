@@ -248,6 +248,11 @@ class FirebaseRepository: Repository {
     override suspend fun searchInterestPlace(coordinate: GeoPoint) : InterestPlace {
         TODO("Not yet implemented")
     }
+
+    override suspend fun viewInterestPlaceData(coordinate: GeoPoint): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override fun deleteInterestPlace(coordinate: GeoPoint): Boolean {
         return false
     }
