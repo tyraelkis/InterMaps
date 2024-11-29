@@ -86,4 +86,15 @@ class InterestPlaceServiceTests {
             interestPlaceService.searchInterestPlaceByToponym("Roshar")
         }
     }
+
+    @Test //A la hora de hacer el codigo mirar si miramos una lista generica o logeamos un usuario generico como el de usuario para ver su lista etc.
+    fun viewInterestPlaceList_E1Valido_InterestPlaceListViewed(){
+        val res = interestPlaceService.viewInterestPlaceList()
+        assertEquals(true, res)
+    }
+
+    @Test
+    fun viewInterestPlaceList_E2Invalido_errorOnViewingInterestPlaceList(){
+        //Crear una lista o un usuario con una lista vacia e intentar comprobar que se muestre la lista vacia
+    }
 }

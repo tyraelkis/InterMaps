@@ -257,6 +257,10 @@ class FirebaseRepository: Repository {
         TODO("Not yet implemented")
     }
 
+    override fun viewInterestPlaceList(callback: (List<InterestPlace>) -> Unit) {
+        TODO("Not yet implemented")
+    }
+
     override fun deleteInterestPlace(coordinate: GeoPoint): Boolean {
         return false
     }

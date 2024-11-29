@@ -46,11 +46,11 @@ class InterestPlaceService(private val repository: Repository) {
         return false
     }
 
-    suspend fun searchInterestPlace(coordinate: GeoPoint) : Boolean{
+    fun searchInterestPlace(coordinate: GeoPoint) : Boolean{
         return false
     }
 
-    suspend fun viewInterestPlaceData(coordinate: GeoPoint): Boolean{
+    fun viewInterestPlaceData(coordinate: GeoPoint): Boolean{
         return false
     }
 
@@ -69,8 +69,12 @@ class InterestPlaceService(private val repository: Repository) {
         return true
     }
 
-    suspend fun searchInterestPlaceByToponym(toponym: String) : Boolean{
+    fun searchInterestPlaceByToponym(toponym: String) : Boolean{
         return false
+    }
+
+    fun viewInterestPlaceList(): List<InterestPlace>{
+        return emptyList()
     }
 
     fun getFavList(callback: (List<InterestPlace>) -> Unit){
