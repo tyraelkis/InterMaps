@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">InterMaps</string>
+    <string name="mapbox_access_token" translatable="false">pk.eyJ1IjoiZ3VpbGxlcm9zc2FsIiwiYSI6ImNtMmR2NzNqdTE3Y3gybXIxODM1NXp3bGoifQ.AZ1194WDeuRG6M4-VDvH3A</string>
 </resources>
