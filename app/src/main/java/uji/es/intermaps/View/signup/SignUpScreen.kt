@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -45,7 +46,9 @@ import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.UserService
+import uji.es.intermaps.ViewModel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 
@@ -55,6 +58,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
     val userService = UserService(repository)
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
 
     //Variables para mensajes de debajo de los campos
     var submesageEmail by remember { mutableStateOf("Ejemplo: usuario@ejemplo.com") }
@@ -169,7 +173,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
 
         Spacer(modifier = Modifier.height(64.dp))
 
-                OutlinedButton(
+        OutlinedButton(
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
@@ -248,4 +252,5 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             }
         }
     }
+
 }

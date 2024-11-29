@@ -73,17 +73,13 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
     var selectedOptionRoutes by remember { mutableStateOf(optionsRoutes[0]) }
     var selectedOptionTransport by remember { mutableStateOf(optionsRoutes[0]) }
 
-    var showPopupEmail by remember { mutableStateOf(false) }
     var showPopupPassword by remember { mutableStateOf(false) }
     var showPopupModifications by remember { mutableStateOf(false) }
     var showPopUpDelete by remember { mutableStateOf(false) }
-    var showPopUpReAuth by remember { mutableStateOf(false) }
 
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-    var newEmail by remember { mutableStateOf("") }
-    var confirmEmail by remember { mutableStateOf("") }
 
     var password by remember { mutableStateOf("") }
 
@@ -91,7 +87,6 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
     val repository: Repository = FirebaseRepository()
     val userService = UserService(repository)
     var currentEmail by remember { mutableStateOf(user?.email.toString()) }
-    val passwordInput = remember { mutableStateOf("") }
 
 
 
@@ -129,9 +124,9 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                 fontWeight = FontWeight.Bold
             )
         }
-        Spacer(modifier = Modifier.height(50.dp))
+        //Spacer(modifier = Modifier.height(50.dp))
 
-        Box(
+        /*Box(
             modifier = Modifier
                 .height(45.dp)
                 .width(350.dp)
@@ -151,9 +146,9 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                     fontWeight = FontWeight.Bold
                 )
             }
-        }
+        }*/
 
-        Spacer(modifier = Modifier.height(64.dp))
+       Spacer(modifier = Modifier.height(64.dp))
 
         /*Box(
             modifier = Modifier
@@ -381,8 +376,8 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                     ),
                     textStyle = androidx.compose.ui.text.TextStyle(
                         fontSize = 16.sp,
-                        lineHeight = 20.sp,  // Ajustar el lineHeight para evitar corte, manteniendo el texto centrado
-                        textAlign = TextAlign.Center  // Asegura que el texto esté centrado verticalmente
+                        lineHeight = 20.sp,
+                        textAlign = TextAlign.Center
                     ),
                 )
                 ExposedDropdownMenu(
@@ -412,7 +407,7 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                 }
             }
         }
-        Spacer(modifier = Modifier.height(128.dp))
+        Spacer(modifier = Modifier.height(100.dp))
 
         Button(
             onClick = {},

@@ -88,4 +88,15 @@ class InterestPlaceService(private val repository: Repository) {
             }
         }
     }
+
+    suspend fun getInterestPlaceByToponym(toponym: String, callback: (List<InterestPlace>) -> Unit) {
+        repository.getInterestPlaceByToponym(toponym) { success, interestPlace ->
+            if (success) {
+                callback(interestPlace)
+            } else {
+                callback(emptyList())
+            }
+
+        }
+    }
 }

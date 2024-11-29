@@ -6,11 +6,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
-import uji.es.intermaps.View.home.HomeSreen
+import uji.es.intermaps.View.home.HomeScreen
 import uji.es.intermaps.View.home.InitialScreen
 import uji.es.intermaps.View.interestPlace.InterestPlaceCreation
 import uji.es.intermaps.View.interestPlace.InterestPlaceList
@@ -20,9 +22,10 @@ import uji.es.intermaps.View.navBar.NavBar
 import uji.es.intermaps.View.signup.SignUpScreen
 import uji.es.intermaps.View.user.UserDataScreen
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
+import uji.es.intermaps.ViewModel.UserViewModel
 
 @Composable
-fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, viewModel: InterestPlaceViewModel) {
+fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, viewModel: InterestPlaceViewModel, viewModel1: UserViewModel) {
 
     val currentRoute = navHostController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -35,8 +38,15 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
                     onNavigate = { route ->
                         if (route != currentRoute) { // Evitar recargar la misma ruta
                             navHostController.navigate(route) {
-                                popUpTo(navHostController.graph.startDestinationId) {
-                                    saveState = true
+                                if (route == "home"){
+                                    popUpTo(navHostController.graph.startDestinationId){
+                                        inclusive = true
+                                    }
+                                }
+                                else{
+                                    popUpTo(navHostController.graph.startDestinationId){
+                                        saveState = true
+                                    }
                                 }
                                 launchSingleTop = true
                                 restoreState = true
@@ -73,9 +83,10 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
                 )
             }
             composable("home") {
-                HomeSreen(
+                HomeScreen (
                     navigateToUserDataScreen = { navHostController.navigate("userDataScreen") },
-                    navigateToInterestPlaceList = { navHostController.navigate("interestPlaceList") }
+                    navigateToInterestPlaceList = { navHostController.navigate("interestPlaceList") },
+                    viewModel1
                 )
             }
             composable("userDataScreen") {
@@ -86,18 +97,34 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             }
             composable("interestPlaceList") {
                 InterestPlaceList(
+                    navHostController,
                     navigateToInterestPlaceList = { navHostController.navigate("interestPlaceList") },
                     auth,
-                    navigateToInterestPlaceSetAlias = { navHostController.navigate("interestPlaceSetAlias") },
+                    navigateToInterestPlaceSetAlias = {
+                        //navHostController.navigate("interestPlaceSetAlias")
+                        },
                     navigateToInterestPlaceCreation = { navHostController.navigate("interestPlaceCreation") },
                     viewModel
                 )
             }
-            composable("interestPlaceCreation") {
+            composable(
+                route = "interestPlaceCreation"
+
+            ) {
                 InterestPlaceCreation(viewModel)
             }
-            composable("interestPlaceSetAlias") {
-                InterestPlaceSetAlias(viewModel)
+            composable(
+                route = "interestPlaceSetAlias/{toponym}",
+                arguments = listOf(
+                    navArgument("toponym") { type = NavType.StringType}
+                )
+            ) {
+                    backStackEntry ->
+                val toponym = backStackEntry.arguments?.getString("toponym")
+                if (toponym != null) {
+                    InterestPlaceSetAlias(viewModel, toponym)
+                }
+
             }
 
         }

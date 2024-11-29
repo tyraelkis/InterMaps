@@ -19,7 +19,11 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.ViewModel.FirebaseRepository
+import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
+import uji.es.intermaps.ViewModel.UserService
+import uji.es.intermaps.ViewModel.UserViewModel
 import uji.es.intermaps.ui.theme.InterMapsTheme
 
 class MainActivity : ComponentActivity() {
@@ -32,13 +36,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             navHostController = rememberNavController()
+            val repository = FirebaseRepository()
+            val interestPlaceService = InterestPlaceService(repository)
+            val userService = UserService(repository)
             InterMapsTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
                         name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
-                    NavigationWrapper(navHostController, auth, viewModel = InterestPlaceViewModel())
+                    NavigationWrapper(navHostController, auth, viewModel = InterestPlaceViewModel(interestPlaceService), viewModel1 = UserViewModel(userService))
 
                 }
             }

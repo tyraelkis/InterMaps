@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -57,13 +58,15 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
-    val place = viewModel.interestPlace.observeAsState().value ?:return
+    val place = viewModel.interestPlace
     var showPopupCreateSucces by remember { mutableStateOf(false) }
     var showPopupCreateError by remember { mutableStateOf(false) }
     var alias by remember { mutableStateOf("") }
     var repository: Repository = FirebaseRepository()
     var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
     val  coroutineScope = rememberCoroutineScope()
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()

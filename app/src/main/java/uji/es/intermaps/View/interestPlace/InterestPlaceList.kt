@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.firebase.firestore.FirebaseFirestore
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
@@ -44,7 +45,9 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -> Unit,navigateToInterestPlaceCreation: () -> Unit, viewModel: InterestPlaceViewModel) {
+fun InterestPlaceList(
+    navController: NavController,
+    navigateToInterestPlaceList: () -> Unit = {}, auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -> Unit,navigateToInterestPlaceCreation: () -> Unit, viewModel: InterestPlaceViewModel) {
     var db = FirebaseFirestore.getInstance()
     var user = auth.currentUser
     var repository: Repository = FirebaseRepository()
@@ -135,8 +138,8 @@ fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: Fireba
                         )
                         Button(
                             onClick = {
-                                viewModel.setInterestPlace(place)
-                                navigateToInterestPlaceSetAlias()
+                                //viewModel.putInterestPlace(place)
+                                navController.navigate("interestPlaceSetAlias/${place.toponym}")
                             },
                             modifier = Modifier
                                 .width(100.dp)
@@ -206,7 +209,7 @@ fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: Fireba
                         )
                         Button(
                             onClick = {
-                                viewModel.setInterestPlace(notFavPlace)
+                                viewModel.putInterestPlace(notFavPlace)
                                 navigateToInterestPlaceSetAlias()
                             },
                             modifier = Modifier

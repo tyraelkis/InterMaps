@@ -18,11 +18,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -47,168 +49,189 @@ import kotlinx.coroutines.launch
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel){
-    val place = viewModel.interestPlace.observeAsState().value ?:return
+fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel, toponym: String){
+    val place = viewModel.interestPlace
+    val loading = viewModel.loading
     var showPopupAliasCorrecto by remember { mutableStateOf(false) }
     var showPopupAliasIncorrecto by remember { mutableStateOf(false) }
     var newAlias by remember { mutableStateOf("") }
     var repository: Repository = FirebaseRepository()
     var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
     val  coroutineScope = rememberCoroutineScope()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                White
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(100.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "${place.coordinate.latitude}, ${place.coordinate.longitude}",
-                color = Black,
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(modifier = Modifier.height(15.dp))
 
-        Box(
-            modifier = Modifier
-                .size(350.dp)
-                .clip(RoundedCornerShape(20.dp))
-        ) {
-
-            Image(
-                painter = painterResource(
-                    id = R.drawable.not_aviable_image
-                ),
-                contentDescription = "",
-                modifier = Modifier
-                    .width(350.dp)
-                    .height(350.dp),
-                contentScale = ContentScale.Crop
-            )
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Row (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            horizontalArrangement = Arrangement.Absolute.Left,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Toponimo",
-                color = Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Box(
-            modifier = Modifier
-                .height(52.dp)
-                .width(350.dp)
-                .background(Color(0xFFFFFFF), shape = RoundedCornerShape(10.dp))
-                .border(
-                    width = 1.dp,
-                    color = Black,
-                    shape = RoundedCornerShape(10.dp) )
-                .clip(RoundedCornerShape(10.dp))
-                .padding(5.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            // Texto en el fondo
-            Text(
-                text = "${place.toponym}",
-                color = Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.CenterStart),
-            )
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Row (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            horizontalArrangement = Arrangement.Absolute.Left,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Alias",
-                color = Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-
+    LaunchedEffect(Unit) {
+        viewModel.getInterestPlaceByToponym(toponym)
+    }
+    if (loading) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) { CircularProgressIndicator() }
+    } else {
         Column(
             modifier = Modifier
-                .height(52.dp)
-                .width(350.dp)
+                .fillMaxSize()
+                .background(
+                    White
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Texto en el fondo
-            TextField(
-                value = newAlias,
-                onValueChange = { newAlias= it },
+            Spacer(modifier = Modifier.height(100.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "${place.toponym ?: "Sin toponimo"} ",
+                    color = Black,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = "(${place.coordinate.latitude}, ${place.coordinate.longitude})",
+                    color = Black,
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Box(
+                modifier = Modifier
+                    .size(350.dp)
+                    .clip(RoundedCornerShape(20.dp))
+            ) {
+
+                Image(
+                    painter = painterResource(
+                        id = R.drawable.not_aviable_image
+                    ),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .width(350.dp)
+                        .height(350.dp),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            /*Row (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp),
+                horizontalArrangement = Arrangement.Absolute.Left,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Toponimo",
+                    color = Black,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
+                )
+            }*/
+            Spacer(modifier = Modifier.height(10.dp))
+
+            /*Box(
                 modifier = Modifier
                     .height(52.dp)
-                    .fillMaxWidth()
-                    .border(1.dp, Black, RoundedCornerShape(10.dp)),
-                placeholder = { Text("${place.alias}", style = TextStyle(fontSize = 20.sp)) },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color(0xFFFFFFF),
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                shape = RoundedCornerShape(8.dp)
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
+                    .width(350.dp)
+                    .background(Color(0xFFFFFFF), shape = RoundedCornerShape(10.dp))
+                    .border(
+                        width = 1.dp,
+                        color = Black,
+                        shape = RoundedCornerShape(10.dp) )
+                    .clip(RoundedCornerShape(10.dp))
+                    .padding(5.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                // Texto en el fondo
+                Text(
+                    text = "${place.toponym}",
+                    color = Black,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.align(Alignment.CenterStart),
+                )
+            }
+            Spacer(modifier = Modifier.height(20.dp))*/
 
-        Button(
-            onClick = {
-                coroutineScope.launch {
-                    if (interestPlaceService.setAlias(
-                            interestPlace = place,
-                            newAlias = newAlias
-                        )
-                    ) {
-                        showPopupAliasCorrecto = true
-                    } else {
-                        showPopupAliasIncorrecto = true
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp),
+                horizontalArrangement = Arrangement.Absolute.Left,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Alias",
+                    color = Black,
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Column(
+                modifier = Modifier
+                    .height(52.dp)
+                    .width(350.dp)
+            ) {
+                // Texto en el fondo
+                TextField(
+                    value = newAlias,
+                    onValueChange = { newAlias= it },
+                    modifier = Modifier
+                        .height(52.dp)
+                        .fillMaxWidth()
+                        .border(1.dp, Black, RoundedCornerShape(10.dp)),
+                    placeholder = { Text("${place.alias}", style = TextStyle(fontSize = 20.sp)) },
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color(0xFFFFFFF),
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        if (interestPlaceService.setAlias(
+                                interestPlace = place,
+                                newAlias = newAlias
+                            )
+                        ) {
+                            showPopupAliasCorrecto = true
+                        } else {
+                            showPopupAliasIncorrecto = true
+                        }
                     }
-                }
-            } ,
-            modifier = Modifier
-                .height(36.dp)
-                .padding(horizontal = 32.dp, vertical = 1.dp)
-                .align(AbsoluteAlignment.Right),
-            colors = ButtonDefaults.buttonColors(containerColor = Black),
-            shape = RoundedCornerShape(10.dp)
-        ) {
-            Text(text = "Editar", color = White, fontSize = 14.sp)
+                } ,
+                modifier = Modifier
+                    .height(36.dp)
+                    .padding(horizontal = 32.dp, vertical = 1.dp)
+                    .align(AbsoluteAlignment.Right),
+                colors = ButtonDefaults.buttonColors(containerColor = Black),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text(text = "Editar", color = White, fontSize = 14.sp)
+            }
         }
     }
 

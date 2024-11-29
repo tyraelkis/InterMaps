@@ -245,6 +245,37 @@ class FirebaseRepository: Repository {
         }
     }
 
+
+    override suspend fun getInterestPlaceByToponym(
+        toponym: String,
+        callback: ((Boolean), (List<InterestPlace>)) -> Unit
+    ) {
+        return suspendCoroutine { continuation ->
+            Log.d("toponym", toponym)
+            db.collection("InterestPlace")
+                .whereEqualTo("toponym", toponym)
+                .get()
+                .addOnSuccessListener { documents ->
+                    Log.i("getInteresetPlaceByToponym", "${documents.documents}")
+                    if (!documents.isEmpty) {
+                        val favList = mutableListOf<InterestPlace>()
+                        for (document in documents) {
+
+                            val interestPlace = document.toObject(InterestPlace::class.java)
+                            favList.add(interestPlace)
+                        }
+                        callback(true, favList)
+                    } else {
+                        callback(false, emptyList())
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("getInteresetPlaceByToponym", e.message ?: "")
+                    callback(false, emptyList())
+                }
+        }
+    }
+
     override suspend fun searchInterestPlace(coordinate: GeoPoint) : InterestPlace {
         TODO("Not yet implemented")
     }

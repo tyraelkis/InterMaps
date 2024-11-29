@@ -11,6 +11,7 @@ object RetrofitConfig {
         val retrofit = Retrofit.Builder()
             .baseUrl("https://api.openrouteservice.org/")
             .addConverterFactory(GsonConverterFactory.create())
+            //.addCallAdapterFactory()
             .build()
         return retrofit.create(ORSAPI::class.java)
     }
