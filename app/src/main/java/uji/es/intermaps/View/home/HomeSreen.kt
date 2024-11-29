@@ -119,22 +119,6 @@ fun HomeSreen (navigateToUserDataScreen: () -> Unit = {}, navigateToInterestPlac
                 Text(text = "Pantalla lugares de interés", color = White, fontWeight = FontWeight.Bold)
             }
         }
-        Spacer(modifier = Modifier.height(25.dp))
-
-
-        Button(
-            onClick = {
-                navigateToInterestPlaceList()
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(42.dp)
-                .padding(horizontal = 32.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Black),
-            shape = RoundedCornerShape(10.dp)
-        ) {
-            Text(text = "Pantalla lugares de interés", color = White, fontWeight = FontWeight.Bold)
-        }
     }
 
 }

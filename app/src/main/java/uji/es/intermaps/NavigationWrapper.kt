@@ -12,7 +12,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.firebase.auth.FirebaseAuth
 import uji.es.intermaps.View.home.HomeSreen
 import uji.es.intermaps.View.home.InitialScreen
-//import uji.es.intermaps.View.interestPlace.InterestPlaceCreation
+import uji.es.intermaps.View.interestPlace.InterestPlaceCreation
 import uji.es.intermaps.View.interestPlace.InterestPlaceList
 import uji.es.intermaps.View.interestPlace.InterestPlaceSetAlias
 import uji.es.intermaps.View.login.LoginScreen
@@ -89,13 +89,13 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
                     navigateToInterestPlaceList = { navHostController.navigate("interestPlaceList") },
                     auth,
                     navigateToInterestPlaceSetAlias = { navHostController.navigate("interestPlaceSetAlias") },
-                   // navigateToInterestPlaceCreation = { navHostController.navigate("interestPlaceCreation") },
+                    navigateToInterestPlaceCreation = { navHostController.navigate("interestPlaceCreation") },
                     viewModel
                 )
             }
-            /*composable("interestPlaceCreation") {
+            composable("interestPlaceCreation") {
                 InterestPlaceCreation(viewModel)
-            }*/
+            }
             composable("interestPlaceSetAlias") {
                 InterestPlaceSetAlias(viewModel)
             }
