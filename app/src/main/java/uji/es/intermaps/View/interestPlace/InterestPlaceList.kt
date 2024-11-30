@@ -46,13 +46,10 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InterestPlaceList(
-    navController: NavController,
-    navigateToInterestPlaceList: () -> Unit = {}, auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -> Unit,navigateToInterestPlaceCreation: () -> Unit, viewModel: InterestPlaceViewModel) {
-    var db = FirebaseFirestore.getInstance()
+    navController: NavController, auth: FirebaseAuth) {
     var user = auth.currentUser
     var repository: Repository = FirebaseRepository()
     var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
-    var interestPlace: InterestPlace = InterestPlace()
     var favList by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
     var noFavList by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
 

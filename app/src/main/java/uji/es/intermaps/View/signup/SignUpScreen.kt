@@ -39,6 +39,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -55,7 +56,7 @@ import uji.es.intermaps.ViewModel.UserViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
-fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateToHome: () -> Unit) {
+fun SignUpScreen(navController: NavController) {
     val repository: Repository = FirebaseRepository()
     val userService = UserService(repository)
     var email by remember { mutableStateOf("") }
@@ -188,7 +189,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
                     try {
                         userService.createUser(email, password)
                         withContext(Dispatchers.Main) {
-                            navigateToHome()
+                            navController.navigate("home")
                         }
                     } catch (e: NotValidUserData) {
                         withContext(Dispatchers.Main) {
@@ -231,7 +232,9 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
                 color = Color.Black,
             )
             Button(
-                onClick = { navigateToLogin() },
+                onClick = {
+                    navController.navigate("logIn")
+                },
                 modifier = Modifier
                     .height(36.dp)
                     .width(140.dp),

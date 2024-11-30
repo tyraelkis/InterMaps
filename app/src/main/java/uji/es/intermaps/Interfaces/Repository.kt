@@ -1,6 +1,5 @@
 package uji.es.intermaps.Interfaces
 
-import com.google.firebase.firestore.GeoPoint
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.User

@@ -18,7 +18,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
-import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
@@ -42,7 +41,6 @@ class MainActivity : ComponentActivity() {
             InterMapsTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
                     NavigationWrapper(navHostController, auth, viewModel = InterestPlaceViewModel(interestPlaceService), viewModel1 = UserViewModel(userService))
@@ -54,7 +52,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
+fun Greeting(modifier: Modifier = Modifier) {
     Text(
         text = "",
         modifier = modifier
@@ -65,6 +63,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     InterMapsTheme {
-        Greeting("Android")
+        Greeting()
     }
 }

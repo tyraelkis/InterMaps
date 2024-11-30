@@ -1,6 +1,5 @@
 package acceptanceTests
 
-import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -102,8 +101,8 @@ class InterestPlaceServiceTests {
     @Test
     fun deleteInterestPlace_E1Valid_InterestPlaceDeleted(): Unit = runBlocking{
         var puntoDelete = Coordinate(39.9333300,-0.1000000 )
-        val result = interestPlaceService.deleteInterestPlace(puntoDelete)
-        assertEquals(true, result)
+        interestPlaceService.createInterestPlaceCoordinates(puntoDelete)
+        assertEquals(true, interestPlaceService.deleteInterestPlace(puntoDelete))
     }
 
     @Test

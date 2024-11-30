@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
@@ -39,7 +40,7 @@ import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.UserViewModel
 
 @Composable
-fun HomeScreen (navigateToUserDataScreen: () -> Unit = {}, navigateToInterestPlaceList: () -> Unit, viewModel: UserViewModel){
+fun HomeScreen (navController: NavController, viewModel: UserViewModel){
 
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
@@ -91,11 +92,12 @@ fun HomeScreen (navigateToUserDataScreen: () -> Unit = {}, navigateToInterestPla
 
                 Button(
                     onClick = {
-                        navigateToUserDataScreen()
+                        // Comentar esto para que solo puedas entrar si esta loggeado
+                        navController.navigate("userDataScreen")
                         coroutineScope.launch {
                             val emailExists = userService.viewUserData(user?.email.toString())
                             if (emailExists) {
-                                navigateToUserDataScreen() // Navega si el correo existe
+                                navController.navigate("userDataScreen")
                             } else {
                                 Log.d("Firestore", "El correo no está registrado.")
                             }
@@ -119,7 +121,7 @@ fun HomeScreen (navigateToUserDataScreen: () -> Unit = {}, navigateToInterestPla
 
                 Button(
                     onClick = {
-                        navigateToInterestPlaceList()
+                        navController.navigate("interestPlaceList")
                     },
                     modifier = Modifier
                         .fillMaxWidth()

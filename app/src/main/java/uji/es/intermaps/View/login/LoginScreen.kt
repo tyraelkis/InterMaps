@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +53,7 @@ import uji.es.intermaps.ViewModel.UserService
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
-fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateToHome:() -> Unit) {
+fun LoginScreen(navController: NavController) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -101,14 +102,14 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
         placeholder = { Text(
             text = "Ingrese su correo electrónico",
             modifier = Modifier
-                .background(Color.Transparent), // Cambiar el fondo del placeholder
-                color = LightGray // Color del texto del placeholder
+                .background(Color.Transparent),
+                color = LightGray
         ) },
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = White, // Fondo del TextField
-                cursorColor = Black, // Color del cursor
-                focusedIndicatorColor = Color.Transparent, // Eliminar el indicador de enfoque
-                unfocusedIndicatorColor = Color.Transparent // Eliminar el indicador cuando no está enfocado
+                containerColor = White,
+                cursorColor = Black,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
             )
         )
         Text(
@@ -188,7 +189,7 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
                     try {
                         userService.login(email, password)
                         withContext(Dispatchers.Main) {
-                            navigateToHome()
+                            navController.navigate("home")
                         }
                     } catch (e: NotValidUserData) {
                         withContext(Dispatchers.Main) {
@@ -230,7 +231,9 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
                 color = Black,
             )
             OutlinedButton(
-                onClick = { navigateToSignUp() },
+                onClick = {
+                          navController.navigate("signUp")
+                          },
                 modifier = Modifier
                     .height(36.dp)
                     .width(130.dp),

@@ -59,52 +59,40 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
     ) { padding ->
         NavHost(
             navController = navHostController,
-            startDestination = "home",
+            startDestination = "initial",
             modifier = Modifier.padding(padding)
         ) {
             composable("initial") {
                 InitialScreen(
-                    navigateToLogin = { navHostController.navigate("logIn") },
-                    navigateToSignUp = { navHostController.navigate("signUp") }
+                    navHostController
                 )
             }
             composable("logIn") {
                 LoginScreen(
-                    auth,
-                    navigateToSignUp = { navHostController.navigate("signUp") },
-                    navigateToHome = { navHostController.navigate("home") }
+                    navHostController
                 )
             }
             composable("signUp") {
                 SignUpScreen(
-                    auth,
-                    navigateToLogin = { navHostController.navigate("logIn") },
-                    navigateToHome = { navHostController.navigate("home") }
+                    navHostController
                 )
             }
             composable("home") {
                 HomeScreen (
-                    navigateToUserDataScreen = { navHostController.navigate("userDataScreen") },
-                    navigateToInterestPlaceList = { navHostController.navigate("interestPlaceList") },
+                    navHostController,
                     viewModel1
                 )
             }
             composable("userDataScreen") {
                 UserDataScreen(
                     auth,
-                    navigateToInitialScreen = { navHostController.navigate("initial") },
+                    navHostController
                     )
             }
             composable("interestPlaceList") {
                 InterestPlaceList(
                     navHostController,
-                    navigateToInterestPlaceList = { navHostController.navigate("interestPlaceList") },
-                    auth,
-                    navigateToInterestPlaceSetAlias = {
-                        //navHostController.navigate("interestPlaceSetAlias")
-                        },
-                    navigateToInterestPlaceCreation = { navHostController.navigate("interestPlaceCreation") },
-                    viewModel
+                    auth
                 )
             }
             composable(

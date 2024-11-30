@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
@@ -57,7 +58,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Exceptions.SessionNotStartedException
+import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.ViewModel.UserService
@@ -65,7 +68,7 @@ import uji.es.intermaps.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} ){
+fun UserDataScreen(auth: FirebaseAuth, navController: NavController){
 
     var expandedVehicles by remember { mutableStateOf(false) }
     var expandedRoutes by remember { mutableStateOf(false) }
@@ -84,7 +87,6 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-
     var password by remember { mutableStateOf("") }
 
     val user = auth.currentUser
@@ -432,7 +434,7 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                     val success = userService.signOut()
                     withContext(Dispatchers.Main) {
                         if (success) {
-                            navigateToInitialScreen() // Navega a la pantalla inicial tras cerrar sesión
+                            navController.navigate("initial")
                         } else {
                             errorMessage = "Error al cerrar sesión."
                             Log.e("SignOut", "No se pudo cerrar la sesión.")
@@ -591,10 +593,6 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                                                     showPopupModifications = true
                                                 } else {
                                                     errorMessage = "Error al modificar los datos"
-                                                    Log.e(
-                                                        "PasswordChange",
-                                                        "No se pudo modificar la contraseña"
-                                                    )
                                                 }
                                             }
                                             newPassword = ""
@@ -604,11 +602,19 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                                                 errorMessage = "Las contraseñas no coinciden"
                                             }
                                         }
-                                    } catch (e: Exception) {
+                                    } catch (e: NotValidUserData) {
                                         withContext(Dispatchers.Main) {
-                                            errorMessage = "Ocurrió un error inesperado: ${e.message}"
-                                            Log.e("PasswordChange", "Error: ${e.message}", e)
+                                            errorMessage = e.message.toString()
                                         }
+                                    } catch (e: IllegalArgumentException) {
+                                        withContext(Dispatchers.Main) {
+                                            errorMessage = e.message.toString()
+                                        }
+                                    } catch (e: UnregistredUserException) {
+                                        withContext(Dispatchers.Main) {
+                                            errorMessage = e.message.toString()
+                                        }
+
                                     }
                                 }
                             },
@@ -623,7 +629,7 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
 
 
                         Button(
-                            onClick = { showPopupPassword = false }, // Simplemente cierra el popup si el usuario hace clic en cancelar
+                            onClick = { showPopupPassword = false },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
                         ) {
@@ -787,7 +793,7 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                                             val result = userService.deleteUser(email, password)
                                             if (result) {
                                                 showPopUpDelete = false
-                                                navigateToInitialScreen()
+                                                navController.navigate("initial")
                                                 password = ""
                                             } else {
                                                 errorMessage = "No se pudo eliminar el usuario. Intenta de nuevo."

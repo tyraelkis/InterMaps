@@ -12,6 +12,7 @@ import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
+import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.User
 import kotlin.coroutines.resume
@@ -166,10 +167,10 @@ class FirebaseRepository: Repository {
 
     override suspend fun setAlias(interestPlace: InterestPlace, newAlias: String):Boolean {
         return try{
-            val geoPoint = interestPlace.coordinate
+            val coordinate = interestPlace.coordinate
 
             val search = db.collection("InterestPlace")
-                .whereEqualTo("coordinate", geoPoint)
+                .whereEqualTo("coordinate", coordinate)
                 .get()
                 .await()
             if(search.isEmpty){
@@ -298,6 +299,31 @@ class FirebaseRepository: Repository {
     }
 
     override suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean {
+        return try {
+            Log.d("deleteInterestPlace", "Starting deletion for coordinate: $coordinate")
+
+            val querySnapshot = DataBase.db.collection("InterestPlace")
+                .whereEqualTo("coordinate", coordinate)
+                .get()
+                .await()
+
+            if (querySnapshot.isEmpty) {
+                Log.d("deleteInterestPlace", "No documents found for coordinate: $coordinate")
+                return false
+            }
+
+            querySnapshot.documents.forEach { document ->
+                DataBase.db.collection("InterestPlace")
+                    .document(document.id)
+                    .delete()
+                    .await() // Convierte a una operación suspendida
+                Log.d("deleteInterestPlace", "Document with ID ${document.id} deleted successfully.")
+            }
+            true
+        } catch (e: Exception) {
+            Log.e("deleteInterestPlace", "Error while deleting documents: ${e.message}", e)
+            false
+        }
         return false
     }
 }

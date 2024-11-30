@@ -64,7 +64,6 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
     var alias by remember { mutableStateOf("") }
     var repository: Repository = FirebaseRepository()
     var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
-    val  coroutineScope = rememberCoroutineScope()
 
 
     Column(

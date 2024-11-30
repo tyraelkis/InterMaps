@@ -8,13 +8,13 @@
       <SelectionState runConfigName="InterestPlaceServiceTests">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="deleteInterestPlace_E1Valid_InterestPlaceDeleted()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="deleteInterestPlace_E2OInvalid_InterestPlaceDeleted()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="InterestPlaceServiceTests">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="createInterestPlace_E1Valid_InterestPlaceCreated()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="deleteInterestPlace_E1Valid_InterestPlaceDeleted()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
