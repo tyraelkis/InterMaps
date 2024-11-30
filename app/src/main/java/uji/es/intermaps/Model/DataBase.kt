@@ -41,7 +41,7 @@ object DataBase {
         }
     }
 
-    suspend fun doesInteresPlaceExists(coordinate: GeoPoint): Boolean {
+    suspend fun doesInteresPlaceExists(coordinate: Coordinate): Boolean {
         return try {
             val documents = db.collection("InterestPlace")
                 .whereEqualTo("coordinate", coordinate)

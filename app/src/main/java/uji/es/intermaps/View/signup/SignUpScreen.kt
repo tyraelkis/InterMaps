@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -31,13 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.graphics.Color.Companion.LightGray
+import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -46,46 +46,39 @@ import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Interfaces.Repository
-import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.UserService
-import uji.es.intermaps.ViewModel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
-fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateToHome: () -> Unit) {
+fun SignUpScreen(navigateToLogin: () -> Unit = {}, navigateToHome: () -> Unit) {
     val repository: Repository = FirebaseRepository()
     val userService = UserService(repository)
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-
-    //Variables para mensajes de debajo de los campos
-    var submesageEmail by remember { mutableStateOf("Ejemplo: usuario@ejemplo.com") }
-    var submesageEmailColor by remember { mutableStateOf(Color.LightGray) }
-    var submesagePswd by remember { mutableStateOf("Mínimo 6 carácteres") }
-    var submesagePswdColor by remember { mutableStateOf(Color.LightGray) }
+    var errorMessage by remember { mutableStateOf("") }
 
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Color.White
+                White
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(80.dp))
         Text(
             text = "Crear Cuenta",
-            color = Color.Black,
+            color = Black,
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(50.dp))
         Text(
             text = "Correo Electrónico",
-            color = Color.Black,
+            color = Black,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -101,23 +94,23 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
-                .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
+                .border(1.dp, LightGray, RoundedCornerShape(8.dp)),
             placeholder = { Text(
                 text = "Ingrese su correo electrónico",
                 modifier = Modifier
                     .background(Color.Transparent), // Cambiar el fondo del placeholder
-                color = Color.Black // Color del texto del placeholder
+                color = LightGray // Color del texto del placeholder
             ) },
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White, // Fondo del TextField
-                cursorColor = Color.Black, // Color del cursor
+                containerColor = White, // Fondo del TextField
+                cursorColor = Black, // Color del cursor
                 focusedIndicatorColor = Color.Transparent, // Eliminar el indicador de enfoque
                 unfocusedIndicatorColor = Color.Transparent // Eliminar el indicador cuando no está enfocado
             )
         )
         Text(
-            text = submesageEmail,
-            color = submesageEmailColor,
+            text = "Ejemplo: usuario@ejemplo.com",
+            color = LightGray,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -129,7 +122,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
         Spacer(modifier = Modifier.height(25.dp))
         Text(
             text = "Contraseña",
-            color = Color.Black,
+            color = Black,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -145,24 +138,24 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
-                .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
+                .border(1.dp, LightGray, RoundedCornerShape(8.dp)),
             visualTransformation = PasswordVisualTransformation(),
             placeholder = { Text(
                 text = "Ingrese su contraseña",
                 modifier = Modifier
                     .background(Color.Transparent), // Cambiar el fondo del placeholder
-                color = Color.Black // Color del texto del placeholder
+                color = LightGray // Color del texto del placeholder
             ) },
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White, // Fondo del TextField
-                cursorColor = Color.Black, // Color del cursor
+                containerColor = White, // Fondo del TextField
+                cursorColor = Black, // Color del cursor
                 focusedIndicatorColor = Color.Transparent, // Eliminar el indicador de enfoque
                 unfocusedIndicatorColor = Color.Transparent // Eliminar el indicador cuando no está enfocado
             )
         )
         Text(
-            text = submesagePswd,
-            color = submesagePswdColor,
+            text = "Mínimo 6 carácteres",
+            color = LightGray,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -171,9 +164,21 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             textAlign = TextAlign.Left
         )
 
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            text = errorMessage,
+            color = Red,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            textAlign = TextAlign.Left
+        )
         Spacer(modifier = Modifier.height(64.dp))
 
-        OutlinedButton(
+                OutlinedButton(
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
@@ -183,34 +188,15 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
                         }
                     } catch (e: NotValidUserData) {
                         withContext(Dispatchers.Main) {
-                            submesageEmail = e.message.toString()
-                            submesageEmailColor = Color.Red
-                            submesagePswd = e.message.toString()
-                            submesagePswdColor = Color.Red
+                            errorMessage = e.message.toString()
                         }
                     } catch (e: IllegalArgumentException) {
                         withContext(Dispatchers.Main) {
-                            when (e.message.toString()) {
-                                "El correo electrónico no tiene un formato válido." -> {
-                                    submesageEmail = "El correo electrónico no tiene un formato válido."
-                                    submesageEmailColor = Color.Red
-                                }
-                                "La contraseña debe tener al menos 6 caracteres." -> {
-                                    submesagePswd = "La contraseña debe tener al menos 6 caracteres."
-                                    submesagePswdColor = Color.Red
-                                }
-                                "La contraseña no tiene un formato válido." -> {
-                                    submesagePswd = "La contraseña no tiene un formato válido."
-                                    submesagePswdColor = Color.Red
-                                }
-                            }
+                            errorMessage = e.message.toString()
                         }
                     } catch (e: AccountAlreadyRegistredException) {
                         withContext(Dispatchers.Main) {
-                            submesageEmail = e.message.toString()
-                            submesageEmailColor = Color.Red
-                            submesagePswd = e.message.toString()
-                            submesagePswdColor = Color.Red
+                            errorMessage = e.message.toString()
                         }
                     }
                 }
@@ -221,7 +207,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
                 .padding(horizontal = 32.dp)
                 .align(AbsoluteAlignment.Right),
             colors = ButtonDefaults.buttonColors(containerColor = White),
-            border = BorderStroke(2.dp, Color.Black),
+            border = BorderStroke(2.dp, Black),
             shape = RoundedCornerShape(10.dp)
         ) {
             Text(text = "Crear Cuenta", color = Black, fontSize = 18.sp, fontWeight = FontWeight.Bold)
@@ -238,7 +224,7 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
         ) {
             Text(
                 text = "Si ya tienes una cuenta",
-                color = Color.Black,
+                color = Black,
             )
             Button(
                 onClick = { navigateToLogin() },
@@ -252,5 +238,4 @@ fun SignUpScreen(auth: FirebaseAuth, navigateToLogin: () -> Unit = {}, navigateT
             }
         }
     }
-
 }
