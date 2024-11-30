@@ -52,7 +52,7 @@ class InterestPlaceService(private val repository: Repository) {
         else{
             throw UnableToDeletePlaceException()
         }
-       return false
+        return false
     }
 
     fun searchInterestPlace(coordinate: Coordinate) : Boolean{
@@ -104,5 +104,61 @@ class InterestPlaceService(private val repository: Repository) {
                 callback(emptyList())
             }
         }
+    }
+
+    suspend fun getInterestPlaceByToponym(toponym: String, callback: (List<InterestPlace>) -> Unit) {
+        repository.getInterestPlaceByToponym(toponym) { success, interestPlace ->
+            if (success) {
+                callback(interestPlace)
+            } else {
+                callback(emptyList())
+            }
+
+        }
+    }
+
+    suspend fun createInterestPlaceFromToponym(toponym: String): InterestPlace {
+        if (toponym.isBlank()) {
+            throw IllegalArgumentException("El topónimo no puede estar vacío")
+        }
+
+        // Clase que realizará las llamadas con sus métodos
+        val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
+        var coordinate = Coordinate(0.0,0.0)
+
+        // Llamada a la API para obtener las coordenadas del topónimo
+        val response = withContext(Dispatchers.IO) {
+            openRouteService.getCoordinatesFromToponym(
+                "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23",
+                toponym
+            ).execute()
+        }
+
+        if (response.isSuccessful) {
+            response.body()?.let { ORSResponse ->
+                val respuesta = ORSResponse.features
+                if (respuesta.isNotEmpty()) {
+                    val feature = respuesta[0]
+                    val lon = feature.coordinates.longitude
+                    val lat = feature.coordinates.latitude
+
+                    // Validamos las coordenadas
+                    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+                        throw NotValidCoordinatesException("Las coordenadas no son válidas")
+                    }
+
+                    coordinate = Coordinate(latitude = lat, longitude = lon)
+                }
+            }
+        } else {
+            throw Exception("Error en la llamada a la API para obtener las coordenadas")
+        }
+
+        if (coordinate == Coordinate(0.0, 0.0)) {
+            throw Exception("No se pudieron obtener las coordenadas para el topónimo proporcionado")
+        }
+
+        // Crear el lugar de interés
+        return repository.createInterestPlace(coordinate, toponym, "")
     }
 }

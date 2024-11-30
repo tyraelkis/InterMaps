@@ -34,7 +34,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             // Mostrar la barra de navegación solo en ciertas pantallas
             if (currentRoute !in listOf("logIn", "signUp", "initial")) {
                 NavBar(
-                    currentRoute = currentRoute ?: "initial",
+                    currentRoute = currentRoute ?: "interestPlaceCreation",
                     onNavigate = { route ->
                         if (route != currentRoute) { // Evitar recargar la misma ruta
                             navHostController.navigate(route) {
@@ -59,7 +59,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
     ) { padding ->
         NavHost(
             navController = navHostController,
-            startDestination = "initial",
+            startDestination = "interestPlaceCreation",
             modifier = Modifier.padding(padding)
         ) {
             composable("initial") {
