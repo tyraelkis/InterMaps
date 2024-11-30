@@ -1,6 +1,5 @@
 package acceptanceTests
 
-import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -8,6 +7,7 @@ import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
+import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
@@ -97,5 +97,19 @@ class InterestPlaceServiceTests {
     @Test
     fun viewInterestPlaceList_E2Invalido_errorOnViewingInterestPlaceList(){
         //Crear una lista o un usuario con una lista vacia e intentar comprobar que se muestre la lista vacia
+    }
+    @Test
+    fun deleteInterestPlace_E1Valid_InterestPlaceDeleted(): Unit = runBlocking{
+        var puntoDelete = Coordinate(39.9333300,-0.1000000 )
+        interestPlaceService.createInterestPlaceCoordinates(puntoDelete)
+        assertEquals(true, interestPlaceService.deleteInterestPlace(puntoDelete))
+    }
+
+    @Test
+    fun deleteInterestPlace_E2OInvalid_InterestPlaceDeleted(): Unit = runBlocking{
+        var puntoDelete = Coordinate(38.0,-0.0 )
+        assertThrows<UnableToDeletePlaceException> {
+            interestPlaceService.deleteInterestPlace(puntoDelete)
+        }
     }
 }

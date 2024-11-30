@@ -46,13 +46,10 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InterestPlaceList(
-    navController: NavController,
-    navigateToInterestPlaceList: () -> Unit = {}, auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -> Unit,navigateToInterestPlaceCreation: () -> Unit, viewModel: InterestPlaceViewModel) {
-    var db = FirebaseFirestore.getInstance()
+    navController: NavController, auth: FirebaseAuth) {
     var user = auth.currentUser
     var repository: Repository = FirebaseRepository()
     var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
-    var interestPlace: InterestPlace = InterestPlace()
     var favList by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
     var noFavList by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
 
@@ -138,7 +135,6 @@ fun InterestPlaceList(
                         )
                         Button(
                             onClick = {
-                                //viewModel.putInterestPlace(place)
                                 navController.navigate("interestPlaceSetAlias/${place.toponym}")
                             },
                             modifier = Modifier
@@ -209,8 +205,8 @@ fun InterestPlaceList(
                         )
                         Button(
                             onClick = {
-                                viewModel.putInterestPlace(notFavPlace)
-                                navigateToInterestPlaceSetAlias()
+                                //viewModel.putInterestPlace(notFavPlace)
+                                navController.navigate("interestPlaceSetAlias/${notFavPlace.toponym}")
                             },
                             modifier = Modifier
                                 .width(100.dp)
@@ -235,7 +231,8 @@ fun InterestPlaceList(
             horizontalAlignment = Alignment.CenterHorizontally
         )   {Button(
             onClick = {
-                navigateToInterestPlaceCreation
+                navController.navigate("interestPlaceCreation")
+               // navigateToInterestPlaceCreation
             },
             modifier = Modifier
                 .width(350.dp)

@@ -27,10 +27,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import uji.es.intermaps.R
 
 @Composable
-fun InitialScreen (navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Unit = {}){
+fun InitialScreen (navController: NavController){
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -56,7 +57,9 @@ fun InitialScreen (navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Uni
             textAlign = TextAlign.Left)
         Spacer(modifier = Modifier.height(8.dp))
         Button(
-            onClick = { navigateToLogin() },
+            onClick = {
+                navController.navigate("logIn")
+                      },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
@@ -76,7 +79,9 @@ fun InitialScreen (navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Uni
             textAlign = TextAlign.Left)
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedButton(
-            onClick = { navigateToSignUp() },
+            onClick = {
+                navController.navigate("signUp")
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)

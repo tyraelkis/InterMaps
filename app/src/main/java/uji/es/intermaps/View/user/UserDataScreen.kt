@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -48,12 +50,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Exceptions.SessionNotStartedException
+import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.ViewModel.UserService
@@ -61,7 +68,7 @@ import uji.es.intermaps.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} ){
+fun UserDataScreen(auth: FirebaseAuth, navController: NavController){
 
     var expandedVehicles by remember { mutableStateOf(false) }
     var expandedRoutes by remember { mutableStateOf(false) }
@@ -80,7 +87,6 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
-
     var password by remember { mutableStateOf("") }
 
     val user = auth.currentUser
@@ -93,9 +99,8 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Color.White
-            ),
+            .verticalScroll(rememberScrollState())
+            .background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(100.dp))
@@ -429,7 +434,7 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                     val success = userService.signOut()
                     withContext(Dispatchers.Main) {
                         if (success) {
-                            navigateToInitialScreen() // Navega a la pantalla inicial tras cerrar sesión
+                            navController.navigate("initial")
                         } else {
                             errorMessage = "Error al cerrar sesión."
                             Log.e("SignOut", "No se pudo cerrar la sesión.")
@@ -588,19 +593,28 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                                                     showPopupModifications = true
                                                 } else {
                                                     errorMessage = "Error al modificar los datos"
-                                                    Log.e("PasswordChange", "No se pudo modificar la contraseña")
                                                 }
                                             }
+                                            newPassword = ""
+                                            confirmPassword = ""
                                         } else {
                                             withContext(Dispatchers.Main) {
                                                 errorMessage = "Las contraseñas no coinciden"
                                             }
                                         }
-                                    } catch (e: Exception) {
+                                    } catch (e: NotValidUserData) {
                                         withContext(Dispatchers.Main) {
-                                            errorMessage = "Ocurrió un error inesperado: ${e.message}"
-                                            Log.e("PasswordChange", "Error: ${e.message}", e)
+                                            errorMessage = e.message.toString()
                                         }
+                                    } catch (e: IllegalArgumentException) {
+                                        withContext(Dispatchers.Main) {
+                                            errorMessage = e.message.toString()
+                                        }
+                                    } catch (e: UnregistredUserException) {
+                                        withContext(Dispatchers.Main) {
+                                            errorMessage = e.message.toString()
+                                        }
+
                                     }
                                 }
                             },
@@ -613,8 +627,9 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                             )
                         }
 
+
                         Button(
-                            onClick = { showPopupPassword = false }, // Simplemente cierra el popup si el usuario hace clic en cancelar
+                            onClick = { showPopupPassword = false },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
                         ) {
@@ -686,6 +701,8 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
         }
     }
 
+
+    // POP UP DEL DELETE
     if (showPopUpDelete){
         Box(
             modifier = Modifier
@@ -763,13 +780,33 @@ fun UserDataScreen(auth: FirebaseAuth, navigateToInitialScreen: () -> Unit = {} 
                         Button(
                             onClick = {
                                 coroutineScope.launch {
-                                    val email = user?.email.toString()
-                                    val result = userService.deleteUser(email, password)
-                                    showPopUpDelete = result
-                                    if (result) {
-                                        navigateToInitialScreen()
+                                    if (user != null) {
+                                        val email = user.email.toString()
+                                        val credential = EmailAuthProvider.getCredential(email, password) // Crear credenciales
+
+                                        try {
+                                            // Reautenticar al usuario
+                                            user.reauthenticate(credential).await()
+                                            Log.d("DeleteUser", "Reautenticación exitosa")
+
+                                            // Eliminar el usuario tras la reautenticación exitosa
+                                            val result = userService.deleteUser(email, password)
+                                            if (result) {
+                                                showPopUpDelete = false
+                                                navController.navigate("initial")
+                                                password = ""
+                                            } else {
+                                                errorMessage = "No se pudo eliminar el usuario. Intenta de nuevo."
+                                                password = ""
+                                            }
+                                        } catch (e: Exception) {
+                                            Log.e("DeleteUser", "Error de reautenticación: ${e.message}")
+                                            errorMessage = "Contraseña incorrecta. Inténtalo de nuevo."
+                                            password = ""
+                                        }
                                     } else {
-                                        Log.e("DeleteUser", "No se pudo eliminar el usuario.")
+                                        Log.e("DeleteUser", "Usuario no autenticado")
+                                        errorMessage = "No se encontró un usuario autenticado."
                                     }
                                 }
                             },

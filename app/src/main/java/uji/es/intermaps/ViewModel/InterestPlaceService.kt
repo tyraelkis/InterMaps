@@ -1,11 +1,15 @@
 package uji.es.intermaps.ViewModel
 
+import android.util.Log
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.NotValidAliasException
+import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
+import uji.es.intermaps.Model.DataBase.db
 import uji.es.intermaps.Model.RetrofitConfig
 
 class InterestPlaceService(private val repository: Repository) {
@@ -41,9 +45,14 @@ class InterestPlaceService(private val repository: Repository) {
         return repository.createInterestPlace(coordinate, toponym, "")
     }
 
-    fun deleteInterestPlace(coordinate: Coordinate): Boolean{
-        //elimina el lugar de interés de la base de datos
-        return false
+    suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean{
+        if (repository.deleteInterestPlace(coordinate)){
+            return true
+        }
+        else{
+            throw UnableToDeletePlaceException()
+        }
+       return false
     }
 
     fun searchInterestPlace(coordinate: Coordinate) : Boolean{
