@@ -1,9 +1,11 @@
 package acceptanceTests
 
-import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidAliasException
@@ -14,13 +16,36 @@ import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
+import uji.es.intermaps.Model.User
+import uji.es.intermaps.ViewModel.UserService
 
 class InterestPlaceServiceTests {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
     private var interestPlace: InterestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
+
     //Crear valores por defecto para pruebas de create y delete?
+
+    /* //TODO Preguntar porque puede ser que no se mantenga la sesión iniciada
+    companion object {
+        private val userService = UserService(FirebaseRepository())
+        private val userTest: User = User("emaildeprueba@gmail.com", "123456BB")
+
+        @JvmStatic
+        @BeforeAll
+        fun setup(): Unit = runBlocking {
+            userService.login(userTest.email, userTest.pswd)
+        }
+
+        @JvmStatic
+        @AfterAll
+        fun tearDown(): Unit = runBlocking {
+            userService.signOut()
+        }
+    }
+    */
+
     @Test
     fun createInterestPlace_E1Valid_InterestPlaceCreated(): Unit = runBlocking{
         val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceCoordinates(Coordinate(-16.665695, 36.529562)) //Cambiar coordenadas segun los tests

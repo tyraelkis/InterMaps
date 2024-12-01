@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
@@ -12,6 +13,7 @@ import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
+import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.User
 import kotlin.coroutines.resume
@@ -19,8 +21,8 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class FirebaseRepository: Repository {
-    val db = FirebaseFirestore.getInstance()
-    val auth = Firebase.auth
+    val db = DataBase.db
+    val auth = DataBase.auth
 
 
     override suspend fun createUser(email: String, pswd: String): User {
@@ -29,9 +31,8 @@ class FirebaseRepository: Repository {
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val newUser = User(email, pswd)
-                        //db.collection("Users").add(mapOf("email" to email))
-                        db.collection("Users").add(mapOf("email" to email))
-                            .addOnSuccessListener { documentReference ->
+                        db.collection("Users").document(email).set(mapOf("email" to email))
+                            .addOnSuccessListener { _ ->
                                 continuation.resume(newUser) //Funciona como el return de la coroutine
                             }
                             .addOnFailureListener { e ->
@@ -62,7 +63,7 @@ class FirebaseRepository: Repository {
             auth.signInWithEmailAndPassword(email, pswd)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        continuation.resume(true) //Funciona como el return de la coroutine
+                        continuation.resume(true)
                     } else {
                         val exception = task.exception
                         if (exception is FirebaseAuthInvalidCredentialsException) {
@@ -206,7 +207,7 @@ class FirebaseRepository: Repository {
                     callback(false,emptyList())
                 }
             }
-            .addOnFailureListener { e ->
+            .addOnFailureListener { _ ->
                 callback(false, emptyList())
             }
     }
@@ -226,13 +227,14 @@ class FirebaseRepository: Repository {
                     callback(false,emptyList())
                 }
             }
-            .addOnFailureListener{ e ->
+            .addOnFailureListener{ _ ->
                 callback(false, emptyList())
             }
     }
 
     override suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
-        return suspendCoroutine { continuation ->
+        //Codigo original y funcional para crear lugar de interés
+        /*return suspendCoroutine { continuation ->
             db.collection("InterestPlace").add(
                 mapOf(
                     "coordinate" to coordinate,
@@ -247,6 +249,38 @@ class FirebaseRepository: Repository {
                     continuation.resumeWithException(task.exception ?: Exception("Error desconocido al almacenar el lugar de interés."))
                 }
             }
+        }*/
+
+        //Código modificado para poder relacionar un usuario con sus lugares
+        //Siempre ocurre que el usuario no está autenticado pero la primera vez si que había funcionado así que no entiendo
+        val email = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        return suspendCoroutine { continuation ->
+            val newPlace = mapOf(
+                "coordinate" to mapOf(
+                    "latitude" to coordinate.latitude,
+                    "longitude" to coordinate.longitude
+                ),
+                "toponym" to toponym,
+                "alias" to alias,
+                "fav" to false
+            )
+
+            val userDocument = db.collection("InterestPlace").document(email)
+            //Intenta añadir a interestPlaces el nuevo lugar evitando duplicados con el FieldValue.arrayUnion
+            userDocument.update("interestPlaces", FieldValue.arrayUnion(newPlace))
+                .addOnSuccessListener {
+                    continuation.resume(InterestPlace(coordinate, toponym, alias, false))
+                }
+                .addOnFailureListener { _ ->
+                    // Si falla porque el usuario aún no tiene lugares guardados crea el documento con el atributo interestPlaces y le añade el lugar
+                    userDocument.set(mapOf("interestPlaces" to listOf(newPlace)))
+                        .addOnSuccessListener {
+                            continuation.resume(InterestPlace(coordinate, toponym, alias, false))
+                        }
+                        .addOnFailureListener { e ->
+                            continuation.resumeWithException(e)
+                        }
+                }
         }
     }
 
