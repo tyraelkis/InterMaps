@@ -14,6 +14,21 @@ import uji.es.intermaps.Model.RetrofitConfig
 
 class InterestPlaceService(private val repository: Repository) {
 
+    suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
+        if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){
+            throw NotValidCoordinatesException("Las coordenadas no son válidas")
+        }
+        if (alias.length > 30) {
+            throw IllegalArgumentException("El alias tiene un máximo de 30 caracteres.")
+        }
+        val aliasRegex = "^[A-Za-z0-9]+$".toRegex()
+        if (!alias.matches(aliasRegex)) {
+            throw IllegalArgumentException("El alias no tiene un formato válido.")
+        }
+
+        return repository.createInterestPlace(coordinate, toponym, alias)
+    }
+
     suspend fun createInterestPlaceCoordinates(coordinate: Coordinate): InterestPlace {
         if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){
             throw NotValidCoordinatesException("Las coordenadas no son válidas")
