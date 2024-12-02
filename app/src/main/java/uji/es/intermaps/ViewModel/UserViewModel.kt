@@ -9,65 +9,84 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.NotValidUserData
+import uji.es.intermaps.Exceptions.UnregistredUserException
 
 
 class UserViewModel(
     val userService: UserService,
-    val auth: FirebaseAuth, navController: NavController):
+    val auth: FirebaseAuth):
     ViewModel() {
 
-    var popup by mutableStateOf("")
-            protected set
+    private val _showDeletePopUp = mutableStateOf(false)
+    val showDialog: State<Boolean> get() = _showDeletePopUp
+
+    private val _showUpdatePopUp = mutableStateOf(false)
+    val showUpdateDialog: State<Boolean> get() = _showUpdatePopUp
+
+    private val _showPasswordPopUp = mutableStateOf(false)
+    val showPasswordDialog: State<Boolean> get() = _showPasswordPopUp
+
     var password by mutableStateOf("")
     var errorMessage by mutableStateOf("")
-    var navigateToInitial by mutableStateOf(false)
-        private set
+    var newPassword by mutableStateOf("")
+    var confirmPassword by mutableStateOf("")
 
 
-    /*suspend fun deleteUser (email: String, password: String): Boolean{
-        return try {
-            val result = userService.deleteUser(email, password)
-            result
-        } catch (e: Exception) {
-            Log.e("UserViewModel", "Error al eliminar usuario: ${e.message}")
-            false
-        }
-    }*/
-
-    fun showPopUp(popup: String){
-        this.popup = popup
+    fun showDeletePopUp(){
+        _showDeletePopUp.value = true
     }
 
-    fun hidePopUp(){
-        this.popup = ""
+    fun hideDeletePopUp(){
+        _showDeletePopUp.value = false
+    }
+
+    fun showUpdatePopUp(){
+        _showUpdatePopUp.value = true
+    }
+
+    fun hideUpdatePopUp(){
+        _showUpdatePopUp.value = false
+    }
+
+    fun showPasswordPopUp(){
+        _showPasswordPopUp.value = true
+    }
+
+    fun hidePasswordPopUp(){
+        _showPasswordPopUp.value = false
     }
 
     val user = auth.currentUser
 
 
-    suspend fun deleteUser(){
+    fun deleteUser(navController: NavController){
         viewModelScope.launch {
+            if (password.isNullOrBlank()) {
+                errorMessage = "Introduce tu contraseña"
+                return@launch
+            }
             if (user != null) {
                 val email = user.email.toString()
-                val credential = EmailAuthProvider.getCredential(email, password) // Crear credenciales
+                val credential = EmailAuthProvider.getCredential(email, password)
 
                 try {
-                    // Reautenticar al usuario
                     user.reauthenticate(credential).await()
-                    Log.d("DeleteUser", "Reautenticación exitosa")
 
-                    // Eliminar el usuario tras la reautenticación exitosa
-                    val result = userService.deleteUser(email, password) // Llamada suspend
+                    val result = userService.deleteUser(email, password)
                     if (result) {
-                        navigateToInitial = true
+                        hideDeletePopUp()
                         password = ""
+                        navController.navigate("initial")
                     } else {
                         errorMessage = "No se pudo eliminar el usuario. Intenta de nuevo."
                         password = ""
                     }
                 } catch (e: Exception) {
-                    Log.e("DeleteUser", "Error de reautenticación: ${e.message}")
                     errorMessage = "Contraseña incorrecta. Inténtalo de nuevo."
                     password = ""
                 }
@@ -77,5 +96,31 @@ class UserViewModel(
             }
         }
     }
+
+    fun changeUserPassword() {
+        viewModelScope.launch {
+            try {
+                if (newPassword == confirmPassword) {
+                    userService.editUserData(newPassword)
+                    hidePasswordPopUp()
+                    showUpdatePopUp()
+                    newPassword = ""
+                    confirmPassword = ""
+                } else {
+                    errorMessage = "Las contraseñas no coinciden"
+                }
+            } catch (e: NotValidUserData) {
+                errorMessage = e.message.toString()
+            } catch (e: IllegalArgumentException) {
+                errorMessage = e.message.toString()
+            } catch (e: UnregistredUserException) {
+                errorMessage = e.message.toString()
+            } catch (e: Exception) {
+                errorMessage = "La contraseña es muy corta o no cumple con los requisitos."
+            }
+        }
+
+    }
+
 
 }

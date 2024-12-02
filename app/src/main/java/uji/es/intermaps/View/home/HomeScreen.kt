@@ -108,7 +108,6 @@ fun HomeScreen (navController: NavController, viewModel: UserViewModel){
             }
             Spacer(modifier = Modifier.height(25.dp))
 
-
             Button(
                 onClick = {
                     navController.navigate("interestPlaceList")
