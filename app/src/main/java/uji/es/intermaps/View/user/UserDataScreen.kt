@@ -65,10 +65,11 @@ import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.R
+import uji.es.intermaps.ViewModel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserDataScreen(auth: FirebaseAuth, navController: NavController){
+fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: UserViewModel){
 
     var expandedVehicles by remember { mutableStateOf(false) }
     var expandedRoutes by remember { mutableStateOf(false) }
@@ -79,6 +80,8 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController){
     var selectedOptionVehicles by remember { mutableStateOf(optionsVehicles[0]) }
     var selectedOptionRoutes by remember { mutableStateOf(optionsRoutes[0]) }
     var selectedOptionTransport by remember { mutableStateOf(optionsRoutes[0]) }
+
+    var userDeletePopUp by remember { mutableStateOf(false) }
 
     var showPopupPassword by remember { mutableStateOf(false) }
     var showPopupModifications by remember { mutableStateOf(false) }
@@ -93,7 +96,6 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController){
     val repository: Repository = FirebaseRepository()
     val userService = UserService(repository)
     var currentEmail by remember { mutableStateOf(user?.email.toString()) }
-
 
 
     Column(
