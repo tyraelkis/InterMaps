@@ -32,7 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.firestore.FirebaseFirestore
@@ -55,6 +57,7 @@ fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: Fireba
     val interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
     var interestPlace: InterestPlace = InterestPlace()
     var allPlaces by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
+    val emailPrefix = user?.email?.substringBefore("@") ?: "Usuario"
 
     LaunchedEffect(user?.email) {
         if (user?.email != null) {
@@ -87,12 +90,18 @@ fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: Fireba
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Lista de lugares de ${user?.email}",
+                text = buildAnnotatedString {
+                    append("Lista de lugares de\n")
+                    append("\n")
+                    append(emailPrefix)
+                },
                 color = Color.Black,
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center // Centrar el texto dentro del Row
             )
         }
+
         Spacer(modifier = Modifier.height(25.dp))
 
         Row(
