@@ -179,7 +179,7 @@ fun LoginScreen(navigateToSignUp: () -> Unit = {}, navigateToHome:() -> Unit) {
             textAlign = TextAlign.Left
         )
 
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(80.dp))
 
         Button(
             onClick = {

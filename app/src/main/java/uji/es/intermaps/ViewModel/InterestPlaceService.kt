@@ -88,7 +88,7 @@ class InterestPlaceService(private val repository: Repository) {
         return false
     }
 
-    fun viewInterestPlaceList(): List<InterestPlace>{
+    fun viewInterestPlaceList(email: String): List<InterestPlace>{
         return emptyList()
     }
 
