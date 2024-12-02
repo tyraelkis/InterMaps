@@ -36,6 +36,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
@@ -46,21 +50,26 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 @Composable
 fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -> Unit,navigateToInterestPlaceCreation: () -> Unit, viewModel: InterestPlaceViewModel) {
     var db = FirebaseFirestore.getInstance()
-    var user = auth.currentUser
-    var repository: Repository = FirebaseRepository()
-    var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
+    val user = auth.currentUser
+    val repository: Repository = FirebaseRepository()
+    val interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
     var interestPlace: InterestPlace = InterestPlace()
-    var favList by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
-    var noFavList by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
+    var allPlaces by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
 
-    LaunchedEffect(Unit) {
-        interestPlaceService.getFavList { places ->
-            favList = places
-        }
-        interestPlaceService.getNoFavList { NoFavplaces ->
-            noFavList = NoFavplaces
+    LaunchedEffect(user?.email) {
+        if (user?.email != null) {
+            try {
+                val places = interestPlaceService.viewInterestPlaceList(user.email)
+                allPlaces = places
+            } catch (e: Exception) {
+                allPlaces = emptyList()
+            }
         }
     }
+
+    val favList = allPlaces.filter { it.fav }
+    val noFavList = allPlaces.filter { !it.fav }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

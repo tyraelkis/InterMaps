@@ -8,6 +8,12 @@
       <SelectionState runConfigName="UserServiceTests">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="viewInterestPlaceList_E1Valido_InterestPlaceListViewed()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="viewInterestPlaceList_E2Invalido_emptyInterestPlaceListViewed()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>

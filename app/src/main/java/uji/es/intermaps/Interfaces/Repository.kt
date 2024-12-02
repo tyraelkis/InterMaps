@@ -16,8 +16,8 @@ interface Repository {
     suspend fun searchInterestPlace(coordinate: Coordinate) : InterestPlace
     suspend fun searchInterestPlaceByToponym(toponym: String) : InterestPlace
     suspend fun viewInterestPlaceData(coordinate: Coordinate): Boolean
-    fun viewInterestPlaceList(callback: (List<InterestPlace>) -> Unit)
+    suspend fun viewInterestPlaceList(email:String?): List<InterestPlace>
     fun deleteInterestPlace(coordinate: Coordinate): Boolean
-    fun getFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)
-    fun getNoFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)
+    /*fun getFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)
+    fun getNoFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)*/
 }

@@ -88,27 +88,7 @@ class InterestPlaceService(private val repository: Repository) {
         return false
     }
 
-    fun viewInterestPlaceList(email: String): List<InterestPlace>{
-        return emptyList()
-    }
-
-    fun getFavList(callback: (List<InterestPlace>) -> Unit){
-        repository.getFavList{ success, favList ->
-            if (success){
-                callback(favList)
-            }else{
-                callback(emptyList())
-            }
-        }
-    }
-
-    fun getNoFavList(callback: (List<InterestPlace>) -> Unit){
-        repository.getNoFavList{ success, NoFavList ->
-            if (success){
-                callback(NoFavList)
-            }else{
-                callback(emptyList())
-            }
-        }
+    suspend fun viewInterestPlaceList(email: String? = null): List<InterestPlace> {
+        return repository.viewInterestPlaceList(email)
     }
 }

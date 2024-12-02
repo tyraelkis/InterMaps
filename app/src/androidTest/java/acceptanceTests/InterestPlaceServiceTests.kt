@@ -25,7 +25,7 @@ class InterestPlaceServiceTests {
     private var repository: Repository = FirebaseRepository()
     private var interestPlace: InterestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
-    private var email: String = "emaildeprueba@gmail.com" //Usuario con lista de lugares
+    private var email: String = "emaildeprueba@gmail.com" //Usuario con lista de lugares. Hay que añadirle un lugar
     private var emailEmpty: String = "emaildepruebaempty@gmail.com" //Usuario sin lista de lugares
 
     //Crear valores por defecto para pruebas de create y delete?
@@ -116,14 +116,14 @@ class InterestPlaceServiceTests {
         }
     }
 
-    @Test //A la hora de hacer el codigo mirar si miramos una lista generica o logeamos un usuario generico como el de usuario para ver su lista etc.
-    fun viewInterestPlaceList_E1Valido_InterestPlaceListViewed() {
+    @Test
+    fun viewInterestPlaceList_E1Valido_InterestPlaceListViewed(): Unit = runBlocking{
         val res = interestPlaceService.viewInterestPlaceList(email)
         assertTrue(res.isNotEmpty())
     }
 
     @Test
-    fun viewInterestPlaceList_E2Invalido_emptyInterestPlaceListViewed(){
+    fun viewInterestPlaceList_E2Invalido_emptyInterestPlaceListViewed(): Unit = runBlocking{
         val res = interestPlaceService.viewInterestPlaceList(emailEmpty)
         assertTrue(res.isEmpty())
     }
