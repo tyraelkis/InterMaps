@@ -61,8 +61,32 @@ class InterestPlaceService(private val repository: Repository) {
         return false
     }
 
-    fun searchInterestPlace(coordinate: Coordinate) : Boolean{
-        return false
+    suspend fun searchInterestPlace(coordinate: Coordinate) : InterestPlace{
+        if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){
+            throw NotValidCoordinatesException("Las coordenadas no son válidas")
+        }
+        val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
+        var toponym = ""
+
+        //Llamada a la API
+        val response = withContext(Dispatchers.IO) {
+            openRouteService.getToponym(
+                "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23",
+                coordinate.longitude,
+                coordinate.latitude
+            ).execute()
+        }
+        if (response.isSuccessful) {
+            response.body()?.let { ORSResponse ->
+                val respuesta = ORSResponse.features
+                if (respuesta.isNotEmpty()) {
+                    toponym = respuesta[0].properties.label
+                }
+            }
+        } else {
+            throw Exception("Error en la llamada a la API")
+        }
+        return InterestPlace(coordinate, toponym, "", false)
     }
 
     fun viewInterestPlaceData(coordinate: Coordinate): Boolean{

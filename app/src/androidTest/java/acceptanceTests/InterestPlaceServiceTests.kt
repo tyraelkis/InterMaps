@@ -66,8 +66,9 @@ class InterestPlaceServiceTests {
 
     @Test
     fun searchInterestPlace_E1Valid_InterestPlaceFound(): Unit = runBlocking {
-        val res: Boolean = interestPlaceService.searchInterestPlace(interestPlace.coordinate)
-        assertEquals(true, res)
+        val res: InterestPlace = interestPlaceService.searchInterestPlace(interestPlace.coordinate)
+        val resultado : Boolean = res.toponym.contains(interestPlace.toponym)
+        assertEquals(true, resultado)
     }
 
     @Test
