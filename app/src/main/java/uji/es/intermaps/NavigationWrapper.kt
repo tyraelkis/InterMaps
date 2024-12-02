@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 import uji.es.intermaps.View.home.HomeScreen
 import uji.es.intermaps.View.home.InitialScreen
 import uji.es.intermaps.View.interestPlace.InterestPlaceCreation
+import uji.es.intermaps.View.interestPlace.InterestPlaceCreationByToponym
 import uji.es.intermaps.View.interestPlace.InterestPlaceList
 import uji.es.intermaps.View.interestPlace.InterestPlaceSetAlias
 import uji.es.intermaps.View.login.LoginScreen
@@ -34,7 +35,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             // Mostrar la barra de navegación solo en ciertas pantallas
             if (currentRoute !in listOf("logIn", "signUp", "initial")) {
                 NavBar(
-                    currentRoute = currentRoute ?: "interestPlaceCreation",
+                    currentRoute = currentRoute ?: "initial",
                     onNavigate = { route ->
                         if (route != currentRoute) { // Evitar recargar la misma ruta
                             navHostController.navigate(route) {
@@ -59,7 +60,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
     ) { padding ->
         NavHost(
             navController = navHostController,
-            startDestination = "interestPlaceCreation",
+            startDestination = "interestPlaceCreationByToponym",
             modifier = Modifier.padding(padding)
         ) {
             composable("initial") {
@@ -100,6 +101,11 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
 
             ) {
                 InterestPlaceCreation(viewModel)
+            }
+            composable(
+                route = "interestPlaceCreationByToponym"
+            ) {
+                InterestPlaceCreationByToponym(viewModel)
             }
             composable(
                 route = "interestPlaceSetAlias/{toponym}",

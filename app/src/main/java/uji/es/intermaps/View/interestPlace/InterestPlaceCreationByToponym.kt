@@ -1,6 +1,6 @@
 package uji.es.intermaps.View.interestPlace
 
-import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,7 +15,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,10 +28,8 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -37,8 +38,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,47 +53,44 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
+import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
-import uji.es.intermaps.Interfaces.Repository
-import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
+import androidx.compose.ui.input.key.Key
+import com.mapbox.geojson.Point.fromLngLat
+
+import uji.es.intermaps.Model.InterestPlace
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
-    val place = viewModel.interestPlace
+fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
     var showPopupCreateSucces by remember { mutableStateOf(false) }
     var showPopupCreateError by remember { mutableStateOf(false) }
-    var alias by remember { mutableStateOf("") }
-    var repository: Repository = FirebaseRepository()
-    var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
+    var toponym by remember { mutableStateOf("") }
+    var sePuedeAñadir by remember { mutableStateOf(false) }
+    var place by remember { mutableStateOf(InterestPlace) }
+    var interestPlaceService = InterestPlaceService(FirebaseRepository())
+    var mapViewportState = rememberMapViewportState {
+        setCameraOptions {
+            zoom(11.0)
+            center(fromLngLat(-0.0675, 39.9947)) // Coordenadas iniciales
+            pitch(0.0)
+            bearing(0.0)
+        }
+    }
 
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .background(
-                White
-            ),
+        .fillMaxSize()
+        .background(
+        White
+        ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(100.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "${place.coordinate.latitude}, ${place.coordinate.longitude}",
-                color = Black,
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(50.dp))
 
         Column(
             modifier = Modifier
@@ -104,21 +102,10 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f), // Ocupa la mitad del espacio
-                mapViewportState = rememberMapViewportState {
-                    setCameraOptions {
-                        zoom(11.0)
-                        center(
-                            Point.fromLngLat(
-                                -0.0675,
-                                39.9947
-                            )
-                        ) // Coordenadas para centrar el mapa en la UJI, Castellón de la Plana
-                        pitch(0.0)
-                        bearing(0.0)
-                    }
-                }
+                mapViewportState = mapViewportState
             )
         }
+
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -139,61 +126,19 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
         }
         Spacer(modifier = Modifier.height(10.dp))
 
-        Box(
-            modifier = Modifier
-                .height(52.dp)
-                .width(350.dp)
-                .background(Color(0xFFFFFFF), shape = RoundedCornerShape(10.dp))
-                .border(
-                    width = 1.dp,
-                    color = Black,
-                    shape = RoundedCornerShape(10.dp) )
-                .clip(RoundedCornerShape(10.dp))
-                .padding(5.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            // Texto en el fondo
-            Text(
-                text = "${place.toponym}",
-                color = Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.CenterStart),
-            )
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Row (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            horizontalArrangement = Arrangement.Absolute.Left,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Alias",
-                color = Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-
         Column(
             modifier = Modifier
                 .height(52.dp)
                 .width(350.dp)
-        ) {
-            // Texto en el fondo
+        ){
             TextField(
-                value = alias,
-                onValueChange = { alias = it },
+                value = toponym,
+                onValueChange = { toponym = it },
                 modifier = Modifier
                     .height(52.dp)
                     .fillMaxWidth()
                     .border(1.dp, Black, RoundedCornerShape(10.dp)),
-                placeholder = { Text("Añade un nuevo alias a este lugar", style = TextStyle(fontSize = 20.sp)) },
+                placeholder = { Text("Escribe un toponimo", style = TextStyle(fontSize = 20.sp)) },
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = Color(0xFFFFFFF),
                     focusedIndicatorColor = Color.Transparent,
@@ -201,29 +146,13 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
                 ),
                 shape = RoundedCornerShape(8.dp)
             )
+
         }
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = {
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        interestPlaceService.createInterestPlaceCoordinates(place.coordinate)
-                        withContext(Dispatchers.Main) {
-                            showPopupCreateSucces = true
-                        }
-                    } catch (e: NotValidCoordinatesException) {
-                        withContext(Dispatchers.Main) {
-                            showPopupCreateError = true
-                            println("Error: ${e.message}")
-                        }
-                    } catch (e: Exception) {
-                        withContext(Dispatchers.Main) {
-                            showPopupCreateError = true
-                            println("Error general: ${e.message}")
-                        }
-                    }
-                }
+                viewModel.getLocationsByToponim(toponym)
             },
             modifier = Modifier
                 .height(36.dp)
@@ -232,9 +161,38 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
             colors = ButtonDefaults.buttonColors(containerColor = Black),
             shape = RoundedCornerShape(10.dp)
         ) {
-            Text(text = "Añadir", color = White, fontSize = 14.sp)
+            Text(text = "Navigate", color = White, fontSize = 14.sp)
         }
-    }
+
+        Column (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            horizontalAlignment = Alignment.Start
+        ){
+
+            LazyColumn {
+                items(viewModel.locations.value.size) { index ->
+                    Text(text = viewModel.locations.value[index].properties.label,
+                    modifier = Modifier
+                        .clickable {
+                            val coordinates = viewModel.locations.value[index].geometry.coordinates
+                            Log.i("Coordinates", "Coordinates: $coordinates")
+                            mapViewportState.setCameraOptions {
+                                zoom(11.0)
+                                center(
+                                    fromLngLat(
+                                        coordinates[0],
+                                        coordinates[1]
+                                    )
+                                ) // Coordenadas para centrar el mapa en la UJI, Castellón de la Plana
+                            }
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
 
     if (showPopupCreateSucces) {
         Box(
@@ -245,7 +203,6 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
                 .clickable { showPopupCreateSucces = false},
             contentAlignment = Alignment.Center
         ) {
-            // Popup con el contenido de edición de correo
             Box(
                 modifier = Modifier
                     .height(250.dp)
@@ -306,7 +263,6 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
                 .clickable { showPopupCreateSucces = false},
             contentAlignment = Alignment.Center
         ) {
-            // Popup con el contenido de edición de correo
             Box(
                 modifier = Modifier
                     .height(250.dp)
@@ -358,4 +314,5 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
         }
     }
 
+    }
 }

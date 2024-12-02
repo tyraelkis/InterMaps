@@ -19,5 +19,5 @@ interface ORSAPI {
     suspend fun getCoordinatesFromToponym(
         @Query("api_key") apiKey: String,
         @Query("text") toponym: String
-    ): Call<ToponymToCoordORSAPIResponse>
+    ):ToponymToCoordORSAPIResponse
 }

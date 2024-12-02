@@ -1,5 +1,6 @@
 package uji.es.intermaps.APIParsers
 
+import android.graphics.Point
 import uji.es.intermaps.Model.Coordinate
 
 data class ToponymToCoordORSAPIResponse(
@@ -8,5 +9,10 @@ data class ToponymToCoordORSAPIResponse(
 
 data class PossibleCoord(
     val properties: PlaceData,
-    val coordinates: Coordinate
+    val geometry: Geometry
+
 )
+data class Geometry(
+    val coordinates: List<Double>,
+)
+

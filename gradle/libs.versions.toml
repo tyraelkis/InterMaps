@@ -66,7 +66,7 @@ junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.r
 
 #maps-compose = { module = "com.mapbox.maps:maps-compose", version.ref = "mapsCompose" }
 maps-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapsCompose" }
-
+okhttp-logging-interceptor = "com.squareup.okhttp3:logging-interceptor:4.10.0"
 
 
 [plugins]

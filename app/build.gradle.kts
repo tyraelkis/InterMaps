@@ -92,6 +92,9 @@ dependencies {
     implementation(libs.android)
     implementation(libs.maps.compose)
 
+    implementation(libs.okhttp.logging.interceptor)
+
+
 }
 
 
