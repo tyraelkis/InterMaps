@@ -122,47 +122,12 @@ class InterestPlaceService(private val repository: Repository) {
             throw IllegalArgumentException("El topónimo no puede estar vacío")
         }
 
-        val coordinate = getCoordinatesFromToponym(toponym)
+        val coordinate = searchInterestPlaceByToponym(toponym).coordinate
         if (coordinate == Coordinate(0.0, 0.0)) {
             throw Exception("No se pudieron obtener las coordenadas para el topónimo proporcionado")
         }
-
         // Crear el lugar de interés
         return repository.createInterestPlace(coordinate, toponym, "")
     }
 
-    suspend fun getCoordinatesFromToponym(toponym: String): Coordinate {
-        val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
-        var coordinate = Coordinate(0.0, 0.0)
-
-        try {
-            // Llamada a la API para obtener las coordenadas del topónimo
-            val response = openRouteService.getCoordinatesFromToponym(
-                "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23",
-                toponym
-            )
-
-
-            val respuesta = response.features
-            if (respuesta.isNotEmpty()) {
-                val feature = respuesta[0]
-                val lon = feature.geometry.coordinates.get(0)
-                val lat = feature.geometry.coordinates.get(1)
-
-                // Validamos las coordenadas
-                if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
-                    throw NotValidCoordinatesException("Las coordenadas no son válidas")
-                }
-
-                coordinate = Coordinate(latitude = lat, longitude = lon)
-                return coordinate
-            }
-
-        } catch (e: Exception) {
-            // Manejo de excepciones
-            Log.e("Coordenadas", "Error: ${e.message}")
-        }
-
-        throw Exception("Error en la llamada a la API para obtener las coordenadas")
-    }
 }

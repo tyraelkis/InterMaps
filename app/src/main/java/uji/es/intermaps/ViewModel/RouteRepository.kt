@@ -1,5 +1,6 @@
 package uji.es.intermaps.ViewModel
 
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
@@ -40,6 +41,35 @@ class RouteRepository : ORSRepository {
     }
 
     override suspend fun searchInterestPlaceByToponym(toponym: String): InterestPlace {
-        TODO("Not yet implemented")
+        val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
+        var coordinate: Coordinate
+
+        try {
+            // Llamada a la API para obtener las coordenadas del topónimo
+            val response = openRouteService.getCoordinatesFromToponym(
+                apiKey,
+                toponym
+            )
+            val respuesta = response.features
+            if (respuesta.isNotEmpty()) {
+                val feature = respuesta[0]
+                val lon = feature.geometry.coordinates.get(0)
+                val lat = feature.geometry.coordinates.get(1)
+
+                // Validamos las coordenadas
+                if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+                    throw NotValidCoordinatesException("Las coordenadas no son válidas")
+                }
+
+                coordinate = Coordinate(lat,lon)
+                return InterestPlace(coordinate, toponym, "", false)
+            }
+
+        } catch (e: Exception) {
+            // Manejo de excepciones
+            Log.e("Coordenadas", "Error: ${e.message}")
+        }
+
+        throw Exception("Error en la llamada a la API para obtener las coordenadas")
     }
 }
