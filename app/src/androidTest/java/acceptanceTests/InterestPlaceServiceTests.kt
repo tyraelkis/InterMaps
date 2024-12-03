@@ -11,6 +11,7 @@ import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
+import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
 import uji.es.intermaps.Interfaces.ORSRepository
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.ViewModel.FirebaseRepository
@@ -132,5 +133,19 @@ class InterestPlaceServiceTests {
     fun viewInterestPlaceList_E2Invalido_emptyInterestPlaceListViewed(): Unit = runBlocking{
         val res = interestPlaceService.viewInterestPlaceList(emailEmpty)
         assertTrue(res.isEmpty())
+    }
+    @Test
+    fun deleteInterestPlace_E1Valid_InterestPlaceDeleted(): Unit = runBlocking{
+        var puntoDelete = Coordinate(39.9333300,-0.1000000 )
+        interestPlaceService.createInterestPlaceCoordinates(puntoDelete)
+        assertEquals(true, interestPlaceService.deleteInterestPlace(puntoDelete))
+    }
+
+    @Test
+    fun deleteInterestPlace_E2OInvalid_InterestPlaceDeleted(): Unit = runBlocking{
+        var puntoDelete = Coordinate(38.0,-0.0 )
+        assertThrows<UnableToDeletePlaceException> {
+            interestPlaceService.deleteInterestPlace(puntoDelete)
+        }
     }
 }
