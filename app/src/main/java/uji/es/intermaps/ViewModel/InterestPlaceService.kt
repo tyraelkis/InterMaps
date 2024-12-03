@@ -64,6 +64,19 @@ class InterestPlaceService(private val repository: Repository) {
         return repository.createInterestPlace(coordinate, toponym, "")
     }
 
+    suspend fun createInterestPlaceFromToponym(toponym: String): InterestPlace {
+        if (toponym.isBlank()) {
+            throw IllegalArgumentException("El topónimo no puede estar vacío")
+        }
+
+        val coordinate = searchInterestPlaceByToponym(toponym).coordinate
+        if (coordinate == Coordinate(0.0, 0.0)) {
+            throw Exception("No se pudieron obtener las coordenadas para el topónimo proporcionado")
+        }
+        // Crear el lugar de interés
+        return repository.createInterestPlace(coordinate, toponym, "")
+    }
+
     suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean{
         if (repository.deleteInterestPlace(coordinate)){
             return true
@@ -117,17 +130,6 @@ class InterestPlaceService(private val repository: Repository) {
         }
     }
 
-    suspend fun createInterestPlaceFromToponym(toponym: String): InterestPlace {
-        if (toponym.isBlank()) {
-            throw IllegalArgumentException("El topónimo no puede estar vacío")
-        }
 
-        val coordinate = searchInterestPlaceByToponym(toponym).coordinate
-        if (coordinate == Coordinate(0.0, 0.0)) {
-            throw Exception("No se pudieron obtener las coordenadas para el topónimo proporcionado")
-        }
-        // Crear el lugar de interés
-        return repository.createInterestPlace(coordinate, toponym, "")
-    }
 
 }
