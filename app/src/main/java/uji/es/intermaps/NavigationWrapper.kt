@@ -85,6 +85,10 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
                     viewModel1
                 )
             }
+            composable("mainMenu") {
+                MainMenu (
+                )
+            }
             composable("userDataScreen") {
                 UserDataScreen(
                     auth,
@@ -123,7 +127,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         }
     }
 }
-    /*NavHost(navController = navHostController, startDestination = "mapaScreen") {
+    /*NavHost(navController = navHostController, startDestination = "initial") {
         composable("initial"){
             InitialScreen(
                 navigateToLogin = {navHostController.navigate("logIn")},
@@ -150,6 +154,10 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
                 navigateToUserDataScreen = {navHostController.navigate("userDataScreen")},
                 navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")}
                 )
+        }
+        composable("mainMenu") {
+            MainMenu (
+            )
         }
         composable("userDataScreen"){
             UserDataScreen(
