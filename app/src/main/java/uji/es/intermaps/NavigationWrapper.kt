@@ -16,6 +16,7 @@ import uji.es.intermaps.View.home.HomeScreen
 import uji.es.intermaps.View.home.InitialScreen
 import uji.es.intermaps.View.home.MainMenu
 import uji.es.intermaps.View.interestPlace.InterestPlaceCreation
+import uji.es.intermaps.View.interestPlace.InterestPlaceCreationByToponym
 import uji.es.intermaps.View.interestPlace.InterestPlaceList
 import uji.es.intermaps.View.interestPlace.InterestPlaceSetAlias
 import uji.es.intermaps.View.login.LoginScreen
@@ -147,13 +148,6 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
                 navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")}
                 )
         }
-
-        composable("mainMenu"){
-            MainMenu(
-                //TODO Poner todos los enlaces
-            )
-        }
-
         composable("userDataScreen"){
             UserDataScreen(
                 auth

@@ -45,99 +45,88 @@ fun HomeScreen (navController: NavController, viewModel: UserViewModel){
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
     val userService = UserService(repository)
-    val loading = viewModel.loading
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        // Mapa en la mitad superior
+        MapboxMap(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f), // Ocupa la mitad del espacio
+            mapViewportState = rememberMapViewportState {
+                setCameraOptions {
+                    zoom(11.0)
+                    center(
+                        Point.fromLngLat(
+                            -0.0675,
+                            39.9947
+                        )
+                    ) // Coordenadas para centrar el mapa en la UJI, Castellón de la Plana
+                    pitch(0.0)
+                    bearing(0.0)
+                }
+            }
+        )
 
-
-    if (loading) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) { CircularProgressIndicator() }
-    } else {
+        // Texto en la mitad inferior
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
+                .fillMaxWidth()
+                .weight(0.8f), // Ocupa la otra mitad del espacio
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            // Mapa en la mitad superior
-            MapboxMap(
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1f), // Ocupa la mitad del espacio
-                mapViewportState = rememberMapViewportState {
-                    setCameraOptions {
-                        zoom(11.0)
-                        center(
-                            Point.fromLngLat(
-                                -0.0675,
-                                39.9947
-                            )
-                        ) // Coordenadas para centrar el mapa en la UJI, Castellón de la Plana
-                        pitch(0.0)
-                        bearing(0.0)
-                    }
-                }
-            )
+            val coroutineScope = rememberCoroutineScope()
 
-            // Texto en la mitad inferior
-            Column(
+            Button(
+                onClick = {
+                    // Comentar esto para que solo puedas entrar si esta loggeado
+                    navController.navigate("userDataScreen")
+                    coroutineScope.launch {
+                        val emailExists = userService.viewUserData(user?.email.toString())
+                        if (emailExists) {
+                            navController.navigate("userDataScreen")
+                        } else {
+                            Log.d("Firestore", "El correo no está registrado.")
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.8f), // Ocupa la otra mitad del espacio
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .height(42.dp)
+                    .padding(horizontal = 32.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Black),
+                shape = RoundedCornerShape(10.dp)
             ) {
-                val coroutineScope = rememberCoroutineScope()
+                Text(
+                    text = "Pantalla datos usuario",
+                    color = White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(modifier = Modifier.height(25.dp))
 
-                Button(
-                    onClick = {
-                        // Comentar esto para que solo puedas entrar si esta loggeado
-                        navController.navigate("userDataScreen")
-                        coroutineScope.launch {
-                            val emailExists = userService.viewUserData(user?.email.toString())
-                            if (emailExists) {
-                                navController.navigate("userDataScreen")
-                            } else {
-                                Log.d("Firestore", "El correo no está registrado.")
-                            }
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(42.dp)
-                        .padding(horizontal = 32.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Black),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Text(
-                        text = "Pantalla datos usuario",
-                        color = White,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(modifier = Modifier.height(25.dp))
-
-
-                Button(
-                    onClick = {
-                        navController.navigate("interestPlaceList")
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(42.dp)
-                        .padding(horizontal = 32.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Black),
-                    shape = RoundedCornerShape(10.dp)
-                ) {
-                    Text(
-                        text = "Pantalla lugares de interés",
-                        color = White,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+            Button(
+                onClick = {
+                    navController.navigate("interestPlaceList")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(42.dp)
+                    .padding(horizontal = 32.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Black),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text(
+                    text = "Pantalla lugares de interés",
+                    color = White,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
+
 
 }

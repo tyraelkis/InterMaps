@@ -121,6 +121,19 @@
             </AndroidTestResultsTableState>
           </value>
         </entry>
+        <entry key="-966357461">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Medium_Phone_API_35" value="120" />
+                  <entry key="Tests" value="360" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
         <entry key="-576540202">
           <value>
             <AndroidTestResultsTableState>
@@ -234,6 +247,7 @@
                   <entry key="HONOR REA-NX9" value="120" />
                   <entry key="Medium_Phone_API_35" value="204" />
                   <entry key="Tests" value="444" />
+                  <entry key="Xiaomi M2103K19G" value="120" />
                 </map>
               </option>
             </AndroidTestResultsTableState>
