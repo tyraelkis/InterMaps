@@ -274,10 +274,6 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun searchInterestPlace(coordinate: Coordinate) : InterestPlace {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun viewInterestPlaceData(coordinate: Coordinate): Boolean {
         TODO("Not yet implemented")
     }
@@ -317,6 +313,7 @@ class FirebaseRepository: Repository {
             emptyList()  // En caso de error, retornamos una lista vacía
         }
     }
+
 
     override suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean {
         return try {

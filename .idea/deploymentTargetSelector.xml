@@ -5,7 +5,15 @@
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="viewInterestPlaceList_E2Invalido_emptyInterestPlaceListViewed()">
+
+      <SelectionState runConfigName="searchInterestPlaceByToponym_E1Valido_InterestPlaceFound()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="searchInterestPlaceByToponym_E2Invalido_errorOnSearchingInterestPlaceByToponym()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="searchInterestPlaceByCoordinate_E1Valid_InterestPlaceFound()">
+
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

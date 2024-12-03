@@ -109,15 +109,16 @@ class InterestPlaceServiceTests {
     }
 
     @Test
-    fun searchInterestPlaceByToponym_E1Valido_InterestPlaceFound(): Unit = runBlocking { //Cambiar para que devuelva un interestplace
-        val res: Boolean = interestPlaceService.searchInterestPlaceByToponym(interestPlace.toponym)
-        assertEquals(true, res)
+    fun searchInterestPlaceByToponym_E1Valido_InterestPlaceFound(): Unit = runBlocking {
+        val res: InterestPlace = interestPlaceService.searchInterestPlaceByToponym(interestPlace.toponym)
+        val resultado : Boolean = res.toponym.contains(interestPlace.toponym)
+        assertEquals(true, resultado)
     }
 
     @Test
     fun searchInterestPlaceByToponym_E2Invalido_errorOnSearchingInterestPlaceByToponym(): Unit = runBlocking {
         assertThrows<NotSuchPlaceException>{
-            interestPlaceService.searchInterestPlaceByToponym("Roshar")
+            interestPlaceService.searchInterestPlaceByToponym("unsitioquenoexisteporfa")
         }
     }
 
