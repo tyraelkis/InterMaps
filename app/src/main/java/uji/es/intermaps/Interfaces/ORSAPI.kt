@@ -4,6 +4,7 @@ import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query
 import uji.es.intermaps.APIParsers.CoordToToponymORSAPIResponse
+import uji.es.intermaps.APIParsers.ToponymToCoordORSAPIResponse
 
 interface ORSAPI {
     @GET("geocode/reverse")
@@ -13,4 +14,10 @@ interface ORSAPI {
         @Query("point.lat", encoded = true) latitude: Double
     ): Call<CoordToToponymORSAPIResponse>
 
+
+    @GET("geocode/search")
+    suspend fun getCoordinatesFromToponym(
+        @Query("api_key") apiKey: String,
+        @Query("text") toponym: String
+    ):ToponymToCoordORSAPIResponse
 }

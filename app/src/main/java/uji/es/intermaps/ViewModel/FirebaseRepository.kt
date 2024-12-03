@@ -243,6 +243,37 @@ class FirebaseRepository: Repository {
         }
     }
 
+
+    override suspend fun getInterestPlaceByToponym(
+        toponym: String,
+        callback: ((Boolean), (List<InterestPlace>)) -> Unit
+    ) {
+        return suspendCoroutine { continuation ->
+            Log.d("toponym", toponym)
+            db.collection("InterestPlace")
+                .whereEqualTo("toponym", toponym)
+                .get()
+                .addOnSuccessListener { documents ->
+                    Log.i("getInteresetPlaceByToponym", "${documents.documents}")
+                    if (!documents.isEmpty) {
+                        val favList = mutableListOf<InterestPlace>()
+                        for (document in documents) {
+
+                            val interestPlace = document.toObject(InterestPlace::class.java)
+                            favList.add(interestPlace)
+                        }
+                        callback(true, favList)
+                    } else {
+                        callback(false, emptyList())
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("getInteresetPlaceByToponym", e.message ?: "")
+                    callback(false, emptyList())
+                }
+        }
+    }
+
     override suspend fun viewInterestPlaceData(coordinate: Coordinate): Boolean {
         TODO("Not yet implemented")
     }
@@ -282,8 +313,34 @@ class FirebaseRepository: Repository {
             emptyList()  // En caso de error, retornamos una lista vacía
         }
     }
+    
 
-    override fun deleteInterestPlace(coordinate: Coordinate): Boolean {
+    override suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean {
+        return try {
+            Log.d("deleteInterestPlace", "Starting deletion for coordinate: $coordinate")
+
+            val querySnapshot = DataBase.db.collection("InterestPlace")
+                .whereEqualTo("coordinate", coordinate)
+                .get()
+                .await()
+
+            if (querySnapshot.isEmpty) {
+                Log.d("deleteInterestPlace", "No documents found for coordinate: $coordinate")
+                return false
+            }
+
+            querySnapshot.documents.forEach { document ->
+                DataBase.db.collection("InterestPlace")
+                    .document(document.id)
+                    .delete()
+                    .await() // Convierte a una operación suspendida
+                Log.d("deleteInterestPlace", "Document with ID ${document.id} deleted successfully.")
+            }
+            true
+        } catch (e: Exception) {
+            Log.e("deleteInterestPlace", "Error while deleting documents: ${e.message}", e)
+            false
+        }
         return false
     }
 }

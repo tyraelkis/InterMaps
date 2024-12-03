@@ -11,6 +11,8 @@ import org.junit.jupiter.api.assertThrows
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
+import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
+import uji.es.intermaps.Interfaces.ORSRepository
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
@@ -18,11 +20,13 @@ import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.User
+import uji.es.intermaps.ViewModel.RouteRepository
 import uji.es.intermaps.ViewModel.UserService
 
 class InterestPlaceServiceTests {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
+    private var routeRepository: ORSRepository = RouteRepository()
     private var interestPlace: InterestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
     private var email: String = "emaildeprueba@gmail.com" //Usuario con lista de lugares. Hay que añadirle un lugar
@@ -105,15 +109,16 @@ class InterestPlaceServiceTests {
     }
 
     @Test
-    fun searchInterestPlaceByToponym_E1Valido_InterestPlaceFound(): Unit = runBlocking { //Cambiar para que devuelva un interestplace
-        val res: Boolean = interestPlaceService.searchInterestPlaceByToponym(interestPlace.toponym)
-        assertEquals(true, res)
+    fun searchInterestPlaceByToponym_E1Valido_InterestPlaceFound(): Unit = runBlocking {
+        val res: InterestPlace = interestPlaceService.searchInterestPlaceByToponym(interestPlace.toponym)
+        val resultado : Boolean = res.toponym.contains(interestPlace.toponym)
+        assertEquals(true, resultado)
     }
 
     @Test
     fun searchInterestPlaceByToponym_E2Invalido_errorOnSearchingInterestPlaceByToponym(): Unit = runBlocking {
         assertThrows<NotSuchPlaceException>{
-            interestPlaceService.searchInterestPlaceByToponym("Roshar")
+            interestPlaceService.searchInterestPlaceByToponym("unsitioquenoexisteporfa")
         }
     }
 
@@ -127,5 +132,19 @@ class InterestPlaceServiceTests {
     fun viewInterestPlaceList_E2Invalido_emptyInterestPlaceListViewed(): Unit = runBlocking{
         val res = interestPlaceService.viewInterestPlaceList(emailEmpty)
         assertTrue(res.isEmpty())
+    }
+    @Test
+    fun deleteInterestPlace_E1Valid_InterestPlaceDeleted(): Unit = runBlocking{
+        var puntoDelete = Coordinate(39.9333300,-0.1000000 )
+        interestPlaceService.createInterestPlaceCoordinates(puntoDelete)
+        assertEquals(true, interestPlaceService.deleteInterestPlace(puntoDelete))
+    }
+
+    @Test
+    fun deleteInterestPlace_E2OInvalid_InterestPlaceDeleted(): Unit = runBlocking{
+        var puntoDelete = Coordinate(38.0,-0.0 )
+        assertThrows<UnableToDeletePlaceException> {
+            interestPlaceService.deleteInterestPlace(puntoDelete)
+        }
     }
 }

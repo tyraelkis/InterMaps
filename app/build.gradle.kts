@@ -82,11 +82,17 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.converter.gson)
     implementation(libs.retrofit)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.crashlytics)
     implementation(platform(libs.firebase.bom))
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.runtime.livedata)
-    testImplementation (libs.junit.jupiter)
-    //Dependencias mapbox
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+    implementation("androidx.compose.runtime:runtime-livedata:1.7.5")
+    testImplementation ("org.junit.jupiter:junit-jupiter:5")
+    //Mapas
     implementation(libs.android)
     implementation(libs.maps.compose)
+
+    implementation(libs.okhttp.logging.interceptor)
+
+
 }

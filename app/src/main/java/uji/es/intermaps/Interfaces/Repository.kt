@@ -15,7 +15,6 @@ interface Repository {
     suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace
     suspend fun viewInterestPlaceData(coordinate: Coordinate): Boolean
     suspend fun viewInterestPlaceList(email:String?): List<InterestPlace>
-    fun deleteInterestPlace(coordinate: Coordinate): Boolean
-    /*fun getFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)
-    fun getNoFavList(callback: ((Boolean),(List<InterestPlace>)) -> Unit)*/
+    suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean
+    suspend fun getInterestPlaceByToponym(toponym: String, callback: (Boolean, List<InterestPlace>) -> Unit)
 }
