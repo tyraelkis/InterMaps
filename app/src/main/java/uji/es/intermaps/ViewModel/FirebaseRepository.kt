@@ -247,9 +247,6 @@ class FirebaseRepository: Repository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun searchInterestPlaceByToponym(toponym: String) : InterestPlace {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun viewInterestPlaceList(email: String?): List<InterestPlace> {
         val userEmail = email ?: auth.currentUser?.email

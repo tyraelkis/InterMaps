@@ -61,7 +61,7 @@ class InterestPlaceService(private val repository: Repository) {
         return false
     }
 
-    suspend fun searchInterestPlace(coordinate: Coordinate) : InterestPlace{
+    suspend fun searchInterestPlaceByCoordiante(coordinate: Coordinate) : InterestPlace{
         if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){
             throw NotValidCoordinatesException("Las coordenadas no son válidas")
         }

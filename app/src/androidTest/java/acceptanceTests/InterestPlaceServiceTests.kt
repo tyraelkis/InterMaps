@@ -65,16 +65,16 @@ class InterestPlaceServiceTests {
     }
 
     @Test
-    fun searchInterestPlace_E1Valid_InterestPlaceFound(): Unit = runBlocking {
-        val res: InterestPlace = interestPlaceService.searchInterestPlace(interestPlace.coordinate)
+    fun searchInterestPlaceByCoordinate_E1Valid_InterestPlaceFound(): Unit = runBlocking {
+        val res: InterestPlace = interestPlaceService.searchInterestPlaceByCoordiante(interestPlace.coordinate)
         val resultado : Boolean = res.toponym.contains(interestPlace.toponym)
         assertEquals(true, resultado)
     }
 
     @Test
-    fun searchInterestPlace_E2Invalid_errorOnSearchingInterestPlace(): Unit = runBlocking {
+    fun searchInterestPlaceByCoordinate_E2Invalid_errorOnSearchingInterestPlace(): Unit = runBlocking {
         assertThrows<NotValidCoordinatesException>{
-            interestPlaceService.searchInterestPlace(Coordinate(-300.0,300.0))
+            interestPlaceService.searchInterestPlaceByCoordiante(Coordinate(-300.0,300.0))
         }
     }
 
@@ -105,7 +105,7 @@ class InterestPlaceServiceTests {
     }
 
     @Test
-    fun searchInterestPlaceByToponym_E1Valido_InterestPlaceFound(): Unit = runBlocking {
+    fun searchInterestPlaceByToponym_E1Valido_InterestPlaceFound(): Unit = runBlocking { //Cambiar para que devuelva un interestplace
         val res: Boolean = interestPlaceService.searchInterestPlaceByToponym(interestPlace.toponym)
         assertEquals(true, res)
     }

@@ -13,7 +13,6 @@ interface Repository {
     suspend fun deleteUser(email: String, password: String): Boolean
     suspend fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean
     suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace
-    suspend fun searchInterestPlaceByToponym(toponym: String) : InterestPlace
     suspend fun viewInterestPlaceData(coordinate: Coordinate): Boolean
     suspend fun viewInterestPlaceList(email:String?): List<InterestPlace>
     fun deleteInterestPlace(coordinate: Coordinate): Boolean
