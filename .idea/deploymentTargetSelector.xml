@@ -5,16 +5,13 @@
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="viewInterestPlaceData_E1Valid_InterestPlaceDataViewed()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="viewInterestPlaceData_E2Invalid_errorOnViewingInterestPlaceData()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="InterestPlaceServiceTests">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="viewInterestPlaceList_E1Valido_InterestPlaceListViewed()">
+      <SelectionState runConfigName="UserServiceTests">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="add()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
