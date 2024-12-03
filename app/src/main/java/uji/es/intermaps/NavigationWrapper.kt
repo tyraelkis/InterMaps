@@ -1,7 +1,6 @@
 package uji.es.intermaps
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -87,7 +86,8 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             composable("userDataScreen") {
                 UserDataScreen(
                     auth,
-                    navHostController
+                    navHostController,
+                    viewModel1
                     )
             }
             composable("interestPlaceList") {
@@ -121,69 +121,11 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
 
             }
 
+
         }
     }
 }
-    /*NavHost(navController = navHostController, startDestination = "mapaScreen") {
-        composable("initial"){
-            InitialScreen(
-                navigateToLogin = {navHostController.navigate("logIn")},
-                navigateToSignUp = {navHostController.navigate("signUp")}
-            )
-        }
-        composable("logIn"){
-            LoginScreen(
-                auth,
-                navigateToSignUp = {navHostController.navigate("signUp")},
-                navigateToHome = {navHostController.navigate("home")}
-            )
-        }
-        composable("signUp") {
-            SignUpScreen(
-                auth,
-                navigateToLogin = {navHostController.navigate("logIn")},
-                navigateToHome = {navHostController.navigate("home")}
 
-            )
-        }
-        composable("home"){
-            HomeSreen(
-                navigateToUserDataScreen = {navHostController.navigate("userDataScreen")},
-                navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")}
-                )
-        }
-        composable("userDataScreen"){
-            UserDataScreen(
-                auth
-            )
-        }
-
-        composable("interestPlaceList"){
-            InterestPlaceList(navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")},
-                auth,
-                navigateToInterestPlaceSetAlias = {navHostController.navigate("interestPlaceSetAlias")},
-                navigateToInterestPlaceCreation = {navHostController.navigate("interestPlaceCreation")},
-                viewModel
-            )
-        }
-
-        composable("interestPlaceCreation"){
-            InterestPlaceCreation(
-                viewModel
-            )
-        }
-
-        composable("interestPlaceSetAlias"){
-            InterestPlaceSetAlias(
-                viewModel
-            )
-        }
-
-        composable("mapaScreen"){
-            MapaScreen()
-        }
-
-    }*/
 
 
 
