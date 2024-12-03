@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.NotValidUserData
+import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 
 
@@ -120,6 +121,32 @@ class UserViewModel(
             }
         }
 
+    }
+
+    fun signOut (navController: NavController){
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val success = userService.signOut()
+                withContext(Dispatchers.Main) {
+                    if (success) {
+                        navController.navigate("initial")
+                    } else {
+                        errorMessage = "Error al cerrar sesión."
+                        Log.e("SignOut", "No se pudo cerrar la sesión.")
+                    }
+                }
+            } catch (e: SessionNotStartedException) {
+                withContext(Dispatchers.Main) {
+                    errorMessage = "No hay ninguna sesión iniciada."
+                    Log.e("SignOut", e.message.toString())
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    errorMessage = "Ocurrió un error inesperado: ${e.message}"
+                    Log.e("SignOut", e.message.toString(), e)
+                }
+            }
+        }
     }
 
 

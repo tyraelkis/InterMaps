@@ -1,9 +1,13 @@
 package acceptanceTests
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.runner.RunWith
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
@@ -14,12 +18,32 @@ import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
+import uji.es.intermaps.Model.User
+import uji.es.intermaps.ViewModel.UserService
 
+@RunWith(AndroidJUnit4::class)
 class InterestPlaceServiceTests {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
     private var interestPlace: InterestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
+
+    private var email: String = "emaildeprueba@gmail.com" //Usuario con lista de lugares. Hay que añadirle un lugar
+    private var emailEmpty: String = "emaildepruebaempty@gmail.com" //Usuario sin lista de lugares
+
+    private val userService = UserService(FirebaseRepository())
+    private val userTest: User = User("emaildeprueba@gmail.com", "123456BB")
+
+    @Before
+    fun setUp(): Unit = runBlocking {
+        userService.login(userTest.email, userTest.pswd)
+    }
+
+    @After
+    fun tearDown(): Unit = runBlocking {
+        userService.signOut()
+    }
+
     //Crear valores por defecto para pruebas de create y delete?
     @Test
     fun createInterestPlace_E1Valid_InterestPlaceCreated(): Unit = runBlocking{
@@ -29,11 +53,9 @@ class InterestPlaceServiceTests {
         assertEquals(true, res)
     }
 
-    @Test
+    @Test(expected = NotValidCoordinatesException::class)
     fun createInterestPlace_E2Invalid_errorOnCreatingInterestPlace(): Unit = runBlocking {
-        assertThrows<NotValidCoordinatesException>{
-            interestPlaceService.createInterestPlaceCoordinates(Coordinate(-1800.665695,35.529562))
-        }
+        interestPlaceService.createInterestPlaceCoordinates(Coordinate(-1800.665695,35.529562))
     }
 
     @Test
@@ -105,11 +127,10 @@ class InterestPlaceServiceTests {
         assertEquals(true, interestPlaceService.deleteInterestPlace(puntoDelete))
     }
 
-    @Test
+    @Test (expected = UnableToDeletePlaceException::class)
     fun deleteInterestPlace_E2OInvalid_InterestPlaceDeleted(): Unit = runBlocking{
         var puntoDelete = Coordinate(38.0,-0.0 )
-        assertThrows<UnableToDeletePlaceException> {
-            interestPlaceService.deleteInterestPlace(puntoDelete)
-        }
+        interestPlaceService.deleteInterestPlace(puntoDelete)
+
     }
 }

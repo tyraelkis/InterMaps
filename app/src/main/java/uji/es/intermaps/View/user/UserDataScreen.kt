@@ -1,13 +1,10 @@
 package uji.es.intermaps.View.user
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,18 +16,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,34 +27,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import uji.es.intermaps.Exceptions.NotValidUserData
-import uji.es.intermaps.Exceptions.SessionNotStartedException
-import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.R
+import uji.es.intermaps.View.CustomDropdownMenu
 import uji.es.intermaps.ViewModel.UserViewModel
 
 @SuppressLint("CoroutineCreationDuringComposition")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: UserViewModel) {
 
@@ -147,227 +126,36 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
 
         Spacer(modifier = Modifier.height(64.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Vehículo pred.",
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            ExposedDropdownMenuBox(
-                expanded = expandedVehicles,
-                onExpandedChange = { expandedVehicles = !expandedVehicles }
-            ) {
-                TextField(
-                    value = selectedOptionVehicles,
-                    onValueChange = { },
-                    readOnly = true,
-                    modifier = Modifier.menuAnchor()
-                        .width(160.dp)
-                        .padding(0.dp)
-                        .height(48.dp)
-                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp)),
-                    trailingIcon = {
-                        Icon(
-                            imageVector = if (expandedVehicles) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                            contentDescription = null
-                        )
-                    },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
-                        cursorColor = Color.Black,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    textStyle = androidx.compose.ui.text.TextStyle(
-                        fontSize = 16.sp,
-                        lineHeight = 20.sp,
-                        textAlign = TextAlign.Center
-                    ),
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedVehicles,
-                    onDismissRequest = { expandedVehicles = false }
-                ) {
-                    optionsVehicles.forEach { option ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    option,
-                                    color = if (option == selectedOptionVehicles) Color.White else Color.Black
-                                )
-                            },
-                            onClick = {
-                                selectedOptionVehicles = option
-                                expandedVehicles = false
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    if (option == selectedOptionVehicles) Color.Gray else Color.LightGray,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                        )
-                    }
-                }
-            }
-        }
+        CustomDropdownMenu(
+            label = "Vehículo pred.",
+            options = optionsVehicles,
+            selectedOption = selectedOptionVehicles,
+            onOptionSelected = { selectedOptionVehicles = it },
+            expanded = expandedVehicles,
+            onExpandedChange = { expandedVehicles = it }
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Tipo de ruta pred.",
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            ExposedDropdownMenuBox(
-                expanded = expandedRoutes,
-                onExpandedChange = { expandedRoutes = !expandedRoutes }
-            ) {
-                TextField(
-                    value = selectedOptionRoutes,
-                    onValueChange = { },
-                    readOnly = true,
-                    modifier = Modifier.menuAnchor()
-                        .width(160.dp)
-                        .padding(0.dp)
-                        .height(48.dp)
-                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp)),
-                    trailingIcon = {
-                        Icon(
-                            imageVector = if (expandedRoutes) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                            contentDescription = null
-                        )
-                    },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
-                        cursorColor = Color.Black,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    textStyle = androidx.compose.ui.text.TextStyle(
-                        fontSize = 16.sp,
-                        lineHeight = 20.sp,
-                        textAlign = TextAlign.Center
-                    ),
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedRoutes,
-                    onDismissRequest = { expandedRoutes = false }
-                ) {
-                    optionsRoutes.forEach { option ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    option,
-                                    color = if (option == selectedOptionRoutes) Color.White else Color.Black
-                                )
-                            },
-                            onClick = {
-                                selectedOptionRoutes = option
-                                expandedRoutes = false
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    if (option == selectedOptionRoutes) Color.Gray else Color.LightGray,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                        )
-                    }
-                }
-            }
-        }
+        CustomDropdownMenu(
+            label = "Tipo de ruta pred.",
+            options = optionsRoutes,
+            selectedOption = selectedOptionRoutes,
+            onOptionSelected = { selectedOptionRoutes = it },
+            expanded = expandedRoutes,
+            onExpandedChange = { expandedRoutes = it }
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Tipo de ruta pred.",
-                color = Color.Black,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            ExposedDropdownMenuBox(
-                expanded = expandedTransport,
-                onExpandedChange = { expandedTransport = !expandedTransport }
-            ) {
-                TextField(
-                    value = selectedOptionTransport,
-                    onValueChange = { },
-                    readOnly = true,
-                    modifier = Modifier.menuAnchor()
-                        .width(160.dp)
-                        .padding(0.dp)
-                        .height(48.dp)
-                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp)),
-                    trailingIcon = {
-                        Icon(
-                            imageVector = if (expandedTransport) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                            contentDescription = null
-                        )
-                    },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
-                        cursorColor = Color.Black,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    textStyle = androidx.compose.ui.text.TextStyle(
-                        fontSize = 16.sp,
-                        lineHeight = 20.sp,
-                        textAlign = TextAlign.Center
-                    ),
-                )
-                ExposedDropdownMenu(
-                    expanded = expandedTransport,
-                    onDismissRequest = { expandedTransport = false }
-                ) {
-                    optionsTransport.forEach { option ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    option,
-                                    color = if (option == selectedOptionTransport) Color.White else Color.Black
-                                )
-                            },
-                            onClick = {
-                                selectedOptionTransport = option
-                                expandedTransport = false
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    if (option == selectedOptionTransport) Color.Gray else Color.LightGray,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                        )
-                    }
-                }
-            }
-        }
+        CustomDropdownMenu(
+            label = "Tipo de transporte pred.",
+            options = optionsTransport,
+            selectedOption = selectedOptionTransport,
+            onOptionSelected = { selectedOptionTransport = it },
+            expanded = expandedTransport,
+            onExpandedChange = { expandedTransport = it }
+        )
         Spacer(modifier = Modifier.height(100.dp))
 
         Button(
@@ -385,29 +173,7 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
 
         Button(
             onClick = {
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        val success = userService.signOut()
-                        withContext(Dispatchers.Main) {
-                            if (success) {
-                                navController.navigate("initial")
-                            } else {
-                                errorMessage = "Error al cerrar sesión."
-                                Log.e("SignOut", "No se pudo cerrar la sesión.")
-                            }
-                        }
-                    } catch (e: SessionNotStartedException) {
-                        withContext(Dispatchers.Main) {
-                            errorMessage = "No hay ninguna sesión iniciada."
-                            Log.e("SignOut", e.message.toString())
-                        }
-                    } catch (e: Exception) {
-                        withContext(Dispatchers.Main) {
-                            errorMessage = "Ocurrió un error inesperado: ${e.message}"
-                            Log.e("SignOut", e.message.toString(), e)
-                        }
-                    }
-                }
+                viewModel.signOut(navController)
             },
             modifier = Modifier
                 .height(45.dp)
