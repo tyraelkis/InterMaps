@@ -9,6 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
+import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Interfaces.Repository
@@ -165,7 +166,7 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun setAlias(interestPlace: InterestPlace, newAlias: String):Boolean { //Coger el get y ponerlo en el otro metodo. Este llamara al otro para buscar el lugar
+    override suspend fun setAlias(interestPlace: InterestPlace, newAlias: String):Boolean {
         return try{
             val geoPoint = interestPlace.coordinate
 
@@ -274,8 +275,42 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun viewInterestPlaceData(coordinate: Coordinate): Boolean {
-        TODO()
+    override suspend fun viewInterestPlaceData(interestPlaceCoordinate: Coordinate, email: String?): InterestPlace {
+        val userEmail = email ?: auth.currentUser?.email
+        if (userEmail == null) {
+            throw NotSuchPlaceException("El email es nulo o no válido")
+        }
+        try {
+            val documentSnapshot = db.collection("InterestPlace")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                val interestPlaces = documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
+
+                val foundPlace = interestPlaces.find { place ->
+                    val coordinate = place["coordinate"] as? Map<String, Double>
+                    val latitude = coordinate?.get("latitude") ?: 0.0
+                    val longitude = coordinate?.get("longitude") ?: 0.0
+
+                    latitude == interestPlaceCoordinate.latitude && longitude == interestPlaceCoordinate.longitude
+                } ?: throw NotSuchPlaceException("Lugar de interés no encontrado")
+
+                // Construir el objeto InterestPlace a partir del mapa encontrado
+                return InterestPlace(
+                    coordinate = interestPlaceCoordinate,
+                    toponym = foundPlace["toponym"] as? String ?: "",
+                    alias = foundPlace["alias"] as? String ?: "",
+                    fav = foundPlace["fav"] as? Boolean ?: false
+                )
+            } else {
+                throw Exception("No existe el documento para el usuario: $userEmail")
+            }
+        } catch (e: Exception) {
+            Log.e("GeneralError", "Ocurrió un error", e)
+            throw e
+        }
     }
 
 
@@ -291,10 +326,10 @@ class FirebaseRepository: Repository {
                 .await()
 
             if (documentSnapshot.exists()) {
-                // Extraemos el array "interestPlaces" del documento
+                // Extraemos el array interestPlaces del documento
                 val interestPlaces = documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
 
-                // Convertimos cada elemento del array a `InterestPlace`
+                // Convertimos cada elemento del array a InterestPlace
                 interestPlaces.map { place ->
                     InterestPlace(
                         coordinate = Coordinate(

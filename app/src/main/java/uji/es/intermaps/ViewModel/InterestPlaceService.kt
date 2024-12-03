@@ -91,8 +91,8 @@ class InterestPlaceService(private val repository: Repository) {
         return routeRepository.searchInterestPlaceByCoordinates(coordinate)
     }
 
-    fun viewInterestPlaceData(coordinate: Coordinate): Boolean{
-        return false
+    suspend fun viewInterestPlaceData(coordinate: Coordinate, email: String? = null): InterestPlace{
+       return repository.viewInterestPlaceData(coordinate, email)
     }
 
     suspend fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean{
