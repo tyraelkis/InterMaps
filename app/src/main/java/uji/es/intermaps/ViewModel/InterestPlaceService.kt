@@ -5,6 +5,7 @@ import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.NotValidAliasException
+import uji.es.intermaps.Interfaces.ORSRepository
 import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Interfaces.Repository
@@ -13,6 +14,7 @@ import uji.es.intermaps.Model.DataBase.db
 import uji.es.intermaps.Model.RetrofitConfig
 
 class InterestPlaceService(private val repository: Repository) {
+    private val routeRepository = RouteRepository()
 
     suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
         if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){
@@ -70,8 +72,8 @@ class InterestPlaceService(private val repository: Repository) {
        return false
     }
 
-    fun searchInterestPlace(coordinate: Coordinate) : Boolean{
-        return false
+    suspend fun searchInterestPlaceByCoordiante(coordinate: Coordinate) : InterestPlace{
+        return routeRepository.searchInterestPlaceByCoordinates(coordinate)
     }
 
     fun viewInterestPlaceData(coordinate: Coordinate): Boolean{
@@ -97,29 +99,10 @@ class InterestPlaceService(private val repository: Repository) {
         return false
     }
 
-    fun viewInterestPlaceList(): List<InterestPlace>{
-        return emptyList()
+    suspend fun viewInterestPlaceList(email: String? = null): List<InterestPlace> {
+        return repository.viewInterestPlaceList(email)
     }
 
-    fun getFavList(callback: (List<InterestPlace>) -> Unit){
-        repository.getFavList{ success, favList ->
-            if (success){
-                callback(favList)
-            }else{
-                callback(emptyList())
-            }
-        }
-    }
-
-    fun getNoFavList(callback: (List<InterestPlace>) -> Unit){
-        repository.getNoFavList{ success, NoFavList ->
-            if (success){
-                callback(NoFavList)
-            }else{
-                callback(emptyList())
-            }
-        }
-    }
 
     suspend fun getInterestPlaceByToponym(toponym: String, callback: (List<InterestPlace>) -> Unit) {
         repository.getInterestPlaceByToponym(toponym) { success, interestPlace ->

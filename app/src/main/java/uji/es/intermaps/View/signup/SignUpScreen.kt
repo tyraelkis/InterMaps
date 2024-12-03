@@ -159,7 +159,7 @@ fun SignUpScreen(navController: NavController) {
             )
         )
         Text(
-            text = "Mínimo 6 carácteres",
+            text = "Mínimo 8 carácteres",
             color = LightGray,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,

@@ -2,6 +2,7 @@ package acceptanceTests
 
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -11,6 +12,7 @@ import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
+import uji.es.intermaps.Interfaces.ORSRepository
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
@@ -18,13 +20,17 @@ import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.User
+import uji.es.intermaps.ViewModel.RouteRepository
 import uji.es.intermaps.ViewModel.UserService
 
 class InterestPlaceServiceTests {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
+    private var routeRepository: ORSRepository = RouteRepository()
     private var interestPlace: InterestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
+    private var email: String = "emaildeprueba@gmail.com" //Usuario con lista de lugares. Hay que añadirle un lugar
+    private var emailEmpty: String = "emaildepruebaempty@gmail.com" //Usuario sin lista de lugares
 
     //Crear valores por defecto para pruebas de create y delete?
 
@@ -63,15 +69,16 @@ class InterestPlaceServiceTests {
     }
 
     @Test
-    fun searchInterestPlace_E1Valid_InterestPlaceFound(): Unit = runBlocking {
-        val res: Boolean = interestPlaceService.searchInterestPlace(interestPlace.coordinate)
-        assertEquals(true, res)
+    fun searchInterestPlaceByCoordinate_E1Valid_InterestPlaceFound(): Unit = runBlocking {
+        val res: InterestPlace = interestPlaceService.searchInterestPlaceByCoordiante(interestPlace.coordinate)
+        val resultado : Boolean = res.toponym.contains(interestPlace.toponym)
+        assertEquals(true, resultado)
     }
 
     @Test
-    fun searchInterestPlace_E2Invalid_errorOnSearchingInterestPlace(): Unit = runBlocking {
+    fun searchInterestPlaceByCoordinate_E2Invalid_errorOnSearchingInterestPlace(): Unit = runBlocking {
         assertThrows<NotValidCoordinatesException>{
-            interestPlaceService.searchInterestPlace(Coordinate(-300.0,300.0))
+            interestPlaceService.searchInterestPlaceByCoordiante(Coordinate(-300.0,300.0))
         }
     }
 
@@ -102,7 +109,7 @@ class InterestPlaceServiceTests {
     }
 
     @Test
-    fun searchInterestPlaceByToponym_E1Valido_InterestPlaceFound(): Unit = runBlocking {
+    fun searchInterestPlaceByToponym_E1Valido_InterestPlaceFound(): Unit = runBlocking { //Cambiar para que devuelva un interestplace
         val res: Boolean = interestPlaceService.searchInterestPlaceByToponym(interestPlace.toponym)
         assertEquals(true, res)
     }
@@ -114,15 +121,16 @@ class InterestPlaceServiceTests {
         }
     }
 
-    @Test //A la hora de hacer el codigo mirar si miramos una lista generica o logeamos un usuario generico como el de usuario para ver su lista etc.
-    fun viewInterestPlaceList_E1Valido_InterestPlaceListViewed(){
-        val res = interestPlaceService.viewInterestPlaceList()
-        assertEquals(true, res)
+    @Test
+    fun viewInterestPlaceList_E1Valido_InterestPlaceListViewed(): Unit = runBlocking{
+        val res = interestPlaceService.viewInterestPlaceList(email)
+        assertTrue(res.isNotEmpty())
     }
 
     @Test
-    fun viewInterestPlaceList_E2Invalido_errorOnViewingInterestPlaceList(){
-        //Crear una lista o un usuario con una lista vacia e intentar comprobar que se muestre la lista vacia
+    fun viewInterestPlaceList_E2Invalido_emptyInterestPlaceListViewed(): Unit = runBlocking{
+        val res = interestPlaceService.viewInterestPlaceList(emailEmpty)
+        assertTrue(res.isEmpty())
     }
     @Test
     fun deleteInterestPlace_E1Valid_InterestPlaceDeleted(): Unit = runBlocking{

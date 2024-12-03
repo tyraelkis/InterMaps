@@ -32,11 +32,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
@@ -45,22 +50,29 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceList(
-    navController: NavController, auth: FirebaseAuth) {
-    var user = auth.currentUser
-    var repository: Repository = FirebaseRepository()
-    var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
-    var favList by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
-    var noFavList by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
+fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -> Unit,navigateToInterestPlaceCreation: () -> Unit, viewModel: InterestPlaceViewModel) {
+    var db = FirebaseFirestore.getInstance()
+    val user = auth.currentUser
+    val repository: Repository = FirebaseRepository()
+    val interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
+    var interestPlace: InterestPlace = InterestPlace()
+    var allPlaces by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
+    val emailPrefix = user?.email?.substringBefore("@") ?: "Usuario"
 
-    LaunchedEffect(Unit) {
-        interestPlaceService.getFavList { places ->
-            favList = places
-        }
-        interestPlaceService.getNoFavList { NoFavplaces ->
-            noFavList = NoFavplaces
+    LaunchedEffect(user?.email) {
+        if (user?.email != null) {
+            try {
+                val places = interestPlaceService.viewInterestPlaceList(user.email)
+                allPlaces = places
+            } catch (e: Exception) {
+                allPlaces = emptyList()
+            }
         }
     }
+
+    val favList = allPlaces.filter { it.fav }
+    val noFavList = allPlaces.filter { !it.fav }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,12 +90,18 @@ fun InterestPlaceList(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Lista de lugares de ${user?.email}",
+                text = buildAnnotatedString {
+                    append("Lista de lugares de\n")
+                    append("\n")
+                    append(emailPrefix)
+                },
                 color = Color.Black,
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center // Centrar el texto dentro del Row
             )
         }
+
         Spacer(modifier = Modifier.height(25.dp))
 
         Row(
@@ -135,7 +153,8 @@ fun InterestPlaceList(
                         )
                         Button(
                             onClick = {
-                                navController.navigate("interestPlaceSetAlias/${place.toponym}")
+                                viewModel.setInterestPlace(place)
+                                navigateToInterestPlaceSetAlias()
                             },
                             modifier = Modifier
                                 .width(100.dp)
@@ -205,8 +224,8 @@ fun InterestPlaceList(
                         )
                         Button(
                             onClick = {
-                                //viewModel.putInterestPlace(notFavPlace)
-                                navController.navigate("interestPlaceSetAlias/${notFavPlace.toponym}")
+                                viewModel.setInterestPlace(notFavPlace)
+                                navigateToInterestPlaceSetAlias()
                             },
                             modifier = Modifier
                                 .width(100.dp)
@@ -231,8 +250,7 @@ fun InterestPlaceList(
             horizontalAlignment = Alignment.CenterHorizontally
         )   {Button(
             onClick = {
-                navController.navigate("interestPlaceCreation")
-               // navigateToInterestPlaceCreation
+                navigateToInterestPlaceCreation
             },
             modifier = Modifier
                 .width(350.dp)

@@ -181,7 +181,7 @@ fun LoginScreen(navController: NavController) {
             textAlign = TextAlign.Left
         )
 
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(80.dp))
 
         Button(
             onClick = {

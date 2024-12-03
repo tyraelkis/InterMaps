@@ -167,10 +167,10 @@ class FirebaseRepository: Repository {
 
     override suspend fun setAlias(interestPlace: InterestPlace, newAlias: String):Boolean {
         return try{
-            val coordinate = interestPlace.coordinate
+            val geoPoint = interestPlace.coordinate
 
             val search = db.collection("InterestPlace")
-                .whereEqualTo("coordinate", coordinate)
+                .whereEqualTo("coordinate", geoPoint)
                 .get()
                 .await()
             if(search.isEmpty){
@@ -189,47 +189,6 @@ class FirebaseRepository: Repository {
             e.printStackTrace()
             false
         }
-    }
-
-    override fun getFavList(callback:  ((Boolean),(List<InterestPlace>)) -> Unit){
-        db.collection("InterestPlace")
-            .whereEqualTo("fav", true)
-            .get()
-            .addOnSuccessListener { documents ->
-                if (!documents.isEmpty){
-                    val favList = mutableListOf<InterestPlace>()
-                    for (document in documents){
-                        val interestPlace = document.toObject(InterestPlace::class.java)
-                        favList.add(interestPlace)
-                    }
-                    callback(true, favList)
-                }else{
-                    callback(false,emptyList())
-                }
-            }
-            .addOnFailureListener { _ ->
-                callback(false, emptyList())
-            }
-    }
-    override fun getNoFavList(callback:  ((Boolean),(List<InterestPlace>)) -> Unit){
-        db.collection("InterestPlace")
-            .whereEqualTo("fav", false)
-            .get()
-            .addOnSuccessListener { documents ->
-                if (!documents.isEmpty){
-                    val noFavList = mutableListOf<InterestPlace>()
-                    for (document in documents){
-                        val interestPlace = document.toObject(InterestPlace::class.java)
-                        noFavList.add(interestPlace)
-                    }
-                    callback(true, noFavList)
-                }else{
-                    callback(false,emptyList())
-                }
-            }
-            .addOnFailureListener{ _ ->
-                callback(false, emptyList())
-            }
     }
 
     override suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
@@ -323,12 +282,40 @@ class FirebaseRepository: Repository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun searchInterestPlaceByToponym(toponym: String) : InterestPlace {
-        TODO("Not yet implemented")
-    }
 
-    override fun viewInterestPlaceList(callback: (List<InterestPlace>) -> Unit) {
-        TODO("Not yet implemented")
+    override suspend fun viewInterestPlaceList(email: String?): List<InterestPlace> {
+        val userEmail = email ?: auth.currentUser?.email
+        if (userEmail == null) {
+            return emptyList()
+        }
+        return try {
+            val documentSnapshot = db.collection("InterestPlace")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                // Extraemos el array "interestPlaces" del documento
+                val interestPlaces = documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
+
+                // Convertimos cada elemento del array a `InterestPlace`
+                interestPlaces.map { place ->
+                    InterestPlace(
+                        coordinate = Coordinate(
+                            latitude = (place["coordinate"] as Map<String, Double>)["latitude"] ?: 0.0,
+                            longitude = (place["coordinate"] as Map<String, Double>)["longitude"] ?: 0.0
+                        ),
+                        toponym = place["toponym"] as String? ?: "",
+                        alias = place["alias"] as String? ?: "",
+                        fav = place["fav"] as Boolean? ?: false
+                    )
+                }
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            emptyList()  // En caso de error, retornamos una lista vacía
+        }
     }
 
     override suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean {
