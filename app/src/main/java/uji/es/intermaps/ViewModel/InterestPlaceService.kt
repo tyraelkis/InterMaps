@@ -86,8 +86,8 @@ class InterestPlaceService(private val repository: Repository) {
         return true
     }
 
-    fun searchInterestPlaceByToponym(toponym: String) : Boolean{
-        return false
+    suspend fun searchInterestPlaceByToponym(toponym: String) : InterestPlace{
+        return routeRepository.searchInterestPlaceByToponym(toponym)
     }
 
     suspend fun viewInterestPlaceList(email: String? = null): List<InterestPlace> {
