@@ -165,7 +165,7 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun setAlias(interestPlace: InterestPlace, newAlias: String):Boolean {
+    override suspend fun setAlias(interestPlace: InterestPlace, newAlias: String):Boolean { //Coger el get y ponerlo en el otro metodo. Este llamara al otro para buscar el lugar
         return try{
             val geoPoint = interestPlace.coordinate
 
@@ -275,7 +275,7 @@ class FirebaseRepository: Repository {
     }
 
     override suspend fun viewInterestPlaceData(coordinate: Coordinate): Boolean {
-        TODO("Not yet implemented")
+        TODO()
     }
 
 

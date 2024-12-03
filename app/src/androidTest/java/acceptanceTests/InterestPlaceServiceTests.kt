@@ -84,14 +84,14 @@ class InterestPlaceServiceTests {
 
     @Test
     fun viewInterestPlaceData_E1Valid_InterestPlaceDataViewed(): Unit = runBlocking {
-        val res : Boolean = interestPlaceService.viewInterestPlaceData(interestPlace.coordinate)
+        val res : Boolean = interestPlaceService.viewInterestPlaceData(interestPlace)
         assertEquals(true, res)
     }
 
     @Test
     fun viewInterestPlaceData_E2Invalid_errorOnViewingInterestPlaceData(): Unit = runBlocking { //Busca en la lista de lugares
         assertThrows<NotSuchPlaceException>{
-            interestPlaceService.viewInterestPlaceData(Coordinate(-19.665695,35.529562))
+            interestPlaceService.viewInterestPlaceData(InterestPlace(Coordinate(-19.665695, 35.529562), "Mozambique", "Moz", false))
         }
     }
     
