@@ -3,6 +3,7 @@ package uji.es.intermaps.ViewModel
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Interfaces.ORSRepository
 import uji.es.intermaps.Model.Coordinate
@@ -70,6 +71,6 @@ class RouteRepository : ORSRepository {
             Log.e("Coordenadas", "Error: ${e.message}")
         }
 
-        throw Exception("Error en la llamada a la API para obtener las coordenadas")
+        throw NotSuchPlaceException("Error en la llamada a la API para obtener las coordenadas")
     }
 }
