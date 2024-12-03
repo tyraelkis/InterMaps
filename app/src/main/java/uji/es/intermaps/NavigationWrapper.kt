@@ -18,7 +18,7 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth,viewModel: InterestPlaceViewModel){
-    NavHost(navController = navHostController, startDestination = "initial") {
+    NavHost(navController = navHostController, startDestination = "mainMenu") {
         composable("initial"){
             InitialScreen(
                 navigateToLogin = {navHostController.navigate("logIn")},
