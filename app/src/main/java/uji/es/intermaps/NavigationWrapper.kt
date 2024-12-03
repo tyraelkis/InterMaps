@@ -88,13 +88,16 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             composable("userDataScreen") {
                 UserDataScreen(
                     auth,
-                    navHostController
+                    navHostController,
+                    viewModel1
                     )
             }
             composable("interestPlaceList") {
                 InterestPlaceList(
-                    navHostController,
-                    auth
+                    auth,
+                    navigateToInterestPlaceSetAlias = { navHostController.navigate("interestPlaceSetAlias") },
+                    navigateToInterestPlaceCreation = { navHostController.navigate("interestPlaceCreation") },
+                    viewModel
                 )
             }
             composable(

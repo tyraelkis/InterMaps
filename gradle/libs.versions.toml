@@ -1,6 +1,6 @@
 [versions]
 agp = "8.6.0"
-android = "11.8.0"
+android = "11.7.1"
 converterGson = "2.11.0"
 junitJupiterApi = "5.11.0-M1"
 junitJupiterEngine = "5.11.0-M1"
@@ -19,7 +19,7 @@ firebaseFirestore = "25.1.0"
 firebaseCrashlytics = "19.2.0"
 googleFirebaseCrashlytics = "3.0.2"
 firebaseAuth = "23.0.0"
-mapsCompose = "11.8.0"
+mapsCompose = "11.7.1"
 navigationRuntimeKtx = "2.8.2"
 navigationCompose = "2.8.2"
 coil = "3.0.0-rc01"
@@ -27,10 +27,8 @@ junitKtx = "1.2.1"
 okhttp = "4.12.0"
 junitJupiter = "5.8.1"
 firebaseBom = "33.1.1"
-
-
-
 runtimeLivedata = "1.7.5"
+lifecycleRuntimeCompose = "2.8.7"
 
 [libraries]
 android = { module = "com.mapbox.maps:android", version.ref = "android" }

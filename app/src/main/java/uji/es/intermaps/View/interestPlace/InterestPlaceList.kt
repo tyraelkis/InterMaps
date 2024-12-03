@@ -50,7 +50,7 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -> Unit,navigateToInterestPlaceCreation: () -> Unit, viewModel: InterestPlaceViewModel) {
+fun InterestPlaceList( auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -> Unit,navigateToInterestPlaceCreation: () -> Unit, viewModel: InterestPlaceViewModel) {
     var db = FirebaseFirestore.getInstance()
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
@@ -91,12 +91,12 @@ fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: Fireba
         ) {
             Text(
                 text = buildAnnotatedString {
-                    append("Lista de lugares de\n")
-                    append("\n")
-                    append(emailPrefix)
+                        append("Lista de lugares de\n")
+                        append("\n")
+                        append(emailPrefix)
                 },
                 color = Color.Black,
-                fontSize = 32.sp,
+                fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center // Centrar el texto dentro del Row
             )
@@ -153,7 +153,7 @@ fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: Fireba
                         )
                         Button(
                             onClick = {
-                                viewModel.setInterestPlace(place)
+                                viewModel.updateInterestPlace(place)
                                 navigateToInterestPlaceSetAlias()
                             },
                             modifier = Modifier
@@ -224,7 +224,7 @@ fun InterestPlaceList(navigateToInterestPlaceList: () -> Unit = {}, auth: Fireba
                         )
                         Button(
                             onClick = {
-                                viewModel.setInterestPlace(notFavPlace)
+                                viewModel.updateInterestPlace(notFavPlace)
                                 navigateToInterestPlaceSetAlias()
                             },
                             modifier = Modifier

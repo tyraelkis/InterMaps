@@ -318,6 +318,10 @@ class FirebaseRepository: Repository {
         }
     }
 
+    override fun viewInterestPlaceList(callback: (List<InterestPlace>) -> Unit) {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean {
         return try {
             Log.d("deleteInterestPlace", "Starting deletion for coordinate: $coordinate")

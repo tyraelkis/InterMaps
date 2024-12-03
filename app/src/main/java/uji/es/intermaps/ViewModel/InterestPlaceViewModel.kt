@@ -31,14 +31,12 @@ class InterestPlaceViewModel(
 
     private val openRouteService = retrofit.create(ORSAPI::class.java)
 
-    //    val interestPlace: LiveData<InterestPlace> get() = _interestPlace
-//
-//    init {
-//        _interestPlace.value = InterestPlace()
-//    }
-//    fun setInterestPlace(place: InterestPlace){
-//        _interestPlace.value = place
-//    }
+    init {
+        _interestPlace.value = InterestPlace()
+    }
+    fun updateInterestPlace(place: InterestPlace){
+        _interestPlace.value = place
+    }
     var loading by mutableStateOf(false)
         private set
     var interestPlace by mutableStateOf(InterestPlace())
