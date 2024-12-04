@@ -87,6 +87,12 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             }
             composable("mainMenu") {
                 MainMenu (
+                    auth,
+                    navigateToUserDataScreen = { navHostController.navigate("userDataScreen") },
+                    navigateToInterestPlaceList = { navHostController.navigate("interestPlaceList") },
+                    //TODO aun no implementados
+                    //navigateToVehicleList = { navHostController.navigate("vehicleList") },
+                    //navigateToRoutesList = { navHostController.navigate("routeList") }
                 )
             }
             composable("userDataScreen") {

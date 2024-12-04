@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,11 +27,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -39,13 +40,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.auth.FirebaseAuth
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
@@ -54,13 +55,18 @@ import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 
 @Composable
-fun MainMenu() {
+fun MainMenu(auth: FirebaseAuth, navigateToUserDataScreen: () -> Unit, navigateToInterestPlaceList: () -> Unit) {
 
     var busqueda by remember { mutableStateOf("") }
     var interestPlace by remember { mutableStateOf(InterestPlace()) }
     var showMenu by remember { mutableStateOf(false) }
+    var showPlaceData by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
     val interestPlaceService = InterestPlaceService(FirebaseRepository())
-    //val user = FirebaseRepository().auth.currentUser
+    var email = auth.currentUser?.email
+
+    if (email == null)
+        email = "no hay sesión"
 
     Box(
         modifier = Modifier
@@ -132,39 +138,50 @@ fun MainMenu() {
                                     //TODO mover la comprovación de coordenadas a un servicio
                                     var coordinate = Coordinate()
                                     var busquedaCoordenadas = false
-                                    try {
-                                        val aBuscar = busqueda.split(",")
-                                        coordinate =
-                                            Coordinate(aBuscar[0].toDouble(), aBuscar[1].toDouble())
+                                    val coordinatePattern = Regex("""^\s*(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)\s*$""")
+                                    val input = busqueda.trim()
+                                    if (coordinatePattern.matches(input)) {
+                                        val parts = input.split(",")
+                                        val lat = parts[0].trim().toDouble()
+                                        val lon = parts[1].trim().toDouble()
+                                        coordinate = Coordinate(lat, lon)
                                         busquedaCoordenadas = true
-                                    } catch (e: Exception) {
-                                        Log.e("ERROR_CONVERSION", "Error al convertir coordenadas")
+                                        errorMessage = ""
+                                    } else {
+                                        Log.e("FORMATO_NO_VALIDO", "El input no tiene formato de coordenadas")
                                     }
                                     //TODO falta implementar la vista del lugar que se ha buscado
                                     CoroutineScope(Dispatchers.IO).launch {
                                         if (busquedaCoordenadas) {
                                             try {
-                                                interestPlace =
-                                                    interestPlaceService.searchInterestPlaceByCoordiante(
-                                                        coordinate
-                                                    )
+                                                interestPlace = interestPlaceService.searchInterestPlaceByCoordiante(coordinate)
+                                                errorMessage=""
+                                                busqueda = ""
+                                            } catch (e: NotValidCoordinatesException) {
+                                                Log.e("ERROR_BUSQUEDA_COORDS", "Error al buscar por coordenadas")
+                                                errorMessage = e.message.toString()
+                                                busqueda = ""
                                             } catch (e: Exception) {
-                                                Log.e(
-                                                    "ERROR_BUSQUEDA_COORDS",
-                                                    "Error al buscar por coordenadas"
-                                                )
+                                                Log.e("ERROR_BUSQUEDA_COORDS", "Error al buscar por coordenadas")
+                                                errorMessage = e.message.toString()
+                                                busqueda = ""
                                             }
                                         } else {
                                             try {
-                                                //interestPlace = interestPlaceService.searchInterestPlaceByToponym(busqueda)
+                                                //interestPlace = interestPlaceService.searchInterestPlaceByToponym(input)
+                                                errorMessage=""
+                                                busqueda = ""
                                             } catch (e: Exception) {
-                                                Log.e(
-                                                    "ERROR_BUSQUEDA_TOP",
-                                                    "Error al buscar por topónimo"
-                                                )
+                                                Log.e("ERROR_BUSQUEDA_TOP", "Error al buscar por topónimo")
+                                                errorMessage = e.message.toString()
+                                                busqueda = ""
                                             }
                                         }
                                     }
+                                    showPlaceData = true
+                                }
+                                else {
+                                    showPlaceData = false
                                 }
                             },
                         contentScale = ContentScale.Crop
@@ -206,8 +223,7 @@ fun MainMenu() {
                     .background(
                         Color(0XFF007E70),
                         shape = RoundedCornerShape(15.dp)
-                    ),
-
+                    )
                 ) {
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -218,7 +234,7 @@ fun MainMenu() {
                     verticalAlignment = Alignment.CenterVertically
                 ){//Botón para cerrar el menú y correo usuario
 
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(20.dp))
 
                     Image(//Imagen cerrar
                         painter = painterResource(
@@ -231,7 +247,7 @@ fun MainMenu() {
                     )
 
                     Text(
-                        text = "correo@usuario.es",//TODO usar el auth para sacar el correo
+                        text = email,
                         color = Black,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
@@ -259,13 +275,13 @@ fun MainMenu() {
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { showMenu = false }, //TODO Ir a perfil
+                            .clickable { navigateToUserDataScreen() }, //TODO Comprobar que va bien
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            showMenu = false //TODO Ir a perfil
+                            navigateToUserDataScreen() //TODO Comprobar que va bien
                         },
                         modifier = Modifier
                             .height(40.dp)
@@ -298,13 +314,13 @@ fun MainMenu() {
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { showMenu = false }, //TODO Ir a lugares
+                            .clickable { navigateToInterestPlaceList() }, //TODO Comprobar que va bien
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            showMenu = false //TODO Ir a lugares
+                            navigateToInterestPlaceList() //TODO Comprobar que va bien
                         },
                         modifier = Modifier
                             .height(40.dp)
@@ -397,6 +413,102 @@ fun MainMenu() {
                             Text(text = "Tus rutas", color = Black, fontSize = 18.sp)
                         }
                     }
+                }
+            }
+        }
+
+        if (showPlaceData){
+            Column (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        start = 0.dp,
+                        top = 500.dp,
+                        end = 0.dp,
+                        bottom = 0.dp)
+                    .background(
+                        White,
+                    ),
+                verticalArrangement = Arrangement.Center, // Centra el contenido verticalmente
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (errorMessage.isEmpty()) { //Si no hay errores en la busqueda se muestran los datos
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Spacer(modifier = Modifier.width(20.dp))
+
+                        Text(
+                            text = "${interestPlace.toponym} (${interestPlace.coordinate.latitude}, ${interestPlace.coordinate.longitude})",
+                            color = Black,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.width(20.dp))
+
+                        Image(//Imagen lugar 1 //TODO falta centrar las fotos y linkear el botón
+                            painter = painterResource(
+                                id = R.drawable.not_aviable_image
+                            ),
+                            contentDescription = "",
+                            modifier = Modifier.size(150.dp),
+                            contentScale = ContentScale.Crop
+                        )
+
+                        Spacer(modifier = Modifier.width(20.dp))
+
+                        Image(//Imagen lugar 2
+                            painter = painterResource(
+                                id = R.drawable.not_aviable_image
+                            ),
+                            contentDescription = "",
+                            modifier = Modifier.size(150.dp),
+                            contentScale = ContentScale.Crop
+                        )
+
+                        Spacer(modifier = Modifier.width(20.dp))
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(//Botón añadir lugar
+                            onClick = {
+                                showPlaceData = false //TODO Ir a añadir lugar
+                            },
+                            modifier = Modifier
+                                .height(40.dp)
+                                .fillMaxWidth()
+                                .padding(horizontal = 30.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0XFF000000)),
+                        ) {
+                            Text(text = "Añadir lugar", color = White, fontSize = 18.sp)
+                        }
+                    }
+                }
+                else { //Si ha habido errores se muestra el mensaje de error
+                    Text(
+                        text = errorMessage,
+                        color = Red,
+                        fontSize = 18.sp,
+                    )
                 }
             }
         }

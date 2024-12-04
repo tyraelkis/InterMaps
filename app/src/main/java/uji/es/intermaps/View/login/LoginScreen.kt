@@ -189,7 +189,7 @@ fun LoginScreen(navController: NavController) {
                     try {
                         userService.login(email, password)
                         withContext(Dispatchers.Main) {
-                            navController.navigate("home")
+                            navController.navigate("mainMenu")
                         }
                     } catch (e: NotValidUserData) {
                         withContext(Dispatchers.Main) {
