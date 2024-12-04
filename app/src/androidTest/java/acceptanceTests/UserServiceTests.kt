@@ -34,12 +34,10 @@ class UserServiceTests {
         assertEquals(true, res)
 
     }
-    //TODO este test fastidia a los demás porque no llega a borrar el usuario
+
     @Test(expected = AccountAlreadyRegistredException::class)
     fun createUser_E2Invalid_errorOnAccountCreation(): Unit = runBlocking {
-        userService.createUser(email, password)
-        userService.createUser(email, password)
-        userService.deleteUser(email, password)//No se ejecuta esta sentencia
+        userService.createUser(userTest.email, userTest.pswd)
     }
 
     @Test
