@@ -70,14 +70,14 @@ class InterestPlaceServiceTests {
 
     @Test
     fun viewInterestPlaceData_E1Valid_InterestPlaceDataViewed(): Unit = runBlocking {
-        val foundPlace : InterestPlace = interestPlaceService.viewInterestPlaceData(interestPlace.coordinate, email)
+        val foundPlace : InterestPlace = interestPlaceService.viewInterestPlaceData(interestPlace.coordinate)
         val res : Boolean = foundPlace.toponym.contains(interestPlace.toponym)
         assertEquals(true, res)
     }
 
     @Test(expected = NotSuchPlaceException::class)
     fun viewInterestPlaceData_E2Invalid_errorOnViewingInterestPlaceData(): Unit = runBlocking {
-        interestPlaceService.viewInterestPlaceData((Coordinate(-19.665695, 35.529562)), email)
+        interestPlaceService.viewInterestPlaceData((Coordinate(-19.665695, 35.529562)))
     }
     
     @Test
@@ -105,13 +105,15 @@ class InterestPlaceServiceTests {
 
     @Test
     fun viewInterestPlaceList_E1Valido_InterestPlaceListViewed(): Unit = runBlocking{
-        val res = interestPlaceService.viewInterestPlaceList(email)
+        val res = interestPlaceService.viewInterestPlaceList()
         assertTrue(res.isNotEmpty())
     }
 
     @Test
     fun viewInterestPlaceList_E2Invalido_emptyInterestPlaceListViewed(): Unit = runBlocking{
-        val res = interestPlaceService.viewInterestPlaceList(emailEmpty)
+        userService.signOut()
+        userService.login(emailEmpty, "123456BB")
+        val res = interestPlaceService.viewInterestPlaceList()
         assertTrue(res.isEmpty())
     }
     @Test

@@ -92,7 +92,7 @@ class InterestPlaceService(private val repository: Repository) {
     }
 
     suspend fun viewInterestPlaceData(coordinate: Coordinate, email: String? = null): InterestPlace{
-       return repository.viewInterestPlaceData(coordinate, email)
+       return repository.viewInterestPlaceData(coordinate)
     }
 
     suspend fun setAlias(interestPlace: InterestPlace, newAlias : String): Boolean{
@@ -114,8 +114,8 @@ class InterestPlaceService(private val repository: Repository) {
         return routeRepository.searchInterestPlaceByToponym(toponym)
     }
 
-    suspend fun viewInterestPlaceList(email: String? = null): List<InterestPlace> {
-        return repository.viewInterestPlaceList(email)
+    suspend fun viewInterestPlaceList(): List<InterestPlace> {
+        return repository.viewInterestPlaceList()
     }
 
 

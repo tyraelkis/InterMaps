@@ -275,11 +275,9 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun viewInterestPlaceData(interestPlaceCoordinate: Coordinate, email: String?): InterestPlace {
-        val userEmail = email ?: auth.currentUser?.email
-        if (userEmail == null) {
-            throw NotSuchPlaceException("El email es nulo o no válido")
-        }
+    override suspend fun viewInterestPlaceData(interestPlaceCoordinate: Coordinate): InterestPlace {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
         try {
             val documentSnapshot = db.collection("InterestPlace")
                 .document(userEmail)
@@ -314,11 +312,9 @@ class FirebaseRepository: Repository {
     }
 
 
-    override suspend fun viewInterestPlaceList(email: String?): List<InterestPlace> {
-        val userEmail = email ?: auth.currentUser?.email
-        if (userEmail == null) {
-            return emptyList()
-        }
+    override suspend fun viewInterestPlaceList(): List<InterestPlace> {
+        val userEmail =  auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
         return try {
             val documentSnapshot = db.collection("InterestPlace")
                 .document(userEmail)

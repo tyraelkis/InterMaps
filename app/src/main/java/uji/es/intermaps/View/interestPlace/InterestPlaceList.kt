@@ -62,7 +62,7 @@ fun InterestPlaceList( auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -
     LaunchedEffect(user?.email) {
         if (user?.email != null) {
             try {
-                val places = interestPlaceService.viewInterestPlaceList(user.email)
+                val places = interestPlaceService.viewInterestPlaceList()
                 allPlaces = places
             } catch (e: Exception) {
                 allPlaces = emptyList()
