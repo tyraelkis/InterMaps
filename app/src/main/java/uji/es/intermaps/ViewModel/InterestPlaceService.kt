@@ -119,16 +119,12 @@ class InterestPlaceService(private val repository: Repository) {
     }
 
 
-    suspend fun getInterestPlaceByToponym(toponym: String, callback: (List<InterestPlace>) -> Unit) {
-        repository.getInterestPlaceByToponym(toponym) { success, interestPlace ->
-            if (success) {
-                callback(interestPlace)
-            } else {
-                callback(emptyList())
-            }
-
-        }
+    suspend fun getInterestPlaceByToponym(toponym: String): InterestPlace {
+        var returnPlace = repository.getInterestPlaceByToponym(toponym)
+        Log.i("returnPlace", returnPlace.toString())
+        return returnPlace
     }
+
 
 
 

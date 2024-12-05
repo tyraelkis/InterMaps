@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,11 +47,12 @@ import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceList( auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -> Unit,navigateToInterestPlaceCreation: () -> Unit, viewModel: InterestPlaceViewModel) {
+fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
     var db = FirebaseFirestore.getInstance()
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
@@ -154,7 +156,7 @@ fun InterestPlaceList( auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -
                         Button(
                             onClick = {
                                 viewModel.updateInterestPlace(place)
-                                navigateToInterestPlaceSetAlias()
+                                navController.navigate("interestPlaceSetAlias/${place.toponym}")
                             },
                             modifier = Modifier
                                 .width(100.dp)
@@ -225,7 +227,7 @@ fun InterestPlaceList( auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -
                         Button(
                             onClick = {
                                 viewModel.updateInterestPlace(notFavPlace)
-                                navigateToInterestPlaceSetAlias()
+                                navController.navigate("interestPlaceSetAlias/${notFavPlace.toponym}")
                             },
                             modifier = Modifier
                                 .width(100.dp)
@@ -248,9 +250,29 @@ fun InterestPlaceList( auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -
         Column(
             modifier = Modifier.padding(bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
-        )   {Button(
+        ){
+            Button(
+                onClick = {
+                    navController.navigate("interestPlaceCreation")
+                },
+                modifier = Modifier
+                    .width(350.dp)
+                    .height(45.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Black
+                )
+            ){
+                Text(
+                    text = "Añadir lugar",
+                    fontSize = 20.sp,
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(15.dp))
+
+        Button(
             onClick = {
-                navigateToInterestPlaceCreation
+                navController.navigate("interestPlaceCreationByToponym")
             },
             modifier = Modifier
                 .width(350.dp)
@@ -258,13 +280,13 @@ fun InterestPlaceList( auth: FirebaseAuth, navigateToInterestPlaceSetAlias: () -
             colors = ButtonDefaults.buttonColors(
                 containerColor = Black
             )
-        )   {
+        ) {
             Text(
-                text = "Añadir lugar",
+                text = "Añadir lugar por toponimo",
                 fontSize = 20.sp,
             )
         }
-        }
         Spacer(modifier = Modifier.height(15.dp))
+
     }
 }

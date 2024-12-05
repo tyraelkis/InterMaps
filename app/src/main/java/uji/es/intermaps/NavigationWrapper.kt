@@ -99,8 +99,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             composable("interestPlaceList") {
                 InterestPlaceList(
                     auth,
-                    navigateToInterestPlaceSetAlias = { navHostController.navigate("interestPlaceSetAlias") },
-                    navigateToInterestPlaceCreation = { navHostController.navigate("interestPlaceCreation") },
+                    navHostController,
                     viewModel
                 )
             }
@@ -109,6 +108,11 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
 
             ) {
                 InterestPlaceCreation(viewModel)
+            }
+            composable(
+                route = "interestPlaceCreationByToponym"
+            ) {
+                InterestPlaceCreationByToponym(viewModel)
             }
             composable(
                 route = "interestPlaceSetAlias/{toponym}",

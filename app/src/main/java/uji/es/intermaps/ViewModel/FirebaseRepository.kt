@@ -8,6 +8,8 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
+import okhttp3.internal.cookieToString
+import okhttp3.internal.toImmutableMap
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
@@ -39,19 +41,20 @@ class FirebaseRepository: Repository {
                             .addOnFailureListener { e ->
                                 continuation.resumeWithException(e)
                             }
-                    }else {
+                    } else {
                         val exception = task.exception
                         if (exception is FirebaseAuthUserCollisionException) {
                             continuation.resumeWithException(
                                 AccountAlreadyRegistredException("Ya existe una cuenta con este email")
                             )
-                        }
-                        else if (exception is FirebaseAuthInvalidCredentialsException){
+                        } else if (exception is FirebaseAuthInvalidCredentialsException) {
                             continuation.resumeWithException(
                                 IllegalArgumentException("El correo o la contraseña no tienen un formato válido")
                             )
-                        }else {
-                            continuation.resumeWithException(exception ?: Exception("Error desconocido al crear el usuario."))
+                        } else {
+                            continuation.resumeWithException(
+                                exception ?: Exception("Error desconocido al crear el usuario.")
+                            )
                         }
                     }
                 }
@@ -59,7 +62,7 @@ class FirebaseRepository: Repository {
     }
 
 
-    override suspend fun loginUser(email:String, pswd: String): Boolean{
+    override suspend fun loginUser(email: String, pswd: String): Boolean {
         return suspendCoroutine { continuation ->
             auth.signInWithEmailAndPassword(email, pswd)
                 .addOnCompleteListener { task ->
@@ -72,14 +75,16 @@ class FirebaseRepository: Repository {
                                 UnregistredUserException("Usuario o contraseña incorrectos")
                             )
                         } else {
-                            continuation.resumeWithException(exception ?: Exception("Error desconocido al iniciar sesión."))
+                            continuation.resumeWithException(
+                                exception ?: Exception("Error desconocido al iniciar sesión.")
+                            )
                         }
                     }
                 }
         }
     }
 
-    override suspend fun signOut() : Boolean{
+    override suspend fun signOut(): Boolean {
         if (auth.currentUser != null) {
             auth.signOut()
             return true
@@ -101,7 +106,11 @@ class FirebaseRepository: Repository {
                     }
                 }
                 .addOnFailureListener { exception ->
-                    Log.e("Firestore", "Error al verificar el correo: ${exception.message}", exception)
+                    Log.e(
+                        "Firestore",
+                        "Error al verificar el correo: ${exception.message}",
+                        exception
+                    )
                     continuation.resumeWithException(exception)
                 }
         }
@@ -130,7 +139,7 @@ class FirebaseRepository: Repository {
     }
 
     override suspend fun deleteUser(email: String, password: String): Boolean {
-        return try{
+        return try {
             val user = auth.currentUser
             if (user == null) {
                 Log.e("FirebaseAuth", "No hay un usuario autenticado")
@@ -166,31 +175,52 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun setAlias(interestPlace: InterestPlace, newAlias: String):Boolean {
-        return try{
-            val geoPoint = interestPlace.coordinate
+    override suspend fun setAlias(interestPlace: InterestPlace, newAlias: String): Boolean {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
 
-            val search = db.collection("InterestPlace")
-                .whereEqualTo("coordinate", geoPoint)
+        return try {
+            val documentSnapshot = db.collection("InterestPlace")
+                .document(userEmail)
                 .get()
                 .await()
-            if(search.isEmpty){
-                false
-            }else{
-                val document = search.documents[0]
-                val documentId = document.id
 
+            if (documentSnapshot.exists()) {
+                val interestPlaces =
+                    documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
+
+                val foundPlace = (interestPlaces.find { place ->
+                    val coordinate = place["coordinate"] as? Map<String, Double>
+                    val latitude = coordinate?.get("latitude") ?: 0.0
+                    Log.i("latitud", latitude.toString())
+                    val longitude = coordinate?.get("longitude") ?: 0.0
+                    Log.i("longitud", longitude.toString())
+
+
+                    Log.i("latitud1",interestPlace.coordinate.latitude.toString())
+                    Log.i("longitud1",interestPlace.coordinate.longitude.toString())
+
+                    latitude == interestPlace.coordinate.latitude && longitude == interestPlace.coordinate.longitude
+                }?: throw NotSuchPlaceException("Lugar de interés no encontrado")).toMutableMap()
+
+                Log.i("place1", foundPlace.toString())
+                foundPlace["alias"] = newAlias
+                Log.i("place2", foundPlace.toString())
+
+                interestPlace.alias = newAlias
                 db.collection("InterestPlace")
-                    .document(documentId)
-                    .update("alias", newAlias)
+                    .document(userEmail)
+                    .update("interestPlaces", foundPlace)
                     .await()
                 true
+            } else {
+                false
             }
-        }catch (e:Exception){
-            e.printStackTrace()
+        } catch (e: Exception) {
+            Log.e("setAlias", "Error updating alias: ${e.message}", e)
             false
         }
     }
+
 
     override suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
         //Codigo original y funcional para crear lugar de interés
@@ -245,33 +275,36 @@ class FirebaseRepository: Repository {
     }
 
 
-    override suspend fun getInterestPlaceByToponym(
-        toponym: String,
-        callback: ((Boolean), (List<InterestPlace>)) -> Unit
-    ) {
-        return suspendCoroutine { continuation ->
-            Log.d("toponym", toponym)
-            db.collection("InterestPlace")
-                .whereEqualTo("toponym", toponym)
-                .get()
-                .addOnSuccessListener { documents ->
-                    Log.i("getInteresetPlaceByToponym", "${documents.documents}")
-                    if (!documents.isEmpty) {
-                        val favList = mutableListOf<InterestPlace>()
-                        for (document in documents) {
+    override suspend fun getInterestPlaceByToponym(toponym: String): InterestPlace{
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
 
-                            val interestPlace = document.toObject(InterestPlace::class.java)
-                            favList.add(interestPlace)
-                        }
-                        callback(true, favList)
-                    } else {
-                        callback(false, emptyList())
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Log.e("getInteresetPlaceByToponym", e.message ?: "")
-                    callback(false, emptyList())
-                }
+        return try {
+            val documentSnapshot = db.collection("InterestPlace")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                val interestPlaces = documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
+                val foundPlace = interestPlaces.find { place ->
+                    val actualToponym = place["toponym"] as? String ?: ""
+                    toponym.equals(actualToponym)
+                } ?: throw NotSuchPlaceException("Lugar de interés no encontrado")
+
+                var lat = (foundPlace["coordinate"] as Map<String, Double>)["latitude"] ?: 0.0
+                var long = (foundPlace["coordinate"] as Map<String, Double>)["longitude"] ?: 0.0
+                return InterestPlace(
+                    coordinate =  Coordinate(lat,long),
+                    toponym = foundPlace["toponym"] as? String ?: "",
+                    alias = foundPlace["alias"] as? String ?: "",
+                    fav = foundPlace["fav"] as? Boolean ?: false
+                )
+            } else {
+                throw Exception("No existe el documento para el usuario: $userEmail")
+            }
+        } catch (e: Exception) {
+            Log.e("GeneralError", "Ocurrió un error", e)
+            throw e
         }
     }
 

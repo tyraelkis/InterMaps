@@ -1,5 +1,6 @@
 package uji.es.intermaps.View.interestPlace
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -57,6 +58,7 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 @Composable
 fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel, toponym: String){
     val place = viewModel.interestPlace
+    Log.d("Place", place.toString())
     val loading = viewModel.loading
     var showPopupAliasCorrecto by remember { mutableStateOf(false) }
     var showPopupAliasIncorrecto by remember { mutableStateOf(false) }

@@ -46,14 +46,13 @@ class InterestPlaceViewModel(
         this.interestPlace = interestPlace
     }
 
-    suspend fun getInterestPlaceByToponym(toponym: String) {
+    fun getInterestPlaceByToponym(toponym: String) {
         loading = true
         viewModelScope.launch {
-            interestPlaceService.getInterestPlaceByToponym(toponym) {
-                if (it.isNotEmpty()) {
-                    this@InterestPlaceViewModel.interestPlace = it.first()
-                    loading = false
-                }
+            interestPlace = interestPlaceService.getInterestPlaceByToponym(toponym)
+            Log.i("interestplace", interestPlace.toString())
+            if (interestPlace!= null){
+                loading = false
             }
         }
 
