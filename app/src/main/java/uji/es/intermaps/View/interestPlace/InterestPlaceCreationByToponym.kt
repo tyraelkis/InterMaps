@@ -30,6 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -59,6 +60,7 @@ import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import androidx.compose.ui.input.key.Key
 import com.mapbox.geojson.Point.fromLngLat
+import kotlinx.coroutines.coroutineScope
 
 import uji.es.intermaps.Model.InterestPlace
 
@@ -69,9 +71,15 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
     var showPopupCreateSucces by remember { mutableStateOf(false) }
     var showPopupCreateError by remember { mutableStateOf(false) }
     var toponym by remember { mutableStateOf("") }
+    var selectToponym by remember { mutableStateOf("") }
     var sePuedeAñadir by remember { mutableStateOf(false) }
     var place by remember { mutableStateOf(InterestPlace) }
     var interestPlaceService = InterestPlaceService(FirebaseRepository())
+    val  coroutineScope = rememberCoroutineScope()
+
+
+    CreateInterestPlaceCorrectPopUp(viewModel)
+
     var mapViewportState = rememberMapViewportState {
         setCameraOptions {
             zoom(11.0)
@@ -149,19 +157,47 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
 
         }
         Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = {
-                viewModel.getLocationsByToponim(toponym)
-            },
+        Row(
             modifier = Modifier
-                .height(36.dp)
-                .padding(horizontal = 32.dp, vertical = 1.dp)
-                .align(AbsoluteAlignment.Right),
-            colors = ButtonDefaults.buttonColors(containerColor = Black),
-            shape = RoundedCornerShape(10.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            horizontalArrangement = Arrangement.Absolute.Right,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Navigate", color = White, fontSize = 14.sp)
+            if (sePuedeAñadir) {
+                Button(
+                    onClick = {
+                        coroutineScope.launch {
+                            var result =
+                                interestPlaceService.createInterestPlaceFromToponym(selectToponym)
+                            if (result != null) {
+                                viewModel.showCreateInterestPlaceCorrectPopUp()
+                            } else {
+                                viewModel.hideCreateInterestPlaceCorrectPopUp()
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .height(36.dp)
+                        .padding(horizontal = 32.dp, vertical = 1.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Black),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text(text = "Añadir lugar", color = White, fontSize = 14.sp)
+                }
+            }
+            Button(
+                onClick = {
+                    viewModel.getLocationsByToponim(toponym)
+                },
+                modifier = Modifier
+                    .height(36.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Black),
+                shape = RoundedCornerShape(10.dp),
+
+            ) {
+                Text(text = "Obtener lugares", color = White, fontSize = 14.sp)
+            }
         }
 
         Column (
@@ -176,8 +212,9 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                     Text(text = viewModel.locations.value[index].properties.label,
                     modifier = Modifier
                         .clickable {
+                            sePuedeAñadir = true
+                            selectToponym = viewModel.locations.value[index].properties.label
                             val coordinates = viewModel.locations.value[index].geometry.coordinates
-                            Log.i("Coordinates", "Coordinates: $coordinates")
                             mapViewportState.setCameraOptions {
                                 zoom(11.0)
                                 center(

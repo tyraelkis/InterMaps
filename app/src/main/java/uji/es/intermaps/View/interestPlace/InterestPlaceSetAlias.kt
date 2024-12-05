@@ -46,7 +46,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mapbox.geojson.Point.fromLngLat
+import com.mapbox.maps.extension.compose.MapboxMap
+import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
@@ -66,6 +70,17 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel, toponym: String){
     var repository: Repository = FirebaseRepository()
     var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
     val  coroutineScope = rememberCoroutineScope()
+    val long = place.coordinate.longitude
+    val lat = place.coordinate.latitude
+
+    var mapViewportState = rememberMapViewportState {
+        setCameraOptions {
+            zoom(11.0)
+            center(fromLngLat(long,lat)) // Coordenadas iniciales
+            pitch(0.0)
+            bearing(0.0)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.getInterestPlaceByToponym(toponym)
@@ -115,15 +130,10 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel, toponym: String){
                     .clip(RoundedCornerShape(20.dp))
             ) {
 
-                Image(
-                    painter = painterResource(
-                        id = R.drawable.not_aviable_image
-                    ),
-                    contentDescription = "",
+                MapboxMap(
                     modifier = Modifier
-                        .width(350.dp)
-                        .height(350.dp),
-                    contentScale = ContentScale.Crop
+                        .fillMaxWidth(),
+                    mapViewportState = mapViewportState
                 )
             }
 
