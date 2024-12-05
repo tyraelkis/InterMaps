@@ -32,6 +32,8 @@ class UserViewModel(
     private val _showPasswordPopUp = mutableStateOf(false)
     val showPasswordDialog: State<Boolean> get() = _showPasswordPopUp
 
+
+
     var password by mutableStateOf("")
     var errorMessage by mutableStateOf("")
     var newPassword by mutableStateOf("")
@@ -61,6 +63,7 @@ class UserViewModel(
     fun hidePasswordPopUp(){
         _showPasswordPopUp.value = false
     }
+
 
     val user = auth.currentUser
 

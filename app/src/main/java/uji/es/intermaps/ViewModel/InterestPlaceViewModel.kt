@@ -31,6 +31,12 @@ class InterestPlaceViewModel(
 
     private val openRouteService = retrofit.create(ORSAPI::class.java)
 
+    private val _showCreateInterestPlaceCorrectPopUp = mutableStateOf(false)
+    val showCreateInterestPlaceCorrectPopUp: State<Boolean> get() = _showCreateInterestPlaceCorrectPopUp
+
+    private val _showCreateInterestPlaceErrorPopUp = mutableStateOf(false)
+    val showCreateInterestPlaceErrorPopUp: State<Boolean> get() = _showCreateInterestPlaceErrorPopUp
+
     init {
         _interestPlace.value = InterestPlace()
     }
@@ -44,6 +50,20 @@ class InterestPlaceViewModel(
 
     fun putInterestPlace(interestPlace: InterestPlace) {
         this.interestPlace = interestPlace
+    }
+
+    fun showCreateInterestPlaceCorrectPopUp(){
+        _showCreateInterestPlaceCorrectPopUp.value = true
+    }
+    fun hideCreateInterestPlaceCorrectPopUp(){
+        _showCreateInterestPlaceCorrectPopUp.value = false
+    }
+
+    fun showCreateInterestPlaceErrorPopUp(){
+        _showCreateInterestPlaceErrorPopUp.value = true
+    }
+    fun hideCreateInterestPlaceErrorPopUp() {
+        _showCreateInterestPlaceErrorPopUp.value = false
     }
 
     fun getInterestPlaceByToponym(toponym: String) {

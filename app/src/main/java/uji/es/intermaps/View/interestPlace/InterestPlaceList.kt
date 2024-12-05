@@ -5,6 +5,7 @@ package uji.es.intermaps.View.interestPlace
 import com.google.firebase.auth.FirebaseAuth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -53,11 +55,9 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
-    var db = FirebaseFirestore.getInstance()
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
     val interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
-    var interestPlace: InterestPlace = InterestPlace()
     var allPlaces by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
     val emailPrefix = user?.email?.substringBefore("@") ?: "Usuario"
 
@@ -153,24 +153,19 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                 .padding(horizontal = 15.dp)
 
                         )
-                        Button(
-                            onClick = {
-                                viewModel.updateInterestPlace(place)
-                                navController.navigate("interestPlaceSetAlias/${place.toponym}")
-                            },
-                            modifier = Modifier
-                                .width(100.dp)
-                                .height(42.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Black
-                            )
-                        ) {
-                            Text(
-                                text = "Editar",
-                                fontSize = 16.sp,
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit",
 
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clickable {
+                                    viewModel.updateInterestPlace(place)
+                                    navController.navigate("interestPlaceSetAlias/${place.toponym}")
+                                },
+
+                            tint = Color(color = 0XFF007E70)
+                        )
                     }
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -222,25 +217,21 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                             fontSize = 20.sp,
                             modifier = Modifier
                                 .weight(1f)
-                                .padding(horizontal = 15.dp)
+                                .padding(horizontal = 8.dp)
                         )
-                        Button(
-                            onClick = {
-                                viewModel.updateInterestPlace(notFavPlace)
-                                navController.navigate("interestPlaceSetAlias/${notFavPlace.toponym}")
-                            },
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit",
+
                             modifier = Modifier
-                                .width(100.dp)
-                                .height(42.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Black
-                            )
-                        ) {
-                            Text(
-                                text = "Editar",
-                                fontSize = 16.sp,
-                            )
-                        }
+                                .size(30.dp)
+                                .clickable {
+                                    viewModel.updateInterestPlace(notFavPlace)
+                                    navController.navigate("interestPlaceSetAlias/${notFavPlace.toponym}")
+                                },
+
+                            tint = Color.Black
+                        )
 
                     }
                 }

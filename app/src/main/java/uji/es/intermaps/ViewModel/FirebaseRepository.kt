@@ -191,25 +191,22 @@ class FirebaseRepository: Repository {
                 val foundPlace = (interestPlaces.find { place ->
                     val coordinate = place["coordinate"] as? Map<String, Double>
                     val latitude = coordinate?.get("latitude") ?: 0.0
-                    Log.i("latitud", latitude.toString())
                     val longitude = coordinate?.get("longitude") ?: 0.0
-                    Log.i("longitud", longitude.toString())
 
-
-                    Log.i("latitud1",interestPlace.coordinate.latitude.toString())
-                    Log.i("longitud1",interestPlace.coordinate.longitude.toString())
 
                     latitude == interestPlace.coordinate.latitude && longitude == interestPlace.coordinate.longitude
                 }?: throw NotSuchPlaceException("Lugar de interés no encontrado")).toMutableMap()
 
-                Log.i("place1", foundPlace.toString())
-                foundPlace["alias"] = newAlias
-                Log.i("place2", foundPlace.toString())
-
-                interestPlace.alias = newAlias
+                val updatedInterestPlaces = interestPlaces.map { place ->
+                    if (place == foundPlace) {
+                        place.toMutableMap().apply {
+                            this["alias"] = newAlias
+                        }
+                    }
+                }
                 db.collection("InterestPlace")
                     .document(userEmail)
-                    .update("interestPlaces", foundPlace)
+                    .update("interestPlaces", updatedInterestPlaces)
                     .await()
                 true
             } else {
