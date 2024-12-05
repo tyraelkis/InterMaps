@@ -244,6 +244,21 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel, toponym: String){
             ) {
                 Text(text = "Editar", color = White, fontSize = 14.sp)
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = {} ,
+                modifier = Modifier
+                    .height(36.dp)
+                    .width(250.dp)
+                    .padding(horizontal = 32.dp, vertical = 1.dp)
+                    .align(Alignment.CenterHorizontally),
+                colors = ButtonDefaults.buttonColors(containerColor = Black),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text(text = "Eliminar lugar", color = White, fontSize = 14.sp)
+            }
         }
     }
 
