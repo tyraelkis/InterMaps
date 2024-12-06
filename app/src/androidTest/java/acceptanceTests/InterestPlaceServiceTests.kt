@@ -128,4 +128,18 @@ class InterestPlaceServiceTests {
         val puntoDelete = Coordinate(38.0,-0.0 )
         interestPlaceService.deleteInterestPlace(puntoDelete)
         }
+
+    @Test
+    fun  createInterestPlaceByToponym_E1Valid_InterestPlaceCreated(): Unit = runBlocking {
+        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceFromToponym("Mozambique")
+        val res = db.doesInteresPlaceExists(interestPlaceTest.coordinate)
+        interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
+        assertEquals(true, res)
+    }
+
+    @Test(expected = NotValidAliasException::class)
+    fun  createInterestPlaceByToponym_E1Invalid_InterestPlaceCreated(): Unit = runBlocking {
+        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceFromToponym("Mozambique")
+        interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
+    }
 }

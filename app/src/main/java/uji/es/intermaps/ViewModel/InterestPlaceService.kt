@@ -104,7 +104,7 @@ class InterestPlaceService(private val repository: Repository) {
             }
         }
         if (!repository.setAlias(interestPlace, newAlias)){
-            return false
+            throw NotValidAliasException()
         }
         interestPlace.alias = newAlias
         return true
