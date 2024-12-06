@@ -36,16 +36,20 @@ class InterestPlaceServiceTests {
     @Before
     fun setup(): Unit = runBlocking {
         userService.login(userTest.email, userTest.pswd)
+        /*val coord = Coordinate(-18.665695, 35.529562)
+        interestPlaceService.createInterestPlaceCoordinates(coord)*/
     }
 
     @After
     fun tearDown(): Unit = runBlocking {
         userService.signOut()
+
     }
 
     @Test
     fun createInterestPlace_E1Valid_InterestPlaceCreated(): Unit = runBlocking{
-        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceCoordinates(Coordinate(-16.665695, 36.529562)) //Cambiar coordenadas segun los tests
+        val puntoDelete = Coordinate(-16.665695, 36.529562)
+        val interestPlaceTest: InterestPlace = interestPlaceService.createInterestPlaceCoordinates(puntoDelete)
         val res = db.doesInteresPlaceExists(interestPlaceTest.coordinate)
         interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
         assertEquals(true, res)
@@ -60,6 +64,8 @@ class InterestPlaceServiceTests {
     fun searchInterestPlaceByCoordinate_E1Valid_InterestPlaceFound(): Unit = runBlocking {
         val foundPlace: InterestPlace = interestPlaceService.searchInterestPlaceByCoordiante(interestPlace.coordinate)
         val resultado : Boolean = foundPlace.toponym.contains(interestPlace.toponym)
+        val coord = Coordinate(-18.665695, 35.529562)
+        interestPlaceService.createInterestPlaceCoordinates(coord)
         assertEquals(true, resultado)
     }
 
@@ -114,11 +120,12 @@ class InterestPlaceServiceTests {
         userService.signOut()
         userService.login(emailEmpty, "123456BB")
         val res = interestPlaceService.viewInterestPlaceList()
+        userService.login(email, "123456BB")
         assertTrue(res.isEmpty())
     }
     @Test
     fun deleteInterestPlace_E1Valid_InterestPlaceDeleted(): Unit = runBlocking{
-        val puntoDelete = Coordinate(39.9333300,-0.1000000 )
+        val puntoDelete = Coordinate(39.9333300,-0.1000000)
         interestPlaceService.createInterestPlaceCoordinates(puntoDelete)
         assertEquals(true, interestPlaceService.deleteInterestPlace(puntoDelete))
     }
@@ -141,5 +148,15 @@ class InterestPlaceServiceTests {
     fun  createInterestPlaceByToponym_E1Invalid_InterestPlaceCreated(): Unit = runBlocking {
         val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceFromToponym("Mozambique")
         interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
+    }
+
+
+    //@Test
+    fun sara_pruebas(): Unit = runBlocking{
+        userService.login("pruebas@sara.com", "Password")
+        val puntoDelete = Coordinate(39.9333300,-0.1000000)
+        interestPlaceService.createInterestPlaceCoordinates(puntoDelete)
+        val puntoDelete2 = Coordinate(54.9333300,-20.1000000)
+        interestPlaceService.createInterestPlaceCoordinates(puntoDelete2)
     }
 }
