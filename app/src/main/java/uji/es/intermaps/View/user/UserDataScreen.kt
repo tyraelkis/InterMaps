@@ -59,11 +59,7 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
     var selectedOptionRoutes by remember { mutableStateOf(optionsRoutes[0]) }
     var selectedOptionTransport by remember { mutableStateOf(optionsRoutes[0]) }
 
-    var errorMessage by remember { mutableStateOf("") }
-
     val user = auth.currentUser
-    val repository: Repository = FirebaseRepository()
-    val userService = UserService(repository)
     var currentEmail by remember { mutableStateOf(user?.email.toString()) }
 
     DeleteUserPopUp(viewModel, navController)
