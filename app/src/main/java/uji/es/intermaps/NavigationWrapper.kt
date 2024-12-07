@@ -1,10 +1,6 @@
 package uji.es.intermaps
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -16,12 +12,10 @@ import uji.es.intermaps.View.home.HomeScreen
 import uji.es.intermaps.View.home.InitialScreen
 import uji.es.intermaps.View.home.MainMenu
 import uji.es.intermaps.View.interestPlace.InterestPlaceCreation
-import uji.es.intermaps.View.interestPlace.InterestPlaceCreationByToponym
 import uji.es.intermaps.View.interestPlace.InterestPlaceList
 import uji.es.intermaps.View.interestPlace.InterestPlaceSetAlias
 import uji.es.intermaps.View.login.LoginScreen
 import uji.es.intermaps.View.signup.SignUpScreen
-import uji.es.intermaps.View.navBar.NavBar
 import uji.es.intermaps.View.user.UserDataScreen
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.UserViewModel
@@ -31,38 +25,9 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
 
     val currentRoute = navHostController.currentBackStackEntryAsState().value?.destination?.route
 
-    Scaffold(
-        bottomBar = {
-            // Mostrar la barra de navegación solo en ciertas pantallas
-            if (currentRoute !in listOf("logIn", "signUp", "initial")) {
-                NavBar(
-                    currentRoute = currentRoute ?: "initial",
-                    onNavigate = { route ->
-                        if (route != currentRoute) { // Evitar recargar la misma ruta
-                            navHostController.navigate(route) {
-                                if (route == "home"){
-                                    popUpTo(navHostController.graph.startDestinationId){
-                                        inclusive = true
-                                    }
-                                }
-                                else{
-                                    popUpTo(navHostController.graph.startDestinationId){
-                                        saveState = true
-                                    }
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    }
-                )
-            }
-        }
-    ) { padding ->
         NavHost(
             navController = navHostController,
             startDestination = "initial",
-            modifier = Modifier.padding(padding)
         ) {
             composable("initial") {
                 InitialScreen(
@@ -88,11 +53,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             composable("mainMenu") {
                 MainMenu (
                     auth,
-                    navigateToUserDataScreen = { navHostController.navigate("userDataScreen") },
-                    navigateToInterestPlaceList = { navHostController.navigate("interestPlaceList") },
-                    //TODO aun no implementados
-                    //navigateToVehicleList = { navHostController.navigate("vehicleList") },
-                    //navigateToRoutesList = { navHostController.navigate("routeList") }
+                    navHostController
                 )
             }
             composable("userDataScreen") {
@@ -131,7 +92,6 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             }
 
         }
-    }
 }
     /*NavHost(navController = navHostController, startDestination = "initial") {
         composable("initial"){

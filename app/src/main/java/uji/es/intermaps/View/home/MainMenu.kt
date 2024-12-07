@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -55,10 +56,10 @@ import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 
 @Composable
-fun MainMenu(auth: FirebaseAuth, navigateToUserDataScreen: () -> Unit, navigateToInterestPlaceList: () -> Unit) {
+fun MainMenu(auth: FirebaseAuth, navController: NavController) {
 
     var busqueda by remember { mutableStateOf("") }
-    var interestPlace by remember { mutableStateOf(InterestPlace()) }
+    var interestPlace by remember { mutableStateOf(InterestPlace(Coordinate(39.98567, -0.04935), "","",false)) }
     var showMenu by remember { mutableStateOf(false) }
     var showPlaceData by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
@@ -168,7 +169,7 @@ fun MainMenu(auth: FirebaseAuth, navigateToUserDataScreen: () -> Unit, navigateT
                                             }
                                         } else {
                                             try {
-                                                //interestPlace = interestPlaceService.searchInterestPlaceByToponym(input)
+                                                interestPlace = interestPlaceService.searchInterestPlaceByToponym(input)
                                                 errorMessage=""
                                                 busqueda = ""
                                             } catch (e: Exception) {
@@ -203,8 +204,8 @@ fun MainMenu(auth: FirebaseAuth, navigateToUserDataScreen: () -> Unit, navigateT
                 Modifier.fillMaxSize(),
                 mapViewportState = rememberMapViewportState {
                     setCameraOptions {
-                        zoom(12.0)
-                        center(Point.fromLngLat(-0.04935, 39.98567))
+                        zoom(12.0) //TODO mirar en la historia 6 porque no va
+                        center(Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude))
                         pitch(0.0)
                         bearing(0.0)
                     }
@@ -275,13 +276,13 @@ fun MainMenu(auth: FirebaseAuth, navigateToUserDataScreen: () -> Unit, navigateT
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { navigateToUserDataScreen() }, //TODO Comprobar que va bien
+                            .clickable { navController.navigate("userDataScreen") }, //TODO Comprobar que va bien
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            navigateToUserDataScreen() //TODO Comprobar que va bien
+                            navController.navigate("userDataScreen") //TODO Comprobar que va bien
                         },
                         modifier = Modifier
                             .height(40.dp)
@@ -314,13 +315,13 @@ fun MainMenu(auth: FirebaseAuth, navigateToUserDataScreen: () -> Unit, navigateT
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { navigateToInterestPlaceList() }, //TODO Comprobar que va bien
+                            .clickable { navController.navigate("interestPlaceList") }, //TODO Comprobar que va bien
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            navigateToInterestPlaceList() //TODO Comprobar que va bien
+                            navController.navigate("interestPlaceList") //TODO Comprobar que va bien
                         },
                         modifier = Modifier
                             .height(40.dp)
@@ -423,7 +424,7 @@ fun MainMenu(auth: FirebaseAuth, navigateToUserDataScreen: () -> Unit, navigateT
                     .fillMaxSize()
                     .padding(
                         start = 0.dp,
-                        top = 500.dp,
+                        top = 600.dp,
                         end = 0.dp,
                         bottom = 0.dp)
                     .background(
@@ -433,8 +434,6 @@ fun MainMenu(auth: FirebaseAuth, navigateToUserDataScreen: () -> Unit, navigateT
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (errorMessage.isEmpty()) { //Si no hay errores en la busqueda se muestran los datos
-
-                    Spacer(modifier = Modifier.height(20.dp))
 
                     Row(
                         modifier = Modifier
@@ -455,6 +454,7 @@ fun MainMenu(auth: FirebaseAuth, navigateToUserDataScreen: () -> Unit, navigateT
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Spacer(modifier = Modifier.width(20.dp))
@@ -464,7 +464,7 @@ fun MainMenu(auth: FirebaseAuth, navigateToUserDataScreen: () -> Unit, navigateT
                                 id = R.drawable.not_aviable_image
                             ),
                             contentDescription = "",
-                            modifier = Modifier.size(150.dp),
+                            modifier = Modifier.size(160.dp),
                             contentScale = ContentScale.Crop
                         )
 
@@ -475,7 +475,7 @@ fun MainMenu(auth: FirebaseAuth, navigateToUserDataScreen: () -> Unit, navigateT
                                 id = R.drawable.not_aviable_image
                             ),
                             contentDescription = "",
-                            modifier = Modifier.size(150.dp),
+                            modifier = Modifier.size(160.dp),
                             contentScale = ContentScale.Crop
                         )
 
@@ -504,11 +504,20 @@ fun MainMenu(auth: FirebaseAuth, navigateToUserDataScreen: () -> Unit, navigateT
                     }
                 }
                 else { //Si ha habido errores se muestra el mensaje de error
-                    Text(
-                        text = errorMessage,
-                        color = Red,
-                        fontSize = 18.sp,
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(White),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = errorMessage,
+                            color = Red,
+                            fontSize = 18.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }
