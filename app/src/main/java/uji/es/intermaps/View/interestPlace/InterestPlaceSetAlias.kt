@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.mapbox.geojson.Point.fromLngLat
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
@@ -54,24 +55,28 @@ import okhttp3.internal.wait
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel, toponym: String){
+fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlaceViewModel, toponym: String){
     val place = viewModel.interestPlace
     Log.d("Place", place.toString())
     val loading = viewModel.loading
     var showPopupAliasCorrecto by remember { mutableStateOf(false) }
     var showPopupAliasIncorrecto by remember { mutableStateOf(false) }
-    var newAlias by remember { mutableStateOf("") }
+    //var newAlias by remember { mutableStateOf("") }
     var repository: Repository = FirebaseRepository()
     var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
     val  coroutineScope = rememberCoroutineScope()
     val long = place.coordinate.longitude
     val lat = place.coordinate.latitude
+
+    DeleteInterestPlacePopUp(viewModel, navController)
+    ModificationInterestPlacePopUp(viewModel)
 
     var mapViewportState = rememberMapViewportState {
         setCameraOptions {
@@ -204,8 +209,8 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel, toponym: String){
             ) {
                 // Texto en el fondo
                 TextField(
-                    value = newAlias,
-                    onValueChange = { newAlias= it },
+                    value = viewModel.newAlias,
+                    onValueChange = { viewModel.newAlias= it },
                     modifier = Modifier
                         .height(52.dp)
                         .fillMaxWidth()
@@ -224,6 +229,7 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel, toponym: String){
             Button(
                 onClick = {
                     coroutineScope.launch {
+                        val newAlias = viewModel.newAlias
                         if (interestPlaceService.setAlias(
                                 interestPlace = place,
                                 newAlias = newAlias
@@ -248,7 +254,10 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel, toponym: String){
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = {} ,
+                onClick = {
+                    viewModel.coordinate = place.coordinate
+                    viewModel.showDeleteInterestPlacePopUp()
+                } ,
                 modifier = Modifier
                     .height(36.dp)
                     .width(250.dp)
@@ -262,7 +271,7 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel, toponym: String){
         }
     }
 
-    if (showPopupAliasCorrecto) {
+    /*if (showPopupAliasCorrecto) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -321,7 +330,7 @@ fun InterestPlaceSetAlias(viewModel: InterestPlaceViewModel, toponym: String){
                 }
             }
         }
-    }
+    }*/
 
     if (showPopupAliasIncorrecto) {
         Box(

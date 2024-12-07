@@ -123,7 +123,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
                     backStackEntry ->
                 val toponym = backStackEntry.arguments?.getString("toponym")
                 if (toponym != null) {
-                    InterestPlaceSetAlias(viewModel, toponym)
+                    InterestPlaceSetAlias(navHostController,viewModel, toponym)
                 }
 
             }

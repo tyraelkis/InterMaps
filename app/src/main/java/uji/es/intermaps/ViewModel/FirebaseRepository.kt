@@ -380,18 +380,15 @@ class FirebaseRepository: Repository {
             ?: throw IllegalStateException("No hay un usuario autenticado")
 
         return try {
-            // Obtener el documento del usuario
             val documentSnapshot = db.collection("InterestPlace")
                 .document(userEmail)
                 .get()
                 .await()
 
             if (documentSnapshot.exists()) {
-                // Obtener la lista de lugares de interés
                 val interestPlaces = documentSnapshot.get("interestPlaces") as? MutableList<Map<String, Any>>
                     ?: mutableListOf()
 
-                // Buscar el índice del lugar con la coordenada dada
                 val placeIndex = interestPlaces.indexOfFirst { place ->
                     val placeCoordinate = place["coordinate"] as? Map<String, Double> ?: return@indexOfFirst false
                     val latitude = placeCoordinate["latitude"] ?: return@indexOfFirst false
@@ -403,62 +400,11 @@ class FirebaseRepository: Repository {
                 if (placeIndex == -1) {
                     throw NotSuchPlaceException("Lugar de interés no encontrado")
                 }
-
-                // Eliminar el lugar de la lista
                 interestPlaces.removeAt(placeIndex)
 
-                // Actualizar la lista en Firestore
                 db.collection("InterestPlace")
                     .document(userEmail)
                     .update("interestPlaces", interestPlaces)
-                    .await()
-
-                true
-            } else {
-                false
-            }
-        } catch (e: NotSuchPlaceException) {
-            Log.e("deleteInterestPlace", "Lugar no encontrado: ${e.message}")
-            false
-        } catch (e: Exception) {
-            Log.e("deleteInterestPlace", "Error eliminando lugar: ${e.message}", e)
-            false
-        }
-    }
-
-
-
-     suspend fun deleteInterestPlace1(coordinate: Coordinate): Boolean {
-        val userEmail =
-            auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
-
-        return try {
-            // Obtener el documento del usuario
-            val documentSnapshot = db.collection("InterestPlace")
-                .document(userEmail)
-                .get()
-                .await()
-
-            if (documentSnapshot.exists()) {
-                // Obtener la lista de lugares de interés
-                val interestPlaces = documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
-
-                // Buscar el lugar con la coordenada dada
-                val foundPlace = interestPlaces.find { place ->
-                    val newCoordinate = place["coordinate"] as? Map<String, Double>
-                    val latitude = newCoordinate?.get("latitude") ?: 0.0
-                    val longitude = newCoordinate?.get("longitude") ?: 0.0
-
-                    latitude == coordinate.latitude && longitude == coordinate.longitude
-                } ?: throw NotSuchPlaceException("Lugar de interés no encontrado")
-
-                val index = interestPlaces.indexOf(foundPlace)
-                interestPlaces.drop(index)
-
-                // Actualizar la lista en Firestore
-                db.collection("InterestPlace")
-                    .document(userEmail)
-                    .update("interestPlace", interestPlaces)
                     .await()
 
                 true

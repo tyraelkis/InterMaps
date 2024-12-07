@@ -8,7 +8,7 @@
       <SelectionState runConfigName="InterestPlaceServiceTests">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="sara_pruebas()">
+      <SelectionState runConfigName="deleteInterestPlace_E1Valid_InterestPlaceDeleted()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

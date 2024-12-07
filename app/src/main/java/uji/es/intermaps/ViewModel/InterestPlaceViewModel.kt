@@ -8,11 +8,14 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import uji.es.intermaps.APIParsers.PossibleCoord
+import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
 import uji.es.intermaps.Interfaces.ORSAPI
+import uji.es.intermaps.Model.Coordinate
 
 
 class InterestPlaceViewModel(
@@ -21,6 +24,13 @@ class InterestPlaceViewModel(
     private val _locations = mutableStateOf<List<PossibleCoord>>(emptyList())
     val locations: State<List<PossibleCoord>> = _locations
 
+    private val _showDeletePopUp = mutableStateOf(false)
+    val showDeleteDialog: State<Boolean> get() = _showDeletePopUp
+
+    private val _showUpdatePopUp = mutableStateOf(false)
+    val showUpdateDialog: State<Boolean> get() = _showUpdatePopUp
+
+    var coordinate by mutableStateOf(Coordinate(0.0, 0.0))
 
     // Retrofit setup
     private val retrofit = Retrofit.Builder()
@@ -47,9 +57,26 @@ class InterestPlaceViewModel(
         private set
     var interestPlace by mutableStateOf(InterestPlace())
         private set
+    var newAlias by mutableStateOf("")
 
     fun putInterestPlace(interestPlace: InterestPlace) {
         this.interestPlace = interestPlace
+    }
+
+    fun showDeleteInterestPlacePopUp(){
+        _showDeletePopUp.value = true
+    }
+
+    fun hideDeleteInterestPlacePopUp(){
+        _showDeletePopUp.value = false
+    }
+
+    fun showUpdateInterestPlacePopUp(){
+        _showDeletePopUp.value = true
+    }
+
+    fun hideUpdateInterestPlacePopUp(){
+        _showDeletePopUp.value = false
     }
 
     fun showCreateInterestPlaceCorrectPopUp(){
@@ -95,5 +122,12 @@ class InterestPlaceViewModel(
             }
         }
 
+    }
+
+    suspend fun deleteInterestPlace (coordinate: Coordinate){
+        try {
+            interestPlaceService.deleteInterestPlace(coordinate)
+
+        }catch (e: UnableToDeletePlaceException){}
     }
 }
