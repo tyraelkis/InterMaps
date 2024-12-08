@@ -8,6 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.DataBase
@@ -66,6 +67,17 @@ class VehicleTests {
         val res = vehicleService.viewVehicleList()
         userService.login(emailEmpty, "123456BB")
         assertTrue(res.isEmpty())
+    }
+
+    @Test
+    fun deleteVehicle_E1Valid_vehicleDeleted(): Unit = runBlocking{
+        vehicleService.createVehicle("6666NOG", "Gasolina", 9.0)
+        assertEquals(true, vehicleService.deleteVehicle("6666NOG"))
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun deleteVehicle_E2Invalid_vehicleNotDeleted(): Unit = runBlocking{
+        vehicleService.deleteVehicle("8888COD")
     }
 
 }
