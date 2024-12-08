@@ -1,17 +1,43 @@
 package uji.es.intermaps.Model
 
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import uji.es.intermaps.Interfaces.ORSAPI
 import uji.es.intermaps.Interfaces.PrecioCarburanteAPI
 import uji.es.intermaps.Interfaces.PrecioLuzAPI
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Query
+import okhttp3.logging.HttpLoggingInterceptor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
+import android.util.Log
+
 
 object RetrofitConfig {
     fun createRetrofitOpenRouteService(): ORSAPI {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.openrouteservice.org/")
-            .addConverterFactory(GsonConverterFactory.create())
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY // Cambia a NONE en producción
+        }
+
+        // Configuración del cliente HTTP
+        val httpClient = OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .connectTimeout(30, TimeUnit.SECONDS) // Timeout para conexión
+            .readTimeout(30, TimeUnit.SECONDS)    // Timeout para lectura
+            .writeTimeout(30, TimeUnit.SECONDS)   // Timeout para escritura
             .build()
+
+        // Construcción de Retrofit
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://api.openrouteservice.org/") // Base URL
+            .client(httpClient) // Cliente HTTP con configuración personalizada
+            .addConverterFactory(GsonConverterFactory.create()) // Conversión JSON
+            .build()
+
+        // Creación del servicio
         return retrofit.create(ORSAPI::class.java)
     }
 

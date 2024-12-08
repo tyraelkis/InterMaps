@@ -1,9 +1,11 @@
-package uji.es.intermaps.Model
+package uji.es.intermaps.ViewModel
 
 import uji.es.intermaps.Exceptions.IncorrectDataException
 import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
+import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.User
 
 class UserService(var repository: Repository) {
 
@@ -64,7 +66,6 @@ class UserService(var repository: Repository) {
         if (repository.viewUserData(email))
             return true
         throw SessionNotStartedException()
-
 
     }
 

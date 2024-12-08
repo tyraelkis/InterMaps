@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -43,27 +44,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mapbox.geojson.Point
+import com.mapbox.maps.extension.compose.MapboxMap
+import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
-import uji.es.intermaps.Model.FirebaseRepository
-import uji.es.intermaps.Model.InterestPlaceService
-import uji.es.intermaps.Model.Repository
+import uji.es.intermaps.ViewModel.FirebaseRepository
+import uji.es.intermaps.ViewModel.InterestPlaceService
+import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
-    val place = viewModel.interestPlace.observeAsState().value ?:return
+    val place = viewModel.interestPlace
     var showPopupCreateSucces by remember { mutableStateOf(false) }
     var showPopupCreateError by remember { mutableStateOf(false) }
     var alias by remember { mutableStateOf("") }
     var repository: Repository = FirebaseRepository()
     var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
-    val  coroutineScope = rememberCoroutineScope()
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -89,21 +94,29 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
         }
         Spacer(modifier = Modifier.height(15.dp))
 
-        Box(
+        Column(
             modifier = Modifier
                 .size(350.dp)
                 .clip(RoundedCornerShape(20.dp))
         ) {
 
-            Image(
-                painter = painterResource(
-                    id = R.drawable.not_aviable_image
-                ),
-                contentDescription = "",
+            MapboxMap(
                 modifier = Modifier
-                    .width(350.dp)
-                    .height(350.dp),
-                contentScale = ContentScale.Crop
+                    .fillMaxWidth()
+                    .weight(1f), // Ocupa la mitad del espacio
+                mapViewportState = rememberMapViewportState {
+                    setCameraOptions {
+                        zoom(11.0)
+                        center(
+                            Point.fromLngLat(
+                                -0.0675,
+                                39.9947
+                            )
+                        ) // Coordenadas para centrar el mapa en la UJI, Castellón de la Plana
+                        pitch(0.0)
+                        bearing(0.0)
+                    }
+                }
             )
         }
 

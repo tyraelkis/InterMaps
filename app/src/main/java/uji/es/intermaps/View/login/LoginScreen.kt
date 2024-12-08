@@ -32,12 +32,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.graphics.Color.Companion.LightGray
+import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -45,29 +48,26 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Exceptions.UnregistredUserException
-import uji.es.intermaps.Model.FirebaseRepository
-import uji.es.intermaps.Model.UserService
+import uji.es.intermaps.ViewModel.FirebaseRepository
+import uji.es.intermaps.ViewModel.UserService
 @OptIn(ExperimentalMaterial3Api::class)
 
 @Composable
-fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateToHome:() -> Unit) {
+fun LoginScreen(navController: NavController) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     val userService = UserService(FirebaseRepository())
 
-    //Variables para mensajes de debajo de los campos
-    var submesageEmail by remember { mutableStateOf("Ejemplo: usuario@ejemplo.com") }
-    var submesageEmailColor by remember { mutableStateOf(Color.LightGray) }
-    var submesagePswd by remember { mutableStateOf("Mínimo 6 carácteres") }
-    var submesagePswdColor by remember { mutableStateOf(Color.LightGray) }
+    var errorMessage by remember { mutableStateOf("") }
+
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Color.White
+                White
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -75,14 +75,14 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
         Spacer(modifier = Modifier.height(80.dp))
         Text(
             text = "Iniciar Sesión",
-            color = Color.Black,
+            color = Black,
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(50.dp))
         Text(
             text = "Correo Electrónico",
-            color = Color.Black,
+            color = Black,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -98,23 +98,23 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
-                .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
+                .border(1.dp, LightGray, RoundedCornerShape(8.dp)),
         placeholder = { Text(
             text = "Ingrese su correo electrónico",
             modifier = Modifier
-                .background(Color.Transparent), // Cambiar el fondo del placeholder
-                color = Color.Black // Color del texto del placeholder
+                .background(Color.Transparent),
+                color = LightGray
         ) },
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White, // Fondo del TextField
-                cursorColor = Color.Black, // Color del cursor
-                focusedIndicatorColor = Color.Transparent, // Eliminar el indicador de enfoque
-                unfocusedIndicatorColor = Color.Transparent // Eliminar el indicador cuando no está enfocado
+                containerColor = White,
+                cursorColor = Black,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
             )
         )
         Text(
-            text = submesageEmail,
-            color = submesageEmailColor,
+            text = "Ejemplo: usuario@ejemplo.com",
+            color = LightGray,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -126,7 +126,7 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
         Spacer(modifier = Modifier.height(25.dp))
         Text(
             text = "Contraseña",
-            color = Color.Black,
+            color = Black,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -142,24 +142,24 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp)
-                .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
+                .border(1.dp, LightGray, RoundedCornerShape(8.dp)),
             visualTransformation = PasswordVisualTransformation(),
             placeholder = { Text(
                 text = "Ingrese su contraseña",
                 modifier = Modifier
                     .background(Color.Transparent), // Cambiar el fondo del placeholder
-                color = Color.Black // Color del texto del placeholder
+                color = LightGray // Color del texto del placeholder
             ) },
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White, // Fondo del TextField
-                cursorColor = Color.Black, // Color del cursor
+                containerColor = White, // Fondo del TextField
+                cursorColor = Black, // Color del cursor
                 focusedIndicatorColor = Color.Transparent, // Eliminar el indicador de enfoque
                 unfocusedIndicatorColor = Color.Transparent // Eliminar el indicador cuando no está enfocado
             )
         )
         Text(
-            text = submesagePswd,
-            color = submesagePswdColor,
+            text = "Mínimo 6 carácteres",
+            color = LightGray,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
@@ -168,7 +168,20 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
             textAlign = TextAlign.Left
         )
 
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            text = errorMessage,
+            color = Red,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            textAlign = TextAlign.Left
+        )
+
+        Spacer(modifier = Modifier.height(80.dp))
 
         Button(
             onClick = {
@@ -176,38 +189,19 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
                     try {
                         userService.login(email, password)
                         withContext(Dispatchers.Main) {
-                            navigateToHome()
+                            navController.navigate("home")
                         }
                     } catch (e: NotValidUserData) {
                         withContext(Dispatchers.Main) {
-                            submesageEmail = e.message.toString()
-                            submesageEmailColor = Color.Red
-                            submesagePswd = e.message.toString()
-                            submesagePswdColor = Color.Red
+                            errorMessage = e.message.toString()
                         }
                     } catch (e: IllegalArgumentException) {
                         withContext(Dispatchers.Main) {
-                            when (e.message.toString()) {
-                                "El correo electrónico no tiene un formato válido." -> {
-                                    submesageEmail = "El correo electrónico no tiene un formato válido."
-                                    submesageEmailColor = Color.Red
-                                }
-                                "La contraseña debe tener al menos 6 caracteres." -> {
-                                    submesagePswd = "La contraseña debe tener al menos 6 caracteres."
-                                    submesagePswdColor = Color.Red
-                                }
-                                "La contraseña no tiene un formato válido." -> {
-                                    submesagePswd = "La contraseña no tiene un formato válido."
-                                    submesagePswdColor = Color.Red
-                                }
-                            }
+                            errorMessage = e.message.toString()
                         }
                     } catch (e: UnregistredUserException) {
                         withContext(Dispatchers.Main) {
-                            submesageEmail = e.message.toString()
-                            submesageEmailColor = Color.Red
-                            submesagePswd = e.message.toString()
-                            submesagePswdColor = Color.Red
+                            errorMessage = e.message.toString()
                         }
                     }
                 }
@@ -234,15 +228,17 @@ fun LoginScreen(auth: FirebaseAuth, navigateToSignUp: () -> Unit = {}, navigateT
         ) {
             Text(
                 text = "Si no tienes una cuenta",
-                color = Color.Black,
+                color = Black,
             )
             OutlinedButton(
-                onClick = { navigateToSignUp() },
+                onClick = {
+                          navController.navigate("signUp")
+                          },
                 modifier = Modifier
                     .height(36.dp)
                     .width(130.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = White),
-                border = BorderStroke(2.dp, Color.Black),
+                border = BorderStroke(2.dp, Black),
                 shape = RoundedCornerShape(10.dp)
             ) {
                 Text(text = "Crear Cuenta", color = Black, fontSize = 14.sp, fontWeight = FontWeight.Bold)
