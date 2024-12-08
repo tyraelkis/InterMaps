@@ -7,6 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.User
@@ -43,6 +44,12 @@ class VehicleTests {
         val res = db.doesVehicleExist(vehicleTest.plate)
         vehicleService.deleteVehicle(vehicleTest.plate)
         assertEquals(true, res)
+    }
+
+    @Test (expected = VehicleAlreadyExistsException::class)
+    fun createVehicle_E2Invalid_errorOnCreatingVehicle(): Unit = runBlocking {
+        // El vehiculo  ya esta en la BD
+        vehicleService.createVehicle("9999GON", "Gasolina", 9.0)
     }
 
 }

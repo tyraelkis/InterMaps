@@ -43,7 +43,6 @@ class InterestPlaceServiceTests {
     @After
     fun tearDown(): Unit = runBlocking {
         userService.signOut()
-
     }
 
     @Test
