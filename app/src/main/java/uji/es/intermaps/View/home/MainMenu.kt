@@ -573,13 +573,14 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                     ) {
                         Button(//Botón añadir lugar
                             onClick = {
-                                viewModel.setInterestPlace(interestPlace)
-                                navController.navigate("addInterestPlace")
+                                viewModel.setInterestPlaceForCreation(interestPlace)
+                                navController.navigate("interestPlaceCreation")
                             },
                             modifier = Modifier
                                 .height(40.dp)
                                 .fillMaxWidth()
                                 .padding(horizontal = 30.dp),
+                            shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0XFF000000)),
                         ) {
                             Text(text = "Añadir lugar", color = White, fontSize = 18.sp)

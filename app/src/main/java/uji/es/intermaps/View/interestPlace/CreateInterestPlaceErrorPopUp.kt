@@ -18,9 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.navigation.NavController
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
-import uji.es.intermaps.ViewModel.UserViewModel
 
 @Composable
 fun CreateInterestPlaceErrorPopUp (

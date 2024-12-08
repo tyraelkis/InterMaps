@@ -5,10 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import uji.es.intermaps.Model.InterestPlace
 import androidx.compose.runtime.*
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -124,11 +122,11 @@ class InterestPlaceViewModel(
     }
 
     //Variable u función para pasarle el lugar de interés a la pestaña de crear lugar
-    var selectedInterestPlace = MutableLiveData<InterestPlace?>()
+    var selectedInterestPlace by mutableStateOf(InterestPlace())
         private set
 
-    fun setInterestPlace(interestPlace: InterestPlace) {
-        selectedInterestPlace.value = interestPlace
+    fun setInterestPlaceForCreation(interestPlace: InterestPlace) {
+        selectedInterestPlace = interestPlace
     }
 
     suspend fun deleteInterestPlace (coordinate: Coordinate){

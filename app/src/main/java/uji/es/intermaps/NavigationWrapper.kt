@@ -73,7 +73,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         composable(
             route = "interestPlaceCreation"
         ) {
-            InterestPlaceCreation(viewModel)
+            InterestPlaceCreation(navHostController, viewModel)
         }
         composable(
             route = "interestPlaceCreationByToponym"

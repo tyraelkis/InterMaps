@@ -1,7 +1,6 @@
 package uji.es.intermaps.View.interestPlace
 
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,7 +26,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,8 +37,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,13 +47,9 @@ import com.mapbox.geojson.Point.fromLngLat
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
-import uji.es.intermaps.Model.Coordinate
-import uji.es.intermaps.Model.InterestPlace
-import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,8 +61,8 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
     var showPopupAliasCorrecto by remember { mutableStateOf(false) }
     var showPopupAliasIncorrecto by remember { mutableStateOf(false) }
     //var newAlias by remember { mutableStateOf("") }
-    var repository: Repository = FirebaseRepository()
-    var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
+    val repository: Repository = FirebaseRepository()
+    val interestPlaceService = InterestPlaceService(repository)
     val  coroutineScope = rememberCoroutineScope()
     val long = place.coordinate.longitude
     val lat = place.coordinate.latitude
@@ -78,7 +70,7 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
     DeleteInterestPlacePopUp(viewModel, navController)
     ModificationInterestPlacePopUp(viewModel)
 
-    var mapViewportState = rememberMapViewportState {
+    val mapViewportState = rememberMapViewportState {
         setCameraOptions {
             zoom(11.0)
             center(fromLngLat(long,lat)) // Coordenadas iniciales
@@ -114,7 +106,7 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "${place.toponym ?: "Sin toponimo"} ",
+                    text = "${place.toponym} ",
                     color = Black,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Bold
@@ -215,9 +207,9 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                         .height(52.dp)
                         .fillMaxWidth()
                         .border(1.dp, Black, RoundedCornerShape(10.dp)),
-                    placeholder = { Text("${place.alias}", style = TextStyle(fontSize = 20.sp)) },
+                    placeholder = { Text(place.alias, style = TextStyle(fontSize = 20.sp)) },
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color(0xFFFFFFF),
+                        containerColor = Color(0xFFFFFFFF),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent
                     ),

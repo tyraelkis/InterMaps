@@ -11,7 +11,7 @@ import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.RetrofitConfig
 
 class RouteRepository : ORSRepository {
-    val apiKey = "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23"
+    private val apiKey = "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23"
 
     override suspend fun searchInterestPlaceByCoordinates(coordinate: Coordinate): InterestPlace {
         if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){
@@ -43,7 +43,7 @@ class RouteRepository : ORSRepository {
 
     override suspend fun searchInterestPlaceByToponym(toponym: String): InterestPlace {
         val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
-        var coordinate: Coordinate
+        val coordinate: Coordinate
 
         try {
             // Llamada a la API para obtener las coordenadas del topónimo
@@ -54,8 +54,8 @@ class RouteRepository : ORSRepository {
             val respuesta = response.features
             if (respuesta.isNotEmpty()) {
                 val feature = respuesta[0]
-                val lon = feature.geometry.coordinates.get(0)
-                val lat = feature.geometry.coordinates.get(1)
+                val lon = feature.geometry.coordinates[0]
+                val lat = feature.geometry.coordinates[1]
 
                 // Validamos las coordenadas
                 if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
