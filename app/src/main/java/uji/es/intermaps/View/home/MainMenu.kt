@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,11 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.graphics.Color.Companion.Gray
+import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -39,28 +41,50 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import com.mapbox.maps.viewannotation.geometry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
+import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @Composable
-fun MainMenu() {
+fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
 
     var busqueda by remember { mutableStateOf("") }
-    var interestPlace by remember { mutableStateOf(InterestPlace()) }
+    var interestPlace by remember { mutableStateOf(InterestPlace(Coordinate(39.98567, -0.04935), "","",false)) }
     var showMenu by remember { mutableStateOf(false) }
+    var showPlaceData by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
     val interestPlaceService = InterestPlaceService(FirebaseRepository())
-    //val user = FirebaseRepository().auth.currentUser
+    var email = auth.currentUser?.email
+
+    if (email == null)
+        email = "no hay sesión"
+
+    val mapViewportState = rememberMapViewportState {
+        setCameraOptions {
+            zoom(12.0)
+            center(Point.fromLngLat(-0.0675, 39.9947))
+            pitch(0.0)
+            bearing(0.0)
+        }
+    }
+
+    var clickedPoint by remember { mutableStateOf<Point?>(null) }
 
     Box(
         modifier = Modifier
@@ -132,39 +156,63 @@ fun MainMenu() {
                                     //TODO mover la comprovación de coordenadas a un servicio
                                     var coordinate = Coordinate()
                                     var busquedaCoordenadas = false
-                                    try {
-                                        val aBuscar = busqueda.split(",")
-                                        coordinate =
-                                            Coordinate(aBuscar[0].toDouble(), aBuscar[1].toDouble())
+                                    val coordinatePattern = Regex("""^\s*(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)\s*$""")
+                                    val input = busqueda.trim()
+                                    if (coordinatePattern.matches(input)) {
+                                        val parts = input.split(",")
+                                        val lat = parts[0].trim().toDouble()
+                                        val lon = parts[1].trim().toDouble()
+                                        coordinate = Coordinate(lat, lon)
                                         busquedaCoordenadas = true
-                                    } catch (e: Exception) {
-                                        Log.e("ERROR_CONVERSION", "Error al convertir coordenadas")
+                                        errorMessage = ""
+                                    } else {
+                                        Log.e("FORMATO_NO_VALIDO", "El input no tiene formato de coordenadas")
                                     }
-                                    //TODO falta implementar la vista del lugar que se ha buscado
                                     CoroutineScope(Dispatchers.IO).launch {
                                         if (busquedaCoordenadas) {
                                             try {
-                                                interestPlace =
-                                                    interestPlaceService.searchInterestPlaceByCoordiante(
-                                                        coordinate
-                                                    )
+                                                interestPlace = interestPlaceService.searchInterestPlaceByCoordiante(coordinate)
+                                                errorMessage=""
+                                                busqueda = ""
+                                                mapViewportState.setCameraOptions {
+                                                    center(Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude))
+                                                    zoom(12.0)
+                                                }
+                                                clickedPoint = Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude)
+                                            } catch (e: NotValidCoordinatesException) {
+                                                Log.e("ERROR_BUSQUEDA_COORDS", "Error al buscar por coordenadas")
+                                                errorMessage = e.message.toString()
+                                                busqueda = ""
                                             } catch (e: Exception) {
-                                                Log.e(
-                                                    "ERROR_BUSQUEDA_COORDS",
-                                                    "Error al buscar por coordenadas"
-                                                )
+                                                Log.e("ERROR_BUSQUEDA_COORDS", "Error al buscar por coordenadas")
+                                                errorMessage = e.message.toString()
+                                                busqueda = ""
                                             }
                                         } else {
                                             try {
-                                                //interestPlace = interestPlaceService.searchInterestPlaceByToponym(busqueda)
+                                                interestPlace = interestPlaceService.searchInterestPlaceByToponym(input)
+                                                errorMessage=""
+                                                busqueda = ""
+                                                mapViewportState.setCameraOptions {
+                                                    center(Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude))
+                                                    zoom(12.0)
+                                                }
+                                                clickedPoint = Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude)
+                                            } catch (e: NotSuchPlaceException) {
+                                                Log.e("ERROR_BUSQUEDA_TOP", "Error al buscar por topónimo")
+                                                errorMessage = e.message.toString()
+                                                busqueda = ""
                                             } catch (e: Exception) {
-                                                Log.e(
-                                                    "ERROR_BUSQUEDA_TOP",
-                                                    "Error al buscar por topónimo"
-                                                )
+                                                Log.e("ERROR_BUSQUEDA_TOP", "Error al buscar por topónimo")
+                                                errorMessage = e.message.toString()
+                                                busqueda = ""
                                             }
                                         }
                                     }
+                                    showPlaceData = true
+                                }
+                                else {
+                                    showPlaceData = false
                                 }
                             },
                         contentScale = ContentScale.Crop
@@ -184,15 +232,49 @@ fun MainMenu() {
 
             MapboxMap(//Mapa
                 Modifier.fillMaxSize(),
-                mapViewportState = rememberMapViewportState {
-                    setCameraOptions {
-                        zoom(12.0)
-                        center(Point.fromLngLat(-0.04935, 39.98567))
-                        pitch(0.0)
-                        bearing(0.0)
+                mapViewportState = mapViewportState,
+                onMapClickListener = { point ->
+                    clickedPoint = point
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            interestPlace =
+                                interestPlaceService.searchInterestPlaceByCoordiante(
+                                    Coordinate(point.latitude(), point.longitude())
+                                )
+                            errorMessage = ""
+                        } catch (e: NotValidCoordinatesException) {
+                            Log.e(
+                                "ERROR_COORDS_CLICK",
+                                "Error al sacar las coordenadas del mapa"
+                            )
+                            errorMessage = e.message.toString()
+                        } catch (e: Exception) {
+                            Log.e(
+                                "ERROR_COORDS_CLICK",
+                                "Error al sacar las coordenadas del mapa"
+                            )
+                            errorMessage = e.message.toString()
+                        }
                     }
-                },
-            )
+                    showPlaceData = true
+                    true
+                }
+            ) {
+                clickedPoint?.let { point ->
+                    ViewAnnotation(
+                        options = viewAnnotationOptions {
+                            geometry(point)
+                            allowOverlap(true)
+                        }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.marker_icon),
+                            contentDescription = "Marker",
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                }
+            }
         }
         if (showMenu) {
             Column(
@@ -206,8 +288,7 @@ fun MainMenu() {
                     .background(
                         Color(0XFF007E70),
                         shape = RoundedCornerShape(15.dp)
-                    ),
-
+                    )
                 ) {
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -218,7 +299,7 @@ fun MainMenu() {
                     verticalAlignment = Alignment.CenterVertically
                 ){//Botón para cerrar el menú y correo usuario
 
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(20.dp))
 
                     Image(//Imagen cerrar
                         painter = painterResource(
@@ -231,7 +312,7 @@ fun MainMenu() {
                     )
 
                     Text(
-                        text = "correo@usuario.es",//TODO usar el auth para sacar el correo
+                        text = email,
                         color = Black,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
@@ -259,13 +340,13 @@ fun MainMenu() {
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { showMenu = false }, //TODO Ir a perfil
+                            .clickable { navController.navigate("userDataScreen") }, //TODO Comprobar que va bien
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            showMenu = false //TODO Ir a perfil
+                            navController.navigate("userDataScreen") //TODO Comprobar que va bien
                         },
                         modifier = Modifier
                             .height(40.dp)
@@ -298,13 +379,13 @@ fun MainMenu() {
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { showMenu = false }, //TODO Ir a lugares
+                            .clickable { navController.navigate("interestPlaceList") }, //TODO Comprobar que va bien
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            showMenu = false //TODO Ir a lugares
+                            navController.navigate("interestPlaceList") //TODO Comprobar que va bien
                         },
                         modifier = Modifier
                             .height(40.dp)
@@ -396,6 +477,129 @@ fun MainMenu() {
                         ) {
                             Text(text = "Tus rutas", color = Black, fontSize = 18.sp)
                         }
+                    }
+                }
+            }
+        }
+
+        if (showPlaceData){
+            Column (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        start = 0.dp,
+                        top = 500.dp,
+                        end = 0.dp,
+                        bottom = 0.dp)
+                    .background(
+                        White,
+                    ),
+                //verticalArrangement = Arrangement.Center, // Centra el contenido verticalmente
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (errorMessage.isEmpty()) { //Si no hay errores en la busqueda se muestran los datos
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        Text(
+                            text = interestPlace.toponym,
+                            color = Black,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        Text(
+                            text = "(${interestPlace.coordinate.latitude}, ${interestPlace.coordinate.longitude})",
+                            color = Gray,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.width(20.dp))
+
+                        Image(//Imagen lugar 1 //TODO falta centrar las fotos y linkear el botón
+                            painter = painterResource(
+                                id = R.drawable.not_aviable_image
+                            ),
+                            contentDescription = "",
+                            modifier = Modifier.size(160.dp),
+                            contentScale = ContentScale.Crop
+                        )
+
+                        Spacer(modifier = Modifier.width(20.dp))
+
+                        Image(//Imagen lugar 2
+                            painter = painterResource(
+                                id = R.drawable.not_aviable_image
+                            ),
+                            contentDescription = "",
+                            modifier = Modifier.size(160.dp),
+                            contentScale = ContentScale.Crop
+                        )
+
+                        Spacer(modifier = Modifier.width(20.dp))
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(//Botón añadir lugar
+                            onClick = {
+                                viewModel.setInterestPlace(interestPlace)
+                                navController.navigate("addInterestPlace")
+                            },
+                            modifier = Modifier
+                                .height(40.dp)
+                                .fillMaxWidth()
+                                .padding(horizontal = 30.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0XFF000000)),
+                        ) {
+                            Text(text = "Añadir lugar", color = White, fontSize = 18.sp)
+                        }
+                    }
+                }
+                else { //Si ha habido errores se muestra el mensaje de error
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(White),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = errorMessage,
+                            color = Red,
+                            fontSize = 18.sp,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             }
