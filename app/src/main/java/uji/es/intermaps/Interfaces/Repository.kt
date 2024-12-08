@@ -3,6 +3,7 @@ package uji.es.intermaps.Interfaces
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.User
+import uji.es.intermaps.Model.Vehicle
 
 interface Repository {
     suspend fun createUser(email:String, pswd: String): User
@@ -16,5 +17,7 @@ interface Repository {
     suspend fun viewInterestPlaceData(coordinate: Coordinate): InterestPlace
     suspend fun viewInterestPlaceList(): List<InterestPlace>
     suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean
-    suspend fun getInterestPlaceByToponym(toponym: String):InterestPlace
+    suspend fun getInterestPlaceByToponym(toponym: String): InterestPlace
+    suspend fun createVehicle(plate: String,type: String, consumption: Double): Vehicle
+    suspend fun deleteVehicle(plate: String): Boolean
 }

@@ -68,4 +68,8 @@ object DataBase {
             false
         }
     }
+
+    suspend fun doesVehicleExist(plate: String): Boolean{
+        TODO()
+    }
 }

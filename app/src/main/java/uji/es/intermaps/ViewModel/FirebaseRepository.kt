@@ -19,6 +19,7 @@ import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.User
+import uji.es.intermaps.Model.Vehicle
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -420,6 +421,13 @@ class FirebaseRepository: Repository {
         }
     }
 
+    override suspend fun createVehicle(plate: String, type: String, consumption: Double):Vehicle {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteVehicle(plate: String): Boolean {
+        TODO("Not yet implemented")
+    }
 }
 
 
