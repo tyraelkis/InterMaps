@@ -4,6 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,6 +51,21 @@ class VehicleTests {
     fun createVehicle_E2Invalid_errorOnCreatingVehicle(): Unit = runBlocking {
         // El vehiculo  ya esta en la BD
         vehicleService.createVehicle("9999GON", "Gasolina", 9.0)
+    }
+
+    @Test
+    fun viewVehicleList_E1Valid_vehicleListViewed(): Unit = runBlocking{
+        val res = vehicleService.viewVehicleList()
+        assertTrue(res.isNotEmpty())
+    }
+
+    @Test
+    fun viewVehicleList_E2Valid_emptyVehicleListViewed(): Unit = runBlocking{
+        userService.signOut()
+        userService.login(emailEmpty, "123456BB")
+        val res = vehicleService.viewVehicleList()
+        userService.login(emailEmpty, "123456BB")
+        assertTrue(res.isEmpty())
     }
 
 }

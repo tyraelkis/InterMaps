@@ -20,4 +20,5 @@ interface Repository {
     suspend fun getInterestPlaceByToponym(toponym: String): InterestPlace
     suspend fun createVehicle(plate: String,type: String, consumption: Double): Vehicle
     suspend fun deleteVehicle(plate: String): Boolean
+    suspend fun viewVehicleList(): List<Vehicle>
 }

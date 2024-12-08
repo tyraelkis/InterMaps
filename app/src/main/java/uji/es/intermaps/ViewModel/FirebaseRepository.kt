@@ -428,6 +428,10 @@ class FirebaseRepository: Repository {
     override suspend fun deleteVehicle(plate: String): Boolean {
         TODO("Not yet implemented")
     }
+
+    override suspend fun viewVehicleList(): List<Vehicle> {
+        TODO("Not yet implemented")
+    }
 }
 
 

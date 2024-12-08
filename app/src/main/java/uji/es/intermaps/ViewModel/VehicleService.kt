@@ -12,4 +12,8 @@ class VehicleService(private val repository: Repository) {
     suspend fun deleteVehicle(plate: String): Boolean {
         TODO()
     }
+
+    suspend fun viewVehicleList(): List<Vehicle>{
+        TODO()
+    }
 }
