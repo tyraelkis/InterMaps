@@ -75,6 +75,13 @@ class InterestPlaceViewModel(
                 Log.e("Locations", "Error: ${e.message}")
             }
         }
+    }
 
+    //Variable u función para pasarle el lugar de interés a la pestaña de crear lugar
+    var selectedInterestPlace = MutableLiveData<InterestPlace?>()
+        private set
+
+    fun setInterestPlace(interestPlace: InterestPlace) {
+        selectedInterestPlace.value = interestPlace
     }
 }

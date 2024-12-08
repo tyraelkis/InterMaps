@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
@@ -45,18 +46,23 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import com.mapbox.maps.viewannotation.geometry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
+import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @Composable
-fun MainMenu(auth: FirebaseAuth, navController: NavController) {
+fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
 
     var busqueda by remember { mutableStateOf("") }
     var interestPlace by remember { mutableStateOf(InterestPlace(Coordinate(39.98567, -0.04935), "","",false)) }
@@ -68,6 +74,17 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController) {
 
     if (email == null)
         email = "no hay sesión"
+
+    val mapViewportState = rememberMapViewportState {
+        setCameraOptions {
+            zoom(12.0)
+            center(Point.fromLngLat(-0.0675, 39.9947))
+            pitch(0.0)
+            bearing(0.0)
+        }
+    }
+
+    var clickedPoint by remember { mutableStateOf<Point?>(null) }
 
     Box(
         modifier = Modifier
@@ -151,13 +168,17 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController) {
                                     } else {
                                         Log.e("FORMATO_NO_VALIDO", "El input no tiene formato de coordenadas")
                                     }
-                                    //TODO falta implementar la vista del lugar que se ha buscado
                                     CoroutineScope(Dispatchers.IO).launch {
                                         if (busquedaCoordenadas) {
                                             try {
                                                 interestPlace = interestPlaceService.searchInterestPlaceByCoordiante(coordinate)
                                                 errorMessage=""
                                                 busqueda = ""
+                                                mapViewportState.setCameraOptions {
+                                                    center(Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude))
+                                                    zoom(12.0)
+                                                }
+                                                clickedPoint = Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude)
                                             } catch (e: NotValidCoordinatesException) {
                                                 Log.e("ERROR_BUSQUEDA_COORDS", "Error al buscar por coordenadas")
                                                 errorMessage = e.message.toString()
@@ -171,6 +192,15 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController) {
                                             try {
                                                 interestPlace = interestPlaceService.searchInterestPlaceByToponym(input)
                                                 errorMessage=""
+                                                busqueda = ""
+                                                mapViewportState.setCameraOptions {
+                                                    center(Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude))
+                                                    zoom(12.0)
+                                                }
+                                                clickedPoint = Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude)
+                                            } catch (e: NotSuchPlaceException) {
+                                                Log.e("ERROR_BUSQUEDA_TOP", "Error al buscar por topónimo")
+                                                errorMessage = e.message.toString()
                                                 busqueda = ""
                                             } catch (e: Exception) {
                                                 Log.e("ERROR_BUSQUEDA_TOP", "Error al buscar por topónimo")
@@ -202,15 +232,49 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController) {
 
             MapboxMap(//Mapa
                 Modifier.fillMaxSize(),
-                mapViewportState = rememberMapViewportState {
-                    setCameraOptions {
-                        zoom(12.0) //TODO mirar en la historia 6 porque no va
-                        center(Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude))
-                        pitch(0.0)
-                        bearing(0.0)
+                mapViewportState = mapViewportState,
+                onMapClickListener = { point ->
+                    clickedPoint = point
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            interestPlace =
+                                interestPlaceService.searchInterestPlaceByCoordiante(
+                                    Coordinate(point.latitude(), point.longitude())
+                                )
+                            errorMessage = ""
+                        } catch (e: NotValidCoordinatesException) {
+                            Log.e(
+                                "ERROR_COORDS_CLICK",
+                                "Error al sacar las coordenadas del mapa"
+                            )
+                            errorMessage = e.message.toString()
+                        } catch (e: Exception) {
+                            Log.e(
+                                "ERROR_COORDS_CLICK",
+                                "Error al sacar las coordenadas del mapa"
+                            )
+                            errorMessage = e.message.toString()
+                        }
                     }
-                },
-            )
+                    showPlaceData = true
+                    true
+                }
+            ) {
+                clickedPoint?.let { point ->
+                    ViewAnnotation(
+                        options = viewAnnotationOptions {
+                            geometry(point)
+                            allowOverlap(true)
+                        }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.marker_icon),
+                            contentDescription = "Marker",
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                }
+            }
         }
         if (showMenu) {
             Column(
@@ -424,27 +488,45 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController) {
                     .fillMaxSize()
                     .padding(
                         start = 0.dp,
-                        top = 600.dp,
+                        top = 500.dp,
                         end = 0.dp,
                         bottom = 0.dp)
                     .background(
                         White,
                     ),
-                verticalArrangement = Arrangement.Center, // Centra el contenido verticalmente
+                //verticalArrangement = Arrangement.Center, // Centra el contenido verticalmente
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (errorMessage.isEmpty()) { //Si no hay errores en la busqueda se muestran los datos
+
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        Spacer(modifier = Modifier.width(20.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
 
                         Text(
-                            text = "${interestPlace.toponym} (${interestPlace.coordinate.latitude}, ${interestPlace.coordinate.longitude})",
+                            text = interestPlace.toponym,
                             color = Black,
                             fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        Text(
+                            text = "(${interestPlace.coordinate.latitude}, ${interestPlace.coordinate.longitude})",
+                            color = Gray,
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -491,7 +573,8 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController) {
                     ) {
                         Button(//Botón añadir lugar
                             onClick = {
-                                showPlaceData = false //TODO Ir a añadir lugar
+                                viewModel.setInterestPlace(interestPlace)
+                                navController.navigate("addInterestPlace")
                             },
                             modifier = Modifier
                                 .height(40.dp)

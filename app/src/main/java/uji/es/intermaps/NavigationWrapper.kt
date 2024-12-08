@@ -25,73 +25,71 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
 
     val currentRoute = navHostController.currentBackStackEntryAsState().value?.destination?.route
 
-        NavHost(
-            navController = navHostController,
-            startDestination = "initial",
+    NavHost(
+        navController = navHostController,
+        startDestination = "initial",
         ) {
-            composable("initial") {
-                InitialScreen(
-                    navHostController
-                )
-            }
-            composable("logIn") {
-                LoginScreen(
-                    navHostController
-                )
-            }
-            composable("signUp") {
-                SignUpScreen(
-                    navHostController
-                )
-            }
-            composable("home") {
-                HomeScreen (
-                    navHostController,
-                    viewModel1
-                )
-            }
-            composable("mainMenu") {
-                MainMenu (
-                    auth,
-                    navHostController
-                )
-            }
-            composable("userDataScreen") {
-                UserDataScreen(
-                    auth,
-                    navHostController,
-                    viewModel1
-                    )
-            }
-            composable("interestPlaceList") {
-                InterestPlaceList(
-                    auth,
-                    navigateToInterestPlaceSetAlias = { navHostController.navigate("interestPlaceSetAlias") },
-                    navigateToInterestPlaceCreation = { navHostController.navigate("interestPlaceCreation") },
-                    viewModel
-                )
-            }
-            composable(
-                route = "interestPlaceCreation"
-
-            ) {
-                InterestPlaceCreation(viewModel)
-            }
-            composable(
-                route = "interestPlaceSetAlias/{toponym}",
-                arguments = listOf(
-                    navArgument("toponym") { type = NavType.StringType}
-                )
-            ) {
-                    backStackEntry ->
-                val toponym = backStackEntry.arguments?.getString("toponym")
-                if (toponym != null) {
-                    InterestPlaceSetAlias(viewModel, toponym)
-                }
-
-            }
-
+        composable("initial") {
+            InitialScreen(
+                navHostController
+            )
         }
+        composable("logIn") {
+            LoginScreen(
+                navHostController
+            )
+        }
+        composable("signUp") {
+            SignUpScreen(
+                navHostController
+            )
+        }
+        composable("home") {
+            HomeScreen (
+                navHostController,
+                viewModel1
+            )
+        }
+        composable("mainMenu") {
+            MainMenu (
+                auth,
+                navHostController,
+                viewModel
+            )
+        }
+        composable("userDataScreen") {
+            UserDataScreen(
+                auth,
+                navHostController,
+                viewModel1
+            )
+        }
+        composable("interestPlaceList") {
+            InterestPlaceList(
+                auth,
+                navigateToInterestPlaceSetAlias = { navHostController.navigate("interestPlaceSetAlias") },
+                navigateToInterestPlaceCreation = { navHostController.navigate("interestPlaceCreation") },
+                viewModel
+            )
+        }
+        composable(
+            route = "interestPlaceCreation"
+        ) {
+            InterestPlaceCreation(viewModel)
+        }
+        composable(
+            route = "interestPlaceSetAlias/{toponym}",
+            arguments = listOf(
+                navArgument("toponym") { type = NavType.StringType}
+            )
+        ) {
+            backStackEntry ->
+            val toponym = backStackEntry.arguments?.getString("toponym")
+            if (toponym != null) {
+                InterestPlaceSetAlias(viewModel, toponym)
+            }
+        }
+    }
 }
     /*NavHost(navController = navHostController, startDestination = "initial") {
         composable("initial"){
