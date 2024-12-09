@@ -69,6 +69,7 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
 
     DeleteInterestPlacePopUp(viewModel, navController)
     ModificationInterestPlacePopUp(viewModel)
+    ModificationInterestPlaceErrorPopUp(viewModel)
 
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
@@ -222,15 +223,18 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                 onClick = {
                     coroutineScope.launch {
                         val newAlias = viewModel.newAlias
-                        if (interestPlaceService.setAlias(
-                                interestPlace = place,
-                                newAlias = newAlias
-                            )
-                        ) {
-                            showPopupAliasCorrecto = true
-                        } else {
-                            showPopupAliasIncorrecto = true
+                        try {
+                            if (interestPlaceService.setAlias(
+                                    interestPlace = place,
+                                    newAlias = newAlias
+                                )
+                            ) {
+                                viewModel.showUpdateInterestPlacePopUp()
+                            }
+                        }catch (e: Exception){
+                            viewModel.showUpdateInterestPlaceErrorPopUp()
                         }
+
                     }
                 } ,
                 modifier = Modifier

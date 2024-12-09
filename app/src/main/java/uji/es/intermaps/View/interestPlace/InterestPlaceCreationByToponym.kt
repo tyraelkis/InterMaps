@@ -150,8 +150,12 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            interestPlaceService.createInterestPlaceFromToponym(selectToponym)
-                            viewModel.showCreateInterestPlaceCorrectPopUp()
+                            val result = interestPlaceService.createInterestPlaceFromToponym(selectToponym)
+                            if (result != null) {
+                                viewModel.showCreateInterestPlaceCorrectPopUp()
+                            }else{
+                                viewModel.showCreateInterestPlaceErrorPopUp()
+                            }
                         }
                     },
                     modifier = Modifier
