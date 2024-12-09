@@ -71,4 +71,8 @@ object DataBase {
     suspend fun doesVehicleExist(plate: String): Boolean{
         TODO()
     }
+
+    suspend fun doesRouteExist(route: Route): Boolean{
+        TODO()
+    }
 }
