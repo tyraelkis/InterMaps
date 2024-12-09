@@ -5,8 +5,31 @@ import uji.es.intermaps.Model.Vehicle
 
 class VehicleService(private val repository: Repository) {
     //Igual hace falta crear un repositorio aparte como en InterestPlace
-    suspend fun createVehicle(plate: String, model: String, consumption: Double): Vehicle {
-        TODO()
+    suspend fun createVehicle(plate: String, type: String, consumption: Double): Vehicle {
+        validateVehiclePlate(plate)
+        validateVehicleType(type)
+        validateVehicleConsumption(consumption)
+        return repository.createVehicle(plate, type, consumption)
+    }
+
+    private fun validateVehiclePlate(plate: String) {
+        val plateRegex = "^[0-9]{4}[A-Z]{3}$".toRegex()
+        if (!plate.matches(plateRegex)) {
+            throw IllegalArgumentException("La matrícula no tiene un formato válido.")
+        }
+    }
+
+    private fun validateVehicleType(type: String) {
+        val validTypes = listOf("gasoline", "diesel", "electric")
+        if (type.lowercase() !in validTypes) {
+            throw IllegalArgumentException("El tipo de vehículo no es válido.")
+        }
+    }
+
+    private fun validateVehicleConsumption(consumption: Double) {
+        if (consumption <= 0) {
+            throw IllegalArgumentException("La consumo debe ser un número positivo.")
+        }
     }
 
     suspend fun deleteVehicle(plate: String): Boolean {
