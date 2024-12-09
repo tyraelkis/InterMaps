@@ -1,5 +1,6 @@
 package uji.es.intermaps.ViewModel
 
+import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Vehicle
 
@@ -33,7 +34,11 @@ class VehicleService(private val repository: Repository) {
     }
 
     suspend fun deleteVehicle(plate: String): Boolean {
-        TODO()
+        return try {
+            repository.deleteVehicle(plate)
+        } catch (e: NotSuchElementException) {
+            throw NotSuchElementException("No existe un vehículo con esa matrícula")
+        }
     }
 
     suspend fun viewVehicleList(): List<Vehicle>{

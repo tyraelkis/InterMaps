@@ -8,7 +8,10 @@
       <SelectionState runConfigName="InterestPlaceServiceTests">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="createVehicle_E1Valid_vehicleIsCreated()">
+      <SelectionState runConfigName="deleteVehicle_E1Valid_vehicleDeleted()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="deleteVehicle_E2Invalid_vehicleNotDeleted()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

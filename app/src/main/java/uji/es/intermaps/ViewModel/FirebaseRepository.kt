@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
+import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
@@ -466,7 +467,38 @@ class FirebaseRepository: Repository {
     }
 
     override suspend fun deleteVehicle(plate: String): Boolean {
-        TODO("Not yet implemented")
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        val documentSnapshot = db.collection("Vehicle")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val vehicles = documentSnapshot.get("vehicles") as? MutableList<Map<String, Any>>
+                ?: mutableListOf()
+
+            val placeIndex = vehicles.indexOfFirst { vehicle ->
+                val vehiclePlate = vehicle["plate"] as? String ?: return@indexOfFirst false
+                vehiclePlate == plate
+            }
+
+            if (placeIndex == -1) {
+                throw NotSuchElementException("Vehículo no encontrado")
+            } //La excepción no tiene que ser cazada en este metodo sino en el servicio
+
+            vehicles.removeAt(placeIndex)
+
+            db.collection("Vehicle")
+                .document(userEmail)
+                .update("vehicles", vehicles)
+                .await()
+
+            return true
+        } else {
+            return false
+        }
     }
 
     override suspend fun viewVehicleList(): List<Vehicle> {
