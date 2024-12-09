@@ -1,5 +1,6 @@
 package uji.es.intermaps.View.interestPlace
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,11 +35,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import kotlinx.coroutines.launch
@@ -46,6 +49,10 @@ import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import com.mapbox.geojson.Point.fromLngLat
+import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
+import com.mapbox.maps.viewannotation.geometry
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import uji.es.intermaps.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,6 +78,8 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
         }
     }
 
+    var clickedPoint by remember { mutableStateOf<Point?>(null) }
+
 
     Column(
         modifier = Modifier
@@ -93,13 +102,28 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                     .fillMaxWidth()
                     .weight(1f), // Ocupa la mitad del espacio
                 mapViewportState = mapViewportState
-            )
+            ) {
+                clickedPoint?.let { point ->
+                    ViewAnnotation(
+                        options = viewAnnotationOptions {
+                            geometry(point)
+                            allowOverlap(true)
+                        }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.marker_icon),
+                            contentDescription = "Marker",
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                }
+            }
         }
 
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Row (
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp),
@@ -107,7 +131,7 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Toponym",
+                text = "Topónimo",
                 color = Black,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
@@ -120,7 +144,7 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
             modifier = Modifier
                 .height(52.dp)
                 .width(350.dp)
-        ){
+        ) {
             TextField(
                 value = toponym,
                 onValueChange = { toponym = it },
@@ -128,7 +152,7 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                     .height(52.dp)
                     .fillMaxWidth()
                     .border(1.dp, Black, RoundedCornerShape(10.dp)),
-                placeholder = { Text("Escribe un toponimo", style = TextStyle(fontSize = 20.sp)) },
+                placeholder = { Text("Escribe un topónimo", style = TextStyle(fontSize = 20.sp)) },
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = Color(0xFFFFFFFF),
                     focusedIndicatorColor = Color.Transparent,
@@ -138,7 +162,9 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
             )
 
         }
+
         Spacer(modifier = Modifier.height(8.dp))
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -167,6 +193,7 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                     Text(text = "Añadir lugar", color = White, fontSize = 14.sp)
                 }
             }
+
             Button(
                 onClick = {
                     viewModel.getLocationsByToponim(toponym)
@@ -176,36 +203,39 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                 colors = ButtonDefaults.buttonColors(containerColor = Black),
                 shape = RoundedCornerShape(10.dp),
 
-            ) {
+                ) {
                 Text(text = "Obtener lugares", color = White, fontSize = 14.sp)
             }
         }
 
-        Column (
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.Start
-        ){
-
+        ) {
             LazyColumn {
                 items(viewModel.locations.value.size) { index ->
                     Text(text = viewModel.locations.value[index].properties.label,
-                    modifier = Modifier
-                        .clickable {
-                            sePuedeAñadir = true
-                            selectToponym = viewModel.locations.value[index].properties.label
-                            val coordinates = viewModel.locations.value[index].geometry.coordinates
-                            mapViewportState.setCameraOptions {
-                                zoom(11.0)
-                                center(
-                                    fromLngLat(
-                                        coordinates[0],
-                                        coordinates[1]
+                        modifier = Modifier
+                            .clickable {
+                                sePuedeAñadir = true
+                                selectToponym = viewModel.locations.value[index].properties.label
+                                val coordinates =
+                                    viewModel.locations.value[index].geometry.coordinates
+                                mapViewportState.setCameraOptions {
+                                    zoom(11.0)
+                                    center(
+                                        fromLngLat(
+                                            coordinates[0],
+                                            coordinates[1]
+                                        )
                                     )
-                                ) // Coordenadas para centrar el mapa en la UJI, Castellón de la Plana
+                                }
+                                clickedPoint = fromLngLat(coordinates[0], coordinates[1]) //Establece la ubicación del marcador
                             }
-                        }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -336,6 +366,4 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
 
  */
     }
-
-
 }

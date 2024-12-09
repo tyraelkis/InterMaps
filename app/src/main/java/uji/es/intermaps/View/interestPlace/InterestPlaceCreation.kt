@@ -1,5 +1,6 @@
 package uji.es.intermaps.View.interestPlace
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,12 +43,16 @@ import androidx.navigation.NavController
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
+import com.mapbox.maps.viewannotation.geometry
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
+import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
@@ -128,7 +134,20 @@ fun InterestPlaceCreation(navController: NavController, viewModel: InterestPlace
                         bearing(0.0)
                     }
                 }
-            )
+            ) {
+                ViewAnnotation(
+                    options = viewAnnotationOptions {
+                        geometry(Point.fromLngLat(place.coordinate.longitude, place.coordinate.latitude))
+                        allowOverlap(true)
+                    }
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.marker_icon),
+                        contentDescription = "Marker",
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -173,7 +192,7 @@ fun InterestPlaceCreation(navController: NavController, viewModel: InterestPlace
             )
         }
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
         Button(
             onClick = {
@@ -210,6 +229,8 @@ fun InterestPlaceCreation(navController: NavController, viewModel: InterestPlace
         ) {
             Text(text = "Guardar lugar", color = White, fontSize = 18.sp)
         }
+
+        Spacer(modifier = Modifier.height(30.dp))
     }
 
     if (showPopupCreateSucces) {
