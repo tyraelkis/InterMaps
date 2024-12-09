@@ -13,6 +13,9 @@ import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
+import uji.es.intermaps.Model.DieselVehicle
+import uji.es.intermaps.Model.ElectricVehicle
+import uji.es.intermaps.Model.GasolineVehicle
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
@@ -423,7 +426,43 @@ class FirebaseRepository: Repository {
     }
 
     override suspend fun createVehicle(plate: String, type: String, consumption: Double):Vehicle {
-        TODO("Not yet implemented")
+        // Asegúrate de que hay un usuario autenticado
+        val email = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        return suspendCoroutine { continuation ->
+            // Crea el vehículo usando el Factory Method
+            val vehicle = when (type.lowercase()) {
+                "diesel" -> DieselVehicle(plate, "Diesel", consumption, false)
+                "gasoline" -> GasolineVehicle(plate, "Gasoline", consumption, false)
+                "electric" -> ElectricVehicle(plate, "Electric", consumption, false)
+                else -> throw IllegalArgumentException("Unknown vehicle type: $type")
+            }
+
+            // Mapa para almacenar el vehículo en Firebase
+            val newVehicle = mapOf(
+                "plate" to vehicle.plate,
+                "type" to vehicle.type,
+                "consumption" to vehicle.consumption,
+                "fav" to vehicle.fav
+            )
+
+            val userDocument = db.collection("Vehicle").document(email)
+            // Actualiza la colección de vehículos evitando duplicados
+            userDocument.update("vehicles", FieldValue.arrayUnion(newVehicle))
+                .addOnSuccessListener {
+                    continuation.resume(vehicle)
+                }
+                .addOnFailureListener { _ ->
+                    // Si el usuario no tiene la colección, crea un nuevo documento
+                    userDocument.set(mapOf("vehicles" to listOf(newVehicle)))
+                        .addOnSuccessListener {
+                            continuation.resume(vehicle)
+                        }
+                        .addOnFailureListener { e ->
+                            continuation.resumeWithException(e)
+                        }
+                }
+        }
     }
 
     override suspend fun deleteVehicle(plate: String): Boolean {
