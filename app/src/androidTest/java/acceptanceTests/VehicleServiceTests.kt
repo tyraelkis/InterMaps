@@ -21,7 +21,7 @@ import uji.es.intermaps.ViewModel.VehicleService
 
 
 @RunWith(AndroidJUnit4::class)
-class VehicleTests {
+class VehicleServiceTests {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
     private var vehicle: Vehicle = GasolineVehicle("9999GON", "Gasoline",9.0, false)
