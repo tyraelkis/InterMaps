@@ -1,9 +1,6 @@
-@file:Suppress("UNUSED_EXPRESSION")
-
 package uji.es.intermaps.View.interestPlace
 
 import com.google.firebase.auth.FirebaseAuth
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +18,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,24 +36,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
-import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
-    val interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
+    val interestPlaceService = InterestPlaceService(repository)
     var allPlaces by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
     val emailPrefix = user?.email?.substringBefore("@") ?: "Usuario"
 
@@ -97,7 +86,7 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                         append("\n")
                         append(emailPrefix)
                 },
-                color = Color.Black,
+                color = Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center // Centrar el texto dentro del Row
@@ -116,7 +105,7 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
         ) {
             Text(
                 text = "Tus lugares favoritos",
-                color = Color.Black,
+                color = Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -185,7 +174,7 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
         ) {
             Text(
                 text = "Lugares de interés",
-                color = Color.Black,
+                color = Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -210,7 +199,7 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                             contentDescription = "Estrella fav",
                             modifier = Modifier
                                 .size(30.dp),
-                            tint = Color.Black
+                            tint = Black
                         )
                         Text(
                             text = notFavPlace.toponym,
@@ -230,7 +219,7 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                     navController.navigate("interestPlaceSetAlias/${notFavPlace.toponym}")
                                 },
 
-                            tint = Color.Black
+                            tint = Black
                         )
 
                     }

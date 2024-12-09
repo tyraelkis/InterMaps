@@ -1,6 +1,5 @@
 package uji.es.intermaps.View.interestPlace
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,27 +22,22 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
@@ -51,22 +45,20 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
-import uji.es.intermaps.Interfaces.Repository
-import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
-    val place = viewModel.interestPlace
+fun InterestPlaceCreation(navController: NavController, viewModel: InterestPlaceViewModel){
+    val place = viewModel.selectedInterestPlace
     var showPopupCreateSucces by remember { mutableStateOf(false) }
     var showPopupCreateError by remember { mutableStateOf(false) }
     var alias by remember { mutableStateOf("") }
-    var repository: Repository = FirebaseRepository()
-    var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
+    val interestPlaceService = InterestPlaceService(FirebaseRepository())
 
 
     Column(
@@ -78,6 +70,24 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(100.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = place.toponym,
+                color = Black,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,11 +98,12 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
             Text(
                 text = "${place.coordinate.latitude}, ${place.coordinate.longitude}",
                 color = Black,
-                fontSize = 26.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
         }
-        Spacer(modifier = Modifier.height(15.dp))
+
+        Spacer(modifier = Modifier.height(25.dp))
 
         Column(
             modifier = Modifier
@@ -106,13 +117,13 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
                     .weight(1f), // Ocupa la mitad del espacio
                 mapViewportState = rememberMapViewportState {
                     setCameraOptions {
-                        zoom(11.0)
+                        zoom(12.0)
                         center(
                             Point.fromLngLat(
-                                -0.0675,
-                                39.9947
+                                place.coordinate.longitude,
+                                place.coordinate.latitude
                             )
-                        ) // Coordenadas para centrar el mapa en la UJI, Castellón de la Plana
+                        )
                         pitch(0.0)
                         bearing(0.0)
                     }
@@ -121,47 +132,6 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
         }
 
         Spacer(modifier = Modifier.height(32.dp))
-
-        Row (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            horizontalArrangement = Arrangement.Absolute.Left,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Toponym",
-                color = Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Box(
-            modifier = Modifier
-                .height(52.dp)
-                .width(350.dp)
-                .background(Color(0xFFFFFFF), shape = RoundedCornerShape(10.dp))
-                .border(
-                    width = 1.dp,
-                    color = Black,
-                    shape = RoundedCornerShape(10.dp) )
-                .clip(RoundedCornerShape(10.dp))
-                .padding(5.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            // Texto en el fondo
-            Text(
-                text = "${place.toponym}",
-                color = Black,
-                fontSize = 20.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.CenterStart),
-            )
-        }
-        Spacer(modifier = Modifier.height(20.dp))
 
         Row (
             modifier = Modifier
@@ -195,24 +165,30 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
                     .border(1.dp, Black, RoundedCornerShape(10.dp)),
                 placeholder = { Text("Añade un nuevo alias a este lugar", style = TextStyle(fontSize = 20.sp)) },
                 colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color(0xFFFFFFF),
+                    containerColor = Color(0xFFFFFFFF),
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent
                 ),
                 shape = RoundedCornerShape(8.dp)
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
+
+        Spacer(modifier = Modifier.height(30.dp))
 
         Button(
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        interestPlaceService.createInterestPlaceCoordinates(place.coordinate)
+                        interestPlaceService.createInterestPlace(place.coordinate, place.toponym, alias)
                         withContext(Dispatchers.Main) {
                             showPopupCreateSucces = true
                         }
                     } catch (e: NotValidCoordinatesException) {
+                        withContext(Dispatchers.Main) {
+                            showPopupCreateError = true
+                            println("Error: ${e.message}")
+                        }
+                    } catch (e: NotValidAliasException) {
                         withContext(Dispatchers.Main) {
                             showPopupCreateError = true
                             println("Error: ${e.message}")
@@ -226,13 +202,13 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
                 }
             },
             modifier = Modifier
-                .height(36.dp)
-                .padding(horizontal = 32.dp, vertical = 1.dp)
-                .align(AbsoluteAlignment.Right),
+                .height(40.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp, vertical = 1.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Black),
             shape = RoundedCornerShape(10.dp)
         ) {
-            Text(text = "Añadir", color = White, fontSize = 14.sp)
+            Text(text = "Guardar lugar", color = White, fontSize = 18.sp)
         }
     }
 
@@ -245,7 +221,6 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
                 .clickable { showPopupCreateSucces = false},
             contentAlignment = Alignment.Center
         ) {
-            // Popup con el contenido de edición de correo
             Box(
                 modifier = Modifier
                     .height(250.dp)
@@ -278,7 +253,7 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
                     ) {
                         Button(
                             onClick = {
-                                showPopupCreateSucces = false
+                                navController.navigate("mainMenu")
                             },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(
@@ -306,7 +281,7 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
                 .clickable { showPopupCreateSucces = false},
             contentAlignment = Alignment.Center
         ) {
-            // Popup con el contenido de edición de correo
+
             Box(
                 modifier = Modifier
                     .height(250.dp)
@@ -351,11 +326,9 @@ fun InterestPlaceCreation(viewModel: InterestPlaceViewModel){
                                 fontSize = 16.sp,
                             )
                         }
-
                     }
                 }
             }
         }
     }
-
 }

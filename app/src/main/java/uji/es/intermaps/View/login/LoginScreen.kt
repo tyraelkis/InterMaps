@@ -41,7 +41,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -50,8 +49,8 @@ import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.UserService
-@OptIn(ExperimentalMaterial3Api::class)
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController) {
 
@@ -189,7 +188,7 @@ fun LoginScreen(navController: NavController) {
                     try {
                         userService.login(email, password)
                         withContext(Dispatchers.Main) {
-                            navController.navigate("home")
+                            navController.navigate("mainMenu")
                         }
                     } catch (e: NotValidUserData) {
                         withContext(Dispatchers.Main) {

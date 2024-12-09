@@ -3,13 +3,9 @@ package uji.es.intermaps.ViewModel
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
-import okhttp3.internal.cookieToString
-import okhttp3.internal.toImmutableMap
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
@@ -25,8 +21,8 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class FirebaseRepository: Repository {
-    val db = DataBase.db
-    val auth = DataBase.auth
+    private val db = DataBase.db
+    private val auth = DataBase.auth
 
 
     override suspend fun createUser(email: String, pswd: String): User {
@@ -43,19 +39,24 @@ class FirebaseRepository: Repository {
                                 continuation.resumeWithException(e)
                             }
                     } else {
-                        val exception = task.exception
-                        if (exception is FirebaseAuthUserCollisionException) {
-                            continuation.resumeWithException(
-                                AccountAlreadyRegistredException("Ya existe una cuenta con este email")
-                            )
-                        } else if (exception is FirebaseAuthInvalidCredentialsException) {
-                            continuation.resumeWithException(
-                                IllegalArgumentException("El correo o la contraseña no tienen un formato válido")
-                            )
-                        } else {
-                            continuation.resumeWithException(
-                                exception ?: Exception("Error desconocido al crear el usuario.")
-                            )
+                        when (val exception = task.exception) {
+                            is FirebaseAuthUserCollisionException -> {
+                                continuation.resumeWithException(
+                                    AccountAlreadyRegistredException("Ya existe una cuenta con este email")
+                                )
+                            }
+
+                            is FirebaseAuthInvalidCredentialsException -> {
+                                continuation.resumeWithException(
+                                    IllegalArgumentException("El correo o la contraseña no tienen un formato válido")
+                                )
+                            }
+
+                            else -> {
+                                continuation.resumeWithException(
+                                    exception ?: Exception("Error desconocido al crear el usuario.")
+                                )
+                            }
                         }
                     }
                 }
@@ -178,45 +179,45 @@ class FirebaseRepository: Repository {
 
     override suspend fun setAlias(interestPlace: InterestPlace, newAlias: String): Boolean {
         val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        var result = false
+        val documentSnapshot = db.collection("InterestPlace")
+            .document(userEmail)
+            .get()
+            .await()
 
-        return try {
-            val documentSnapshot = db.collection("InterestPlace")
-                .document(userEmail)
-                .get()
-                .await()
+        if (documentSnapshot.exists()) {
+            val interestPlaces =
+                documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
 
-            if (documentSnapshot.exists()) {
-                val interestPlaces =
-                    documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
-
-                val foundPlace = (interestPlaces.find { place ->
-                    val coordinate = place["coordinate"] as? Map<String, Double>
-                    val latitude = coordinate?.get("latitude") ?: 0.0
-                    val longitude = coordinate?.get("longitude") ?: 0.0
+            val foundPlace = (interestPlaces.find { place ->
+                val coordinate = place["coordinate"] as? Map<String, Double>
+                val latitude = coordinate?.get("latitude") ?: 0.0
+                val longitude = coordinate?.get("longitude") ?: 0.0
 
 
-                    latitude == interestPlace.coordinate.latitude && longitude == interestPlace.coordinate.longitude
-                }?: throw NotSuchPlaceException("Lugar de interés no encontrado")).toMutableMap()
+                latitude == interestPlace.coordinate.latitude && longitude == interestPlace.coordinate.longitude
+            }?: throw NotSuchPlaceException("Lugar de interés no encontrado")).toMutableMap()
 
-                val updatedInterestPlaces = interestPlaces.map { place ->
-                    if (place == foundPlace) {
-                        place.toMutableMap().apply {
-                            this["alias"] = newAlias
-                        }
+
+            val updatedInterestPlaces = interestPlaces.map { place ->
+                if (place == foundPlace){
+                    place.toMutableMap().apply {
+                        this["alias"] = newAlias
                     }
+                } else {
+                    place
                 }
-                db.collection("InterestPlace")
-                    .document(userEmail)
-                    .update("interestPlaces", updatedInterestPlaces)
-                    .await()
-                true
-            } else {
-                false
             }
-        } catch (e: Exception) {
-            Log.e("setAlias", "Error updating alias: ${e.message}", e)
-            false
+
+            db.collection("InterestPlace")
+                .document(userEmail)
+                .update("interestPlaces", updatedInterestPlaces)
+                .await()
+            result = true
+        } else {
+            result = false
         }
+        return result
     }
 
 
@@ -276,7 +277,7 @@ class FirebaseRepository: Repository {
     override suspend fun getInterestPlaceByToponym(toponym: String): InterestPlace{
         val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
 
-        return try {
+        try {
             val documentSnapshot = db.collection("InterestPlace")
                 .document(userEmail)
                 .get()
@@ -289,8 +290,8 @@ class FirebaseRepository: Repository {
                     toponym.equals(actualToponym)
                 } ?: throw NotSuchPlaceException("Lugar de interés no encontrado")
 
-                var lat = (foundPlace["coordinate"] as Map<String, Double>)["latitude"] ?: 0.0
-                var long = (foundPlace["coordinate"] as Map<String, Double>)["longitude"] ?: 0.0
+                val lat = (foundPlace["coordinate"] as Map<String, Double>)["latitude"] ?: 0.0
+                val long = (foundPlace["coordinate"] as Map<String, Double>)["longitude"] ?: 0.0
                 return InterestPlace(
                     coordinate =  Coordinate(lat,long),
                     toponym = foundPlace["toponym"] as? String ?: "",
@@ -306,7 +307,7 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun viewInterestPlaceData(interestPlaceCoordinate: Coordinate): InterestPlace {
+    override suspend fun viewInterestPlaceData(coordinate: Coordinate): InterestPlace {
         val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
 
         try {
@@ -319,16 +320,16 @@ class FirebaseRepository: Repository {
                 val interestPlaces = documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
 
                 val foundPlace = interestPlaces.find { place ->
-                    val coordinate = place["coordinate"] as? Map<String, Double>
-                    val latitude = coordinate?.get("latitude") ?: 0.0
-                    val longitude = coordinate?.get("longitude") ?: 0.0
+                    val interestPlaceCoordinate = place["coordinate"] as? Map<String, Double>
+                    val latitude = interestPlaceCoordinate?.get("latitude") ?: 0.0
+                    val longitude = interestPlaceCoordinate?.get("longitude") ?: 0.0
 
-                    latitude == interestPlaceCoordinate.latitude && longitude == interestPlaceCoordinate.longitude
+                    latitude == coordinate.latitude && longitude == coordinate.longitude
                 } ?: throw NotSuchPlaceException("Lugar de interés no encontrado")
 
                 // Construir el objeto InterestPlace a partir del mapa encontrado
                 return InterestPlace(
-                    coordinate = interestPlaceCoordinate,
+                    coordinate = coordinate,
                     toponym = foundPlace["toponym"] as? String ?: "",
                     alias = foundPlace["alias"] as? String ?: "",
                     fav = foundPlace["fav"] as? Boolean ?: false

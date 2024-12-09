@@ -6,14 +6,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import uji.es.intermaps.Interfaces.ORSAPI
 import uji.es.intermaps.Interfaces.PrecioCarburanteAPI
 import uji.es.intermaps.Interfaces.PrecioLuzAPI
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Query
 import okhttp3.logging.HttpLoggingInterceptor
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
-import android.util.Log
 
 
 object RetrofitConfig {

@@ -5,10 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import uji.es.intermaps.Model.InterestPlace
 import androidx.compose.runtime.*
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -27,8 +25,6 @@ class InterestPlaceViewModel(
     private val _showDeletePopUp = mutableStateOf(false)
     val showDeleteDialog: State<Boolean> get() = _showDeletePopUp
 
-    private val _showUpdatePopUp = mutableStateOf(false)
-    val showUpdateDialog: State<Boolean> get() = _showUpdatePopUp
 
     var coordinate by mutableStateOf(Coordinate(0.0, 0.0))
 
@@ -46,6 +42,12 @@ class InterestPlaceViewModel(
 
     private val _showCreateInterestPlaceErrorPopUp = mutableStateOf(false)
     val showCreateInterestPlaceErrorPopUp: State<Boolean> get() = _showCreateInterestPlaceErrorPopUp
+
+    private val _showUpdateInterestPlacePopUp = mutableStateOf(false)
+    val showUpdateInterestPlacePopUp: State<Boolean> get() = _showUpdateInterestPlacePopUp
+
+    private val _showUpdateInterestPlaceErrorPopUp = mutableStateOf(false)
+    val showUpdateInterestPlaceErrorPopUp: State<Boolean> get() = _showUpdateInterestPlaceErrorPopUp
 
     init {
         _interestPlace.value = InterestPlace()
@@ -71,13 +73,7 @@ class InterestPlaceViewModel(
         _showDeletePopUp.value = false
     }
 
-    fun showUpdateInterestPlacePopUp(){
-        _showDeletePopUp.value = true
-    }
 
-    fun hideUpdateInterestPlacePopUp(){
-        _showDeletePopUp.value = false
-    }
 
     fun showCreateInterestPlaceCorrectPopUp(){
         _showCreateInterestPlaceCorrectPopUp.value = true
@@ -91,6 +87,21 @@ class InterestPlaceViewModel(
     }
     fun hideCreateInterestPlaceErrorPopUp() {
         _showCreateInterestPlaceErrorPopUp.value = false
+    }
+
+    fun showUpdateInterestPlacePopUp(){
+        _showUpdateInterestPlacePopUp.value = true
+    }
+
+    fun hideUpdateInterestPlacePopUp(){
+        _showUpdateInterestPlacePopUp.value = false
+    }
+
+    fun showUpdateInterestPlaceErrorPopUp(){
+        _showUpdateInterestPlaceErrorPopUp.value = true
+    }
+    fun hideUpdateInterestPlaceErrorPopUp() {
+        _showUpdateInterestPlaceErrorPopUp.value = false
     }
 
     fun getInterestPlaceByToponym(toponym: String) {
@@ -121,7 +132,14 @@ class InterestPlaceViewModel(
                 Log.e("Locations", "Error: ${e.message}")
             }
         }
+    }
 
+    //Variable u función para pasarle el lugar de interés a la pestaña de crear lugar
+    var selectedInterestPlace by mutableStateOf(InterestPlace())
+        private set
+
+    fun setInterestPlaceForCreation(interestPlace: InterestPlace) {
+        selectedInterestPlace = interestPlace
     }
 
     suspend fun deleteInterestPlace (coordinate: Coordinate){

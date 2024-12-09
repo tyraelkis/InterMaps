@@ -1,19 +1,13 @@
 package uji.es.intermaps.ViewModel
 
-import android.util.Log
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import kotlinx.coroutines.*
-import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.NotValidAliasException
-import uji.es.intermaps.Interfaces.ORSRepository
 import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
-import uji.es.intermaps.Model.DataBase.db
 import uji.es.intermaps.Model.RetrofitConfig
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 
 class InterestPlaceService(private val repository: Repository) {
     private val routeRepository = RouteRepository()
@@ -23,11 +17,11 @@ class InterestPlaceService(private val repository: Repository) {
             throw NotValidCoordinatesException("Las coordenadas no son válidas")
         }
         if (alias.length > 30) {
-            throw IllegalArgumentException("El alias tiene un máximo de 30 caracteres.")
+            throw NotValidAliasException("El alias tiene un máximo de 30 caracteres.")
         }
-        val aliasRegex = "^[A-Za-z0-9]+$".toRegex()
+        val aliasRegex = "^[A-Za-z0-9\\s]+$".toRegex()
         if (!alias.matches(aliasRegex)) {
-            throw IllegalArgumentException("El alias no tiene un formato válido.")
+            throw NotValidAliasException("El alias no tiene un formato válido.")
         }
 
         return repository.createInterestPlace(coordinate, toponym, alias)
@@ -84,14 +78,13 @@ class InterestPlaceService(private val repository: Repository) {
         else{
             throw UnableToDeletePlaceException()
         }
-        return false
     }
 
     suspend fun searchInterestPlaceByCoordiante(coordinate: Coordinate) : InterestPlace{
         return routeRepository.searchInterestPlaceByCoordinates(coordinate)
     }
 
-    suspend fun viewInterestPlaceData(coordinate: Coordinate, email: String? = null): InterestPlace{
+    suspend fun viewInterestPlaceData(coordinate: Coordinate): InterestPlace{
        return repository.viewInterestPlaceData(coordinate)
     }
 
@@ -120,8 +113,7 @@ class InterestPlaceService(private val repository: Repository) {
 
 
     suspend fun getInterestPlaceByToponym(toponym: String): InterestPlace {
-        var returnPlace = repository.getInterestPlaceByToponym(toponym)
-        Log.i("returnPlace", returnPlace.toString())
+        val returnPlace = repository.getInterestPlaceByToponym(toponym)
         return returnPlace
     }
 

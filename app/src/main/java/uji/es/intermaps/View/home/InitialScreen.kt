@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -36,7 +35,7 @@ fun InitialScreen (navController: NavController){
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Color.White
+                White
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -87,7 +86,7 @@ fun InitialScreen (navController: NavController){
                 .height(52.dp)
                 .padding(horizontal = 32.dp),
             colors = ButtonDefaults.buttonColors(containerColor = White),
-            border = BorderStroke(2.dp, Color.Black),
+            border = BorderStroke(2.dp, Black),
             shape = RoundedCornerShape(10.dp)
         ) {
             Text(text = "Crear Cuenta", color = Black, fontSize = 18.sp, fontWeight = FontWeight.Bold)

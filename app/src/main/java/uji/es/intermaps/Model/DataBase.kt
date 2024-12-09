@@ -8,7 +8,6 @@ import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.tasks.await
-import uji.es.intermaps.Exceptions.NotSuchPlaceException
 
 object DataBase {
     @SuppressLint("StaticFieldLeak")

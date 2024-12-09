@@ -39,7 +39,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -51,7 +50,6 @@ import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.ViewModel.UserService
 
 @OptIn(ExperimentalMaterial3Api::class)
-
 @Composable
 fun SignUpScreen(navController: NavController) {
     val repository: Repository = FirebaseRepository()
@@ -186,7 +184,7 @@ fun SignUpScreen(navController: NavController) {
                     try {
                         userService.createUser(email, password)
                         withContext(Dispatchers.Main) {
-                            navController.navigate("home")
+                            navController.navigate("mainMenu")
                         }
                     } catch (e: NotValidUserData) {
                         withContext(Dispatchers.Main) {
@@ -209,7 +207,7 @@ fun SignUpScreen(navController: NavController) {
                 .padding(horizontal = 32.dp)
                 .align(AbsoluteAlignment.Right),
             colors = ButtonDefaults.buttonColors(containerColor = White),
-            border = BorderStroke(2.dp, Color.Black),
+            border = BorderStroke(2.dp, Black),
             shape = RoundedCornerShape(10.dp)
         ) {
             Text(text = "Crear Cuenta", color = Black, fontSize = 18.sp, fontWeight = FontWeight.Bold)
@@ -226,7 +224,7 @@ fun SignUpScreen(navController: NavController) {
         ) {
             Text(
                 text = "Si ya tienes una cuenta",
-                color = Color.Black,
+                color = Black,
             )
             Button(
                 onClick = {

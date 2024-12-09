@@ -1,5 +1,6 @@
 package uji.es.intermaps.View.interestPlace
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,13 +22,14 @@ import androidx.compose.ui.window.Dialog
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @Composable
-fun CreateInterestPlaceErrorPopUp (
+fun ModificationInterestPlaceErrorPopUp (
     viewModel: InterestPlaceViewModel,
 ){
-    val showDialog = viewModel.showCreateInterestPlaceErrorPopUp.value
+
+    val showDialog = viewModel.showUpdateInterestPlaceErrorPopUp.value
     if (showDialog) {
         Dialog(
-            onDismissRequest = { viewModel.hideCreateInterestPlaceErrorPopUp() }
+            onDismissRequest = { viewModel.hideUpdateInterestPlaceErrorPopUp() }
         ) {
             Column(
                 modifier = Modifier
@@ -38,7 +40,7 @@ fun CreateInterestPlaceErrorPopUp (
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "El nuevo lugar de interes se ha añadido de manera correcta",
+                    text = "El cambio de alias no se ha podido realizar de manera correcta",
                     color = Color.White,
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center,
@@ -51,7 +53,7 @@ fun CreateInterestPlaceErrorPopUp (
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Button(
-                    onClick = { viewModel.hideCreateInterestPlaceErrorPopUp() },
+                    onClick = { viewModel.hideUpdateInterestPlaceErrorPopUp() },
                     modifier = Modifier,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Black
