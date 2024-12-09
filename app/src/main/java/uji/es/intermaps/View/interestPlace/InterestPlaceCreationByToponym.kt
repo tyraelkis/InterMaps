@@ -271,7 +271,7 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
             }
         }
     }
-
+/*
     if (showPopupCreateError) {
         Box(
             modifier = Modifier
@@ -332,5 +332,10 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
         }
     }
 
+
+
+ */
     }
+
+
 }
