@@ -1,5 +1,6 @@
 package uji.es.intermaps.View.interestPlace
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,6 +42,8 @@ import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
@@ -150,7 +153,9 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                 .size(30.dp)
                                 .clickable {
                                     viewModel.updateInterestPlace(place)
-                                    navController.navigate("interestPlaceSetAlias/${place.toponym}")
+                                    val encodedToponym = URLEncoder.encode(place.toponym, StandardCharsets.UTF_8.toString())
+                                    Log.d("encodedToponym", encodedToponym)
+                                    navController.navigate("interestPlaceSetAlias/$encodedToponym")
                                 },
 
                             tint = Color(color = 0XFF007E70)
@@ -216,7 +221,10 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                 .size(30.dp)
                                 .clickable {
                                     viewModel.updateInterestPlace(notFavPlace)
-                                    navController.navigate("interestPlaceSetAlias/${notFavPlace.toponym}")
+                                    val encodedToponym = URLEncoder.encode(notFavPlace.toponym, StandardCharsets.UTF_8.toString())
+                                    Log.d("encodedToponym", encodedToponym)
+                                    navController.navigate("interestPlaceSetAlias/$encodedToponym")
+
                                 },
 
                             tint = Black

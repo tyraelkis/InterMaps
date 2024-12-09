@@ -52,7 +52,7 @@ class RouteTests {
 
     @Test (expected = NotValidPlaceException::class)
     fun createRoute_E10Invalid_routeNotCreated(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO)
+        routeService.createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO)
     }
 
 }
