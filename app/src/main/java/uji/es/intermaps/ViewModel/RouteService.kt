@@ -1,13 +1,14 @@
 package uji.es.intermaps.ViewModel
 
+import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.TrasnportMethods
 
-class RouteService(private val repository: Repository){
+open class RouteService(private val repository: Repository){
     public var routeRepository = RouteRepository()
 
-    fun createRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods):Route {
+    suspend fun createRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods):Route {
         TODO()
     }
 

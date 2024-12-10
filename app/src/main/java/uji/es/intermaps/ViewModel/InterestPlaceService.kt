@@ -10,7 +10,7 @@ import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.RetrofitConfig
 
-class InterestPlaceService(private val repository: Repository) {
+open class InterestPlaceService(private val repository: Repository) {
     var routeRepository = RouteRepository()
 
     suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {

@@ -34,7 +34,6 @@ class RouteTests {
 
     var mockRepository: Repository = mock(Repository::class.java)
 
-    var mockRouteService: RouteService = mock(RouteService::class.java)
 
     var mockRouteRepository: RouteRepository = mock(RouteRepository::class.java)
 
@@ -58,17 +57,6 @@ class RouteTests {
 
     @Test
     fun createRoute_E1Valid_routeIsCreated():Unit = runBlocking() {
-        // Mockear la creación de InterestPlace
-        val mockedCoordinate1 = Coordinate(latitude = 39.946, longitude = -0.032)
-        val mockedCoordinate2 = Coordinate(latitude = 39.973, longitude = -0.048)
-
-        `when`(mockInterestPlaceService.createInterestPlaceFromToponym("Burriana")).thenReturn(
-            InterestPlace(coordinate = mockedCoordinate1, alias = "Burriana")
-        )
-        `when`(mockInterestPlaceService.createInterestPlaceFromToponym("Castellón")).thenReturn(
-            InterestPlace(coordinate = mockedCoordinate2, alias = "Castellón")
-        )
-
         // Mockear la creación de la ruta
         var mockedRoute = Route(
             origin = "Burriana",
@@ -83,21 +71,15 @@ class RouteTests {
             vehiclePlate = "",
         )
 
-        `when`(mockRouteService.createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO))
+        `when`(mockRepository.createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO))
             .thenReturn(mockedRoute)
 
-        // Llamar a los métodos del servicio para simular la creación de la ruta
-        mockInterestPlaceService.createInterestPlaceFromToponym("Burriana")
-        mockInterestPlaceService.createInterestPlaceFromToponym("Castellón")
-        val routeTest = mockRouteService.createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO)
+        val routeTest = routeService.createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO)
 
-        // Verificar que se llamaron los métodos correctos
-        verify(mockInterestPlaceService).createInterestPlaceFromToponym("Burriana")
-        verify(mockInterestPlaceService).createInterestPlaceFromToponym("Castellón")
-        verify(mockRouteService).createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO)
+        verify(mockRepository).createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO)
 
         // Comprobamos que la ruta fue creada correctamente
-        assertEquals(mockedRoute, routeService.createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO))
+        assertEquals(mockedRoute, routeTest)
 
 
     }
