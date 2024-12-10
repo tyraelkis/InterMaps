@@ -43,7 +43,7 @@ object DataBase {
 
     suspend fun doesInteresPlaceExists(coordinate: Coordinate): Boolean {
         return try {
-            val userEmail = auth.currentUser?.email.toString()
+            val userEmail = auth.currentUser?.email?: throw IllegalStateException("No hay un usuario autenticado")
             val documentSnapshot = db.collection("InterestPlace")
                 .document(userEmail)
                 .get()
@@ -69,7 +69,28 @@ object DataBase {
     }
 
     suspend fun doesVehicleExist(plate: String): Boolean{
-        TODO()
+        return try {
+            val userEmail = auth.currentUser?.email?: throw IllegalStateException("No hay un usuario autenticado")
+            val documentSnapshot = db.collection("Vehicle")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (!documentSnapshot.exists()) {
+                return false
+            }
+
+            val vehicles = documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
+
+            vehicles.any { vehicle ->
+                val vehiclePlate = vehicle["plate"] ?: return@any false
+
+                plate == vehiclePlate
+            }
+        } catch (exception: Exception) {
+            Log.e("doesVehicleExists", "Error al verificar el vehiculo: ${exception.message}", exception)
+            false
+        }
     }
 
     suspend fun doesRouteExist(route: Route): Boolean{

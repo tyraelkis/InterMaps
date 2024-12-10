@@ -20,6 +20,8 @@ import uji.es.intermaps.View.signup.SignUpScreen
 import uji.es.intermaps.View.user.UserDataScreen
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.UserViewModel
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, viewModel: InterestPlaceViewModel, viewModel1: UserViewModel) {
@@ -87,7 +89,9 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             )
         ) {
             backStackEntry ->
-            val toponym = backStackEntry.arguments?.getString("toponym")
+            val toponym = backStackEntry.arguments?.getString("toponym")?.let {
+                URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+            }
             if (toponym != null) {
                 InterestPlaceSetAlias(navHostController,viewModel, toponym)
             }

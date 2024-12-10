@@ -340,13 +340,13 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { navController.navigate("userDataScreen") }, //TODO Comprobar que va bien
+                            .clickable { navController.navigate("userDataScreen") },
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            navController.navigate("userDataScreen") //TODO Comprobar que va bien
+                            navController.navigate("userDataScreen")
                         },
                         modifier = Modifier
                             .height(40.dp)
@@ -379,13 +379,13 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { navController.navigate("interestPlaceList") }, //TODO Comprobar que va bien
+                            .clickable { navController.navigate("interestPlaceList") },
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            navController.navigate("interestPlaceList") //TODO Comprobar que va bien
+                            navController.navigate("interestPlaceList")
                         },
                         modifier = Modifier
                             .height(40.dp)
@@ -541,7 +541,7 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                     ) {
                         Spacer(modifier = Modifier.width(20.dp))
 
-                        Image(//Imagen lugar 1 //TODO falta centrar las fotos y linkear el botón
+                        Image(//Imagen lugar 1
                             painter = painterResource(
                                 id = R.drawable.not_aviable_image
                             ),

@@ -7,12 +7,17 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
+import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
+import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
+import uji.es.intermaps.Model.DieselVehicle
+import uji.es.intermaps.Model.ElectricVehicle
+import uji.es.intermaps.Model.GasolineVehicle
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
@@ -424,12 +429,100 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun createVehicle(plate: String, type: String, consumption: Double):Vehicle {
-        TODO("Not yet implemented")
+    override suspend fun createVehicle(plate: String, type: String, consumption: Double): Vehicle {
+        val email = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        return suspendCoroutine { continuation ->
+            val userDocument = db.collection("Vehicle").document(email)
+
+            userDocument.get()
+                .addOnSuccessListener { documentSnapshot ->
+                    val vehicles = documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
+
+                    // Verificar si ya existe un vehículo con la misma matrícula
+                    if (vehicles.any { it["plate"] == plate }) {
+                        continuation.resumeWithException(
+                            VehicleAlreadyExistsException("Ya existe un vehículo con la matrícula $plate")
+                        )
+                        return@addOnSuccessListener
+                    }
+
+                    // Crea el vehículo usando el Factory Method
+                    val vehicle = when (type.lowercase()) {
+                        "diesel" -> DieselVehicle(plate, "Diesel", consumption, false)
+                        "gasoline" -> GasolineVehicle(plate, "Gasoline", consumption, false)
+                        "electric" -> ElectricVehicle(plate, "Electric", consumption, false)
+                        else -> {
+                            continuation.resumeWithException(
+                                IllegalArgumentException("Unknown vehicle type: $type")
+                            )
+                            return@addOnSuccessListener
+                        }
+                    }
+
+                    // Mapa para almacenar el vehículo en Firebase
+                    val newVehicle = mapOf(
+                        "plate" to vehicle.plate,
+                        "type" to vehicle.type,
+                        "consumption" to vehicle.consumption,
+                        "fav" to vehicle.fav
+                    )
+
+                    // Agregar el nuevo vehículo a la colección
+                    userDocument.update("vehicles", FieldValue.arrayUnion(newVehicle))
+                        .addOnSuccessListener {
+                            continuation.resume(vehicle)
+                        }
+                        .addOnFailureListener { error ->
+                            // Si la actualización falla, intentar crear un nuevo documento
+                            userDocument.set(mapOf("vehicles" to listOf(newVehicle)))
+                                .addOnSuccessListener {
+                                    continuation.resume(vehicle)
+                                }
+                                .addOnFailureListener { e ->
+                                    continuation.resumeWithException(e)
+                                }
+                        }
+                }
+                .addOnFailureListener { e ->
+                    continuation.resumeWithException(e)
+                }
+        }
     }
 
     override suspend fun deleteVehicle(plate: String): Boolean {
-        TODO("Not yet implemented")
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        val documentSnapshot = db.collection("Vehicle")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val vehicles = documentSnapshot.get("vehicles") as? MutableList<Map<String, Any>>
+                ?: mutableListOf()
+
+            val placeIndex = vehicles.indexOfFirst { vehicle ->
+                val vehiclePlate = vehicle["plate"] as? String ?: return@indexOfFirst false
+                vehiclePlate == plate
+            }
+
+            if (placeIndex == -1) {
+                throw NotSuchElementException("Vehículo no encontrado")
+            } //La excepción no tiene que ser cazada en este metodo sino en el servicio
+
+            vehicles.removeAt(placeIndex)
+
+            db.collection("Vehicle")
+                .document(userEmail)
+                .update("vehicles", vehicles)
+                .await()
+
+            return true
+        } else {
+            return false
+        }
     }
 
     override suspend fun viewVehicleList(): List<Vehicle> {

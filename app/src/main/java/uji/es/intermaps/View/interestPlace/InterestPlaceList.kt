@@ -1,5 +1,6 @@
 package uji.es.intermaps.View.interestPlace
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
@@ -41,6 +43,8 @@ import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
@@ -134,14 +138,24 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                 .size(30.dp),
                             tint = Color(color = 0XFF007E70)
                         )
-                        Text(
-                            text = place.toponym,
-                            fontSize = 20.sp,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 15.dp)
-
-                        )
+                        if(place.alias.isEmpty()) {
+                            Text(
+                                text = place.toponym,
+                                fontSize = 20.sp,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 15.dp)
+                            )
+                        }
+                        else {
+                            Text(
+                                text = place.alias,
+                                fontSize = 20.sp,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 15.dp)
+                            )
+                        }
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Edit",
@@ -150,7 +164,9 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                 .size(30.dp)
                                 .clickable {
                                     viewModel.updateInterestPlace(place)
-                                    navController.navigate("interestPlaceSetAlias/${place.toponym}")
+                                    val encodedToponym = URLEncoder.encode(place.toponym, StandardCharsets.UTF_8.toString())
+                                    Log.d("encodedToponym", encodedToponym)
+                                    navController.navigate("interestPlaceSetAlias/$encodedToponym")
                                 },
 
                             tint = Color(color = 0XFF007E70)
@@ -201,13 +217,23 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                 .size(30.dp),
                             tint = Black
                         )
-                        Text(
-                            text = notFavPlace.toponym,
-                            fontSize = 20.sp,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 8.dp)
-                        )
+                        if(notFavPlace.alias.isEmpty()) {
+                            Text(
+                                text = notFavPlace.toponym,
+                                fontSize = 20.sp,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 8.dp)
+                            )
+                        } else {
+                            Text(
+                                text = notFavPlace.alias,
+                                fontSize = 20.sp,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 8.dp)
+                            )
+                        }
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Edit",
@@ -216,38 +242,18 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                 .size(30.dp)
                                 .clickable {
                                     viewModel.updateInterestPlace(notFavPlace)
-                                    navController.navigate("interestPlaceSetAlias/${notFavPlace.toponym}")
+                                    val encodedToponym = URLEncoder.encode(notFavPlace.toponym, StandardCharsets.UTF_8.toString())
+                                    Log.d("encodedToponym", encodedToponym)
+                                    navController.navigate("interestPlaceSetAlias/$encodedToponym")
                                 },
-
                             tint = Black
                         )
-
                     }
                 }
             }
         }
         Spacer(modifier = Modifier.weight(1f))
-        Column(
-            modifier = Modifier.padding(bottom = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            Button(
-                onClick = {
-                    navController.navigate("interestPlaceCreation")
-                },
-                modifier = Modifier
-                    .width(350.dp)
-                    .height(45.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Black
-                )
-            ){
-                Text(
-                    text = "Añadir lugar",
-                    fontSize = 20.sp,
-                )
-            }
-        }
+
         Spacer(modifier = Modifier.height(15.dp))
 
         Button(
@@ -257,16 +263,17 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
             modifier = Modifier
                 .width(350.dp)
                 .height(45.dp),
+            shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Black
             )
         ) {
             Text(
-                text = "Añadir lugar por toponimo",
+                text = "Añadir lugar por topónimo",
                 fontSize = 20.sp,
             )
         }
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
     }
 }
