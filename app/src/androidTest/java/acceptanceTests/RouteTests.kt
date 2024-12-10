@@ -20,6 +20,7 @@ import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.TrasnportMethods
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
+import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.RouteService
 import uji.es.intermaps.ViewModel.UserService
 
@@ -31,6 +32,7 @@ class RouteTests {
     private var password: String = "123456AA" // Cambiar en las pruebas de aceptacion para que cumpla los requisitos de las contraseñas
     private var userService: UserService = UserService(repository)
     private var userTest: User = User("emaildeprueba@gmail.com", "123456BB")
+    private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
     private var routeService: RouteService = RouteService(repository)
 
     @Before
@@ -44,6 +46,8 @@ class RouteTests {
 
     @Test
     fun createRoute_E1Valid_routeIsCreated(): Unit = runBlocking {
+        interestPlaceService.createInterestPlaceFromToponym("Burriana")
+        interestPlaceService.createInterestPlaceFromToponym("Castellón")
         val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO)
         val res = db.doesRouteExist(routeTest)
         routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod)
@@ -52,7 +56,7 @@ class RouteTests {
 
     @Test (expected = NotValidPlaceException::class)
     fun createRoute_E10Invalid_routeNotCreated(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO)
+        routeService.createRoute("Borriol", "Madrid", TrasnportMethods.VEHICULO)
     }
 
 }
