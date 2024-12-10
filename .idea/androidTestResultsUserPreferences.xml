@@ -526,6 +526,19 @@
             </AndroidTestResultsTableState>
           </value>
         </entry>
+        <entry key="1867995733">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="100" />
+                  <entry key="Medium_Phone_API_35" value="129" />
+                  <entry key="Tests" value="370" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
       </map>
     </option>
   </component>

@@ -21,7 +21,7 @@ class VehicleService(private val repository: Repository) {
     }
 
     private fun validateVehicleType(type: String) {
-        val validTypes = listOf("gasoline", "diesel", "electric")
+        val validTypes = listOf("gasolina", "diesel", "electrico")
         if (type.lowercase() !in validTypes) {
             throw IllegalArgumentException("El tipo de vehículo no es válido.")
         }
@@ -42,6 +42,6 @@ class VehicleService(private val repository: Repository) {
     }
 
     suspend fun viewVehicleList(): List<Vehicle>{
-        TODO()
+        return repository.viewVehicleList()
     }
 }
