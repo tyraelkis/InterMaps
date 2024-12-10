@@ -9,7 +9,10 @@ open class RouteService(private val repository: Repository){
     public var routeRepository = RouteRepository()
 
     suspend fun createRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods):Route {
-        TODO()
+        if (origin.isEmpty() or destination.isEmpty()){
+            throw NotValidPlaceException()
+        }
+        return repository.createRoute(origin, destination, trasnportMethod)
     }
 
     fun deleteRoute(origin: String,destination: String, trasnportMethod: TrasnportMethods): Boolean {
