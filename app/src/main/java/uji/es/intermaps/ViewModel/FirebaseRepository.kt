@@ -17,7 +17,6 @@ import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
-import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TrasnportMethods
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
@@ -508,8 +507,6 @@ class FirebaseRepository: Repository {
 
                 // Convertimos cada elemento del array a Vehicle usando la fábrica
                 vehicles.map { vehicle ->
-                    //val a = (vehicle["consumption"] as Number? ?: 0.0).toDouble()
-
                     VehicleFactory.createVehicle(
                         vehicle["plate"] as String? ?: "",
                         vehicle["type"] as String? ?: "",
@@ -553,6 +550,7 @@ class FirebaseRepository: Repository {
             Log.e("createRoute", "Error al crear la ruta: ${e.message}", e)
             throw Exception("Error al crear la ruta: ${e.message}", e)
         }
+        TODO()
     }
 
 }

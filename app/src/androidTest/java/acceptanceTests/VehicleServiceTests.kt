@@ -51,7 +51,7 @@ class VehicleServiceTests {
     }
 
     @Test (expected = VehicleAlreadyExistsException::class)
-    fun createVehicle_E2Invalid_errorOnCreatingVehicle(): Unit = runBlocking {
+    fun createVehicle_E3Invalid_errorOnCreatingVehicle(): Unit = runBlocking {
         // El vehiculo  ya esta en la BD
         vehicleService.createVehicle("9999GON", VehicleTypes.GASOLINA.type, 9.0)
     }

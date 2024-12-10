@@ -1,6 +1,5 @@
 package acceptanceTests
 
-import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -37,9 +36,6 @@ class InterestPlaceServiceTests {
     @Before
     fun setup(): Unit = runBlocking {
         userService.login(userTest.email, userTest.pswd)
-        Log.i("usuario", DataBase.auth.currentUser?.email.toString())
-        /*val coord = Coordinate(-18.665695, 35.529562)
-        interestPlaceService.createInterestPlaceCoordinates(coord)*/
     }
 
     @After
@@ -57,7 +53,7 @@ class InterestPlaceServiceTests {
     }
 
     @Test(expected = NotValidCoordinatesException::class)
-    fun createInterestPlace_E2Invalid_errorOnCreatingInterestPlace(): Unit = runBlocking {
+    fun createInterestPlace_E3Invalid_errorOnCreatingInterestPlace(): Unit = runBlocking {
         interestPlaceService.createInterestPlaceCoordinates(Coordinate(-1800.665695,35.529562))
     }
 
@@ -117,7 +113,7 @@ class InterestPlaceServiceTests {
     }
 
     @Test
-    fun viewInterestPlaceList_E2Invalido_emptyInterestPlaceListViewed(): Unit = runBlocking{
+    fun viewInterestPlaceList_E2Valido_emptyInterestPlaceListViewed(): Unit = runBlocking{
         userService.signOut()
         userService.login(emailEmpty, "123456BB")
         val res = interestPlaceService.viewInterestPlaceList()

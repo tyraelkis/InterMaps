@@ -9,6 +9,7 @@ import uji.es.intermaps.Interfaces.ORSRepository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.RetrofitConfig
+import uji.es.intermaps.Model.Route
 
 open class RouteRepository : ORSRepository {
     private val apiKey = "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23"
@@ -72,5 +73,9 @@ open class RouteRepository : ORSRepository {
         }
 
         throw NotSuchPlaceException("Error en la llamada a la API para obtener las coordenadas")
+    }
+
+    override suspend fun calculateRoute(origin: Coordinate, destination: Coordinate): Route {
+        TODO("Not yet implemented")
     }
 }

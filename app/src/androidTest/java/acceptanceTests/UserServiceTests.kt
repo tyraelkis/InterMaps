@@ -60,7 +60,7 @@ class UserServiceTests {
     }
 
     @Test(expected = SessionNotStartedException::class)
-    fun viewUserData_E1Invalid_userDataNotViewed(): Unit = runBlocking {
+    fun viewUserData_E2Invalid_userDataNotViewed(): Unit = runBlocking {
         val emailError = "noexiste@gmail.com"
         userService.viewUserData(emailError)
     }
@@ -75,7 +75,7 @@ class UserServiceTests {
     }
 
     @Test(expected = IncorrectDataException::class)
-    fun editUserData_E1Invalid_userDataEdited(): Unit = runBlocking {
+    fun editUserData_E2Invalid_userDataEdited(): Unit = runBlocking {
         val newPassword = "J"
         userService.editUserData(newPassword)
     }
@@ -100,7 +100,7 @@ class UserServiceTests {
     }
 
     @Test(expected = UnableToDeleteUserException::class)
-    fun deleteUser_E1Invalid_userIsDeleted(): Unit = runBlocking {
+    fun deleteUser_E2Invalid_userIsDeleted(): Unit = runBlocking {
         userService.deleteUser(email, password)
     }
 }
