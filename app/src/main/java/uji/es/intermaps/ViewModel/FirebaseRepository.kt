@@ -15,15 +15,13 @@ import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
-import uji.es.intermaps.Model.DieselVehicle
-import uji.es.intermaps.Model.ElectricVehicle
-import uji.es.intermaps.Model.GasolineVehicle
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TrasnportMethods
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
+import uji.es.intermaps.Model.VehicleFactory
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -230,26 +228,6 @@ class FirebaseRepository: Repository {
 
 
     override suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
-        //Codigo original y funcional para crear lugar de interés
-        /*return suspendCoroutine { continuation ->
-            db.collection("InterestPlace").add(
-                mapOf(
-                    "coordinate" to coordinate,
-                    "toponym" to toponym,
-                    "alias" to alias,
-                    "fav" to false
-                )
-            ).addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    continuation.resume(InterestPlace(coordinate, toponym, alias, false))
-                } else {
-                    continuation.resumeWithException(task.exception ?: Exception("Error desconocido al almacenar el lugar de interés."))
-                }
-            }
-        }*/
-
-        //Código modificado para poder relacionar un usuario con sus lugares
-        //Siempre ocurre que el usuario no está autenticado pero la primera vez si que había funcionado así que no entiendo
         val email = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
         return suspendCoroutine { continuation ->
             val newPlace = mapOf(
@@ -448,17 +426,7 @@ class FirebaseRepository: Repository {
                     }
 
                     // Crea el vehículo usando el Factory Method
-                    val vehicle = when (type.lowercase()) {
-                        "diesel" -> DieselVehicle(plate, "Diesel", consumption, false)
-                        "gasoline" -> GasolineVehicle(plate, "Gasoline", consumption, false)
-                        "electric" -> ElectricVehicle(plate, "Electric", consumption, false)
-                        else -> {
-                            continuation.resumeWithException(
-                                IllegalArgumentException("Unknown vehicle type: $type")
-                            )
-                            return@addOnSuccessListener
-                        }
-                    }
+                    val vehicle = VehicleFactory.createVehicle(plate, type, consumption, false)
 
                     // Mapa para almacenar el vehículo en Firebase
                     val newVehicle = mapOf(
@@ -526,7 +494,35 @@ class FirebaseRepository: Repository {
     }
 
     override suspend fun viewVehicleList(): List<Vehicle> {
-        TODO("Not yet implemented")
+        val userEmail =  auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        return try {
+            val documentSnapshot = db.collection("Vehicle")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                // Extraemos el array vehicles del documento
+                val vehicles = documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
+
+                // Convertimos cada elemento del array a Vehicle usando la fábrica
+                vehicles.map { vehicle ->
+                    //val a = (vehicle["consumption"] as Number? ?: 0.0).toDouble()
+
+                    VehicleFactory.createVehicle(
+                        vehicle["plate"] as String? ?: "",
+                        vehicle["type"] as String? ?: "",
+                        (vehicle["consumption"] as Number? ?: 0.0).toDouble(),
+                        vehicle["fav"] as Boolean? ?: false
+                    )
+                }
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            emptyList()  // En caso de error, retornamos una lista vacía
+        }
     }
 
     override suspend fun createRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods): Route {
