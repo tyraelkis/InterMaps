@@ -1,0 +1,4 @@
+package IntegrationTests
+
+class UserServiceTests {
+}

@@ -2,6 +2,7 @@ package uji.es.intermaps.ViewModel
 
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import kotlinx.coroutines.*
+import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
 import uji.es.intermaps.Model.InterestPlace
@@ -9,8 +10,8 @@ import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.RetrofitConfig
 
-class InterestPlaceService(private val repository: Repository) {
-    private val routeRepository = RouteRepository()
+open class InterestPlaceService(private val repository: Repository) {
+    var routeRepository = RouteRepository()
 
     suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
         if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){
@@ -60,15 +61,16 @@ class InterestPlaceService(private val repository: Repository) {
 
     suspend fun createInterestPlaceFromToponym(toponym: String): InterestPlace {
         if (toponym.isBlank()) {
-            throw IllegalArgumentException("El topónimo no puede estar vacío")
+            throw NotSuchPlaceException()
         }
 
         val coordinate = searchInterestPlaceByToponym(toponym).coordinate
         if (coordinate == Coordinate(0.0, 0.0)) {
-            throw Exception("No se pudieron obtener las coordenadas para el topónimo proporcionado")
+            throw NotSuchPlaceException()
         }
+        var result = repository.createInterestPlace(coordinate, toponym, "")
         // Crear el lugar de interés
-        return repository.createInterestPlace(coordinate, toponym, "")
+        return result
     }
 
     suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean{
@@ -104,7 +106,8 @@ class InterestPlaceService(private val repository: Repository) {
     }
 
     suspend fun searchInterestPlaceByToponym(toponym: String) : InterestPlace{
-        return routeRepository.searchInterestPlaceByToponym(toponym)
+        var result = routeRepository.searchInterestPlaceByToponym(toponym)
+        return result
     }
 
     suspend fun viewInterestPlaceList(): List<InterestPlace> {
@@ -116,8 +119,5 @@ class InterestPlaceService(private val repository: Repository) {
         val returnPlace = repository.getInterestPlaceByToponym(toponym)
         return returnPlace
     }
-
-
-
 
 }

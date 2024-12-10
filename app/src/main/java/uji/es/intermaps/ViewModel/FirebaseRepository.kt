@@ -19,6 +19,9 @@ import uji.es.intermaps.Model.DieselVehicle
 import uji.es.intermaps.Model.ElectricVehicle
 import uji.es.intermaps.Model.GasolineVehicle
 import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.Model.Route
+import uji.es.intermaps.Model.RouteTypes
+import uji.es.intermaps.Model.TrasnportMethods
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
 import kotlin.coroutines.resume
@@ -307,8 +310,7 @@ class FirebaseRepository: Repository {
                 throw Exception("No existe el documento para el usuario: $userEmail")
             }
         } catch (e: Exception) {
-            Log.e("GeneralError", "Ocurrió un error", e)
-            throw e
+            throw NotSuchPlaceException()
         }
     }
 
@@ -526,6 +528,37 @@ class FirebaseRepository: Repository {
     override suspend fun viewVehicleList(): List<Vehicle> {
         TODO("Not yet implemented")
     }
+
+    override suspend fun createRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods): Route {
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        try {
+            val documentSnapshot = db.collection("InterestPlace")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                val interestPlaces =
+                    documentSnapshot.get("interestPlaces") as? MutableList<Map<String, Any>>
+                        ?: mutableListOf()
+                val foundOrigin = interestPlaces.find { place ->
+                    val actualToponym = place["toponym"] as? String ?: ""
+                    origin.equals(actualToponym)
+                } ?: throw NotSuchPlaceException()
+                val foundDestination = interestPlaces.find { place ->
+                    val actualToponym = place["toponym"] as? String ?: ""
+                    destination.equals(actualToponym)
+                } ?: throw NotSuchPlaceException()
+            }
+
+        } catch (e: Exception) {
+            Log.e("createRoute", "Error al crear la ruta: ${e.message}", e)
+            throw Exception("Error al crear la ruta: ${e.message}", e)
+        }
+    }
+
 }
 
 
