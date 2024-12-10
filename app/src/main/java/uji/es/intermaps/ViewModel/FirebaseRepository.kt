@@ -14,6 +14,8 @@ import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.Model.Route
+import uji.es.intermaps.Model.TrasnportMethods
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
 import kotlin.coroutines.resume
@@ -302,8 +304,7 @@ class FirebaseRepository: Repository {
                 throw Exception("No existe el documento para el usuario: $userEmail")
             }
         } catch (e: Exception) {
-            Log.e("GeneralError", "Ocurrió un error", e)
-            throw e
+            throw NotSuchPlaceException()
         }
     }
 
@@ -433,6 +434,11 @@ class FirebaseRepository: Repository {
     override suspend fun viewVehicleList(): List<Vehicle> {
         TODO("Not yet implemented")
     }
+
+    override suspend fun createRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods): Route{
+        TODO("Not yet implemented")
+    }
+
 }
 
 

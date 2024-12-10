@@ -5,6 +5,7 @@ import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.TrasnportMethods
 
 class RouteService(private val repository: Repository){
+    public var routeRepository = RouteRepository()
 
     fun createRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods):Route {
         TODO()

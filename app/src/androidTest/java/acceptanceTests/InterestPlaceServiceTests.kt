@@ -1,5 +1,6 @@
 package acceptanceTests
 
+import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -36,6 +37,7 @@ class InterestPlaceServiceTests {
     @Before
     fun setup(): Unit = runBlocking {
         userService.login(userTest.email, userTest.pswd)
+        Log.i("usuario", DataBase.auth.currentUser?.email.toString())
         /*val coord = Coordinate(-18.665695, 35.529562)
         interestPlaceService.createInterestPlaceCoordinates(coord)*/
     }
@@ -143,9 +145,9 @@ class InterestPlaceServiceTests {
         assertEquals(true, res)
     }
 
-    @Test(expected = NotValidAliasException::class)
+    @Test(expected = NotSuchPlaceException::class)
     fun  createInterestPlaceByToponym_E1Invalid_InterestPlaceCreated(): Unit = runBlocking {
-        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceFromToponym("Mozambique")
+        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceFromToponym("Moztrambique")
         interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
     }
 
