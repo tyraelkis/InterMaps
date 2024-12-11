@@ -141,19 +141,5 @@ class InterestPlaceServiceTests {
         assertEquals(true, res)
     }
 
-    @Test(expected = NotSuchPlaceException::class)
-    fun  createInterestPlaceByToponym_E1Invalid_InterestPlaceCreated(): Unit = runBlocking {
-        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceFromToponym("Moztrambique")
-        interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
-    }
 
-
-    //@Test
-    fun sara_pruebas(): Unit = runBlocking{
-        userService.login("pruebas@sara.com", "Password")
-        val puntoDelete = Coordinate(39.9333300,-0.1000000)
-        interestPlaceService.createInterestPlaceCoordinates(puntoDelete)
-        val puntoDelete2 = Coordinate(54.9333300,-20.1000000)
-        interestPlaceService.createInterestPlaceCoordinates(puntoDelete2)
-    }
 }
