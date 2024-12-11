@@ -13,6 +13,8 @@ import uji.es.intermaps.Model.Route
 
 open class RouteRepository : ORSRepository {
     private val apiKey = "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23"
+    val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
+
 
     override suspend fun searchInterestPlaceByCoordinates(coordinate: Coordinate): InterestPlace {
         if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){
@@ -77,5 +79,23 @@ open class RouteRepository : ORSRepository {
 
     override suspend fun calculateRoute(origin: Coordinate, destination: Coordinate): Route {
         TODO("Not yet implemented")
+    }
+
+    override suspend fun getRegion(toponym: String): String {
+        var region: String? = null
+        try{
+            val response = openRouteService.getRegionFromToponym(
+                apiKey,
+                toponym
+            )
+            val res = response.features
+            if (res.isNotEmpty()){
+                val feature = res[0]
+                region = feature.properties.region
+            }
+        }catch (e: Exception){
+            throw NotSuchPlaceException()
+        }
+        return region ?: "Provincia no disponible"
     }
 }

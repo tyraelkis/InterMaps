@@ -8,4 +8,6 @@ interface ORSRepository {
     suspend fun searchInterestPlaceByCoordinates(coordinate: Coordinate):InterestPlace
     suspend fun searchInterestPlaceByToponym(toponym: String): InterestPlace
     suspend fun calculateRoute(origin: Coordinate, destination: Coordinate): Route
+    suspend fun getRegion(toponym: String): String
+
 }

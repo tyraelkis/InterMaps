@@ -7,7 +7,7 @@ import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.VehicleTypes
 
 open class RouteService(private val repository: Repository){
-    public var routeRepository = RouteRepository()
+    var routeRepository = RouteRepository()
 
     suspend fun createRoute(origin: String, destination: String, trasnportMethod: TransportMethods):Route {
         if (origin.isEmpty() or destination.isEmpty()){

@@ -77,4 +77,34 @@ open class RouteTests {
 
 
     }
+
+    @Test
+    fun calculateFuelConsumition_E2Valid_consumitionCalculated():Unit = runBlocking() {
+
+        var mockedRoute = Route(
+            origin = "Burriana",
+            destination = "Castellón",
+            trasnportMethod = TransportMethods.VEHICULO,
+            route = emptyList(),
+            distance = 0.0,
+            duration = 0.0,
+            cost = 0.0,
+            routeType = RouteTypes.RAPIDA,
+            fav = false,
+            vehiclePlate = "",
+        )
+
+        `when`(mockRepository.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO))
+            .thenReturn(mockedRoute)
+
+        val routeTest = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO)
+        val consumition = routeTest.cost
+
+        verify(mockRepository).createRoute("Burriana", "Castellón", TransportMethods.VEHICULO)
+
+        // Comprobamos que la ruta fue creada correctamente
+        assertEquals(mockedRoute.cost, consumition)
+
+
+    }
 }

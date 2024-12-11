@@ -4,9 +4,9 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import uji.es.intermaps.Interfaces.ORSAPI
-import uji.es.intermaps.Interfaces.PrecioCarburanteAPI
 import uji.es.intermaps.Interfaces.PrecioLuzAPI
 import okhttp3.logging.HttpLoggingInterceptor
+import uji.es.intermaps.Interfaces.FuelPriceAPI
 import java.util.concurrent.TimeUnit
 
 
@@ -43,12 +43,12 @@ object RetrofitConfig {
         return retrofit.create(PrecioLuzAPI::class.java)
     }
 
-     fun createRetrofitPrecioCarburante(): PrecioCarburanteAPI {
+     fun createRetrofitFuelPrice(): FuelPriceAPI {
         val retrofit = Retrofit.Builder()
             .baseUrl("https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        return retrofit.create(PrecioCarburanteAPI::class.java)
+        return retrofit.create(FuelPriceAPI::class.java)
 
     }
 }

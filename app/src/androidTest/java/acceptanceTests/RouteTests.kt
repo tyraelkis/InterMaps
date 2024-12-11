@@ -62,7 +62,7 @@ class RouteTests {
 
     @Test
     fun calculateFuelConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
-        var res = true
+        var res = false
         val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO)
         val consumptionPerKm = 0.8
         val expectedConsumption = routeTest.distance * consumptionPerKm
@@ -72,7 +72,7 @@ class RouteTests {
             TransportMethods.VEHICULO,
             VehicleTypes.GASOLINA
         )
-        if (expectedConsumption != calculatedConsumption) res = false
+        if (expectedConsumption == calculatedConsumption) res = true
 
         assertEquals(true, res)
     }
