@@ -3,8 +3,7 @@ package IntegrationTests
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
-import org.junit.After
-import org.junit.Assert
+
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,11 +16,8 @@ import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
-import uji.es.intermaps.Model.User
-import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.RouteRepository
-import uji.es.intermaps.ViewModel.UserService
 
 @RunWith(AndroidJUnit4::class)
 class InterestPlaceServiceTests {
@@ -67,7 +63,7 @@ class InterestPlaceServiceTests {
         interestPlaceService.createInterestPlaceFromToponym("Moztrambique")
     }
 
-    @Test //No funciona
+    @Test
     fun createInterestPlace_E1Valid_InterestPlaceCreated(): Unit = runBlocking{
         `when`(mockRepository.createInterestPlace(coordinate, toponym, "")).thenReturn(
             InterestPlace(coordinate, toponym, "")
@@ -80,7 +76,7 @@ class InterestPlaceServiceTests {
         verify(mockRouteRepository).searchInterestPlaceByCoordinates(coordinate)
     }
 
-    @Test(expected = NotValidCoordinatesException::class) //No funciona
+    @Test(expected = NotValidCoordinatesException::class) 
     fun createInterestPlace_E3Invalid_errorOnCreatingInterestPlace(): Unit = runBlocking {
         doAnswer{ throw NotValidCoordinatesException("Las coordenadas no son válidas") }
             .`when`(mockRouteRepository).searchInterestPlaceByCoordinates(coordinate)

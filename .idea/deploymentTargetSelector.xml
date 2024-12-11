@@ -8,9 +8,6 @@
       <SelectionState runConfigName="createInterestPlaceByToponym_E1Valido_InterestPlaceCreated()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="createInterestPlaceByToponym_E1Invalid_InterestPlaceCreated()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="createInterestPlace_E1Valid_InterestPlaceCreated()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
@@ -18,6 +15,9 @@
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="createInterestPlace_E3Invalid_errorOnCreatingInterestPlace()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="InterestPlaceServiceTests">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

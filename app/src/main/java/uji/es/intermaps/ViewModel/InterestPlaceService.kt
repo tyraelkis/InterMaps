@@ -34,29 +34,9 @@ open class InterestPlaceService(private val repository: Repository) {
         }
         //Aquí se llama a la API openrouteservice para conseguir el topónimo correspondiente con las coordenadas
         //Clase que realizará las llamadas con sus métodos
-        val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
-        var toponym = ""
+        val interestPlaceCreated = routeRepository.searchInterestPlaceByCoordinates(coordinate)
 
-        //Llamada a la API
-        val response = withContext(Dispatchers.IO) {
-            openRouteService.getToponym(
-                "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23",
-                coordinate.longitude,
-                coordinate.latitude
-            ).execute()
-        }
-        if (response.isSuccessful) {
-            response.body()?.let { ORSResponse ->
-                val respuesta = ORSResponse.features
-                if (respuesta.isNotEmpty()) {
-                    toponym = respuesta[0].properties.label
-                }
-            }
-        } else {
-            throw Exception("Error en la llamada a la API")
-        }
-
-        return repository.createInterestPlace(coordinate, toponym, "")
+        return repository.createInterestPlace(interestPlaceCreated.coordinate, interestPlaceCreated.toponym, "")
     }
 
     suspend fun createInterestPlaceFromToponym(toponym: String): InterestPlace {
