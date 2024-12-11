@@ -43,11 +43,12 @@ object RetrofitConfig {
         return retrofit.create(PrecioLuzAPI::class.java)
     }
 
-    fun createRetrofitPrecioCarburante(): PrecioCarburanteAPI {
+     fun createRetrofitPrecioCarburante(): PrecioCarburanteAPI {
         val retrofit = Retrofit.Builder()
             .baseUrl("https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         return retrofit.create(PrecioCarburanteAPI::class.java)
+
     }
 }
