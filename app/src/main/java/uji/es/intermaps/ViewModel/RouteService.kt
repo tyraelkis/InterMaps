@@ -12,7 +12,16 @@ open class RouteService(private val repository: Repository){
         if (origin.isEmpty() or destination.isEmpty()){
             throw NotValidPlaceException()
         }
-        return repository.createRoute(origin, destination, trasnportMethod)
+        if (origin == destination){
+            throw NotValidPlaceException()
+        }
+        val originCoordinate = routeRepository.searchInterestPlaceByToponym(origin).coordinate
+        val destinationCoordinate = routeRepository.searchInterestPlaceByToponym(destination).coordinate
+        val originString = "${originCoordinate.longitude},${originCoordinate.latitude}"
+        val destinationString = "${destinationCoordinate.longitude},${destinationCoordinate.latitude}"
+        val route = routeRepository.calculateRoute(originString, destinationString)
+        val res = repository.createRoute(route)
+        return res
     }
 
     fun deleteRoute(origin: String,destination: String, trasnportMethod: TrasnportMethods): Boolean {

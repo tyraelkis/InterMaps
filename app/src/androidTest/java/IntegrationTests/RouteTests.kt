@@ -60,7 +60,7 @@ class RouteTests {
         // Mockear la creación de la ruta
         var mockedRoute = Route(
             origin = "Burriana",
-            destination = "Castellón",
+            destination = "Castellón de la Plana",
             trasnportMethod = TrasnportMethods.VEHICULO,
             route = emptyList(),
             distance = 0.0,
@@ -71,15 +71,34 @@ class RouteTests {
             vehiclePlate = "",
         )
 
-        `when`(mockRepository.createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO))
+        `when`(mockRouteRepository.searchInterestPlaceByToponym("Burriana"))
+            .thenReturn(
+                InterestPlace(
+                    Coordinate(39.888399, -0.085748),
+                    toponym = "Burriana",""
+                )
+            )
+        `when`(mockRouteRepository.searchInterestPlaceByToponym("Castellón de la Plana"))
+            .thenReturn(
+                InterestPlace(
+                    Coordinate(39.987142, -0.037787),
+                    toponym = "Castellón de la Plana",""
+                )
+            )
+        `when`(mockRouteRepository.calculateRoute("-0.085748,39.888399", "-0.037787,39.987142"))
             .thenReturn(mockedRoute)
 
-        val routeTest = routeService.createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO)
 
-        verify(mockRepository).createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO)
+        `when`(mockRepository.createRoute(mockedRoute))
+            .thenReturn(mockedRoute)
 
+        val routeTest = routeService.createRoute("Burriana", "Castellón de la Plana", TrasnportMethods.VEHICULO)
         // Comprobamos que la ruta fue creada correctamente
         assertEquals(mockedRoute, routeTest)
+        verify(mockRouteRepository).searchInterestPlaceByToponym("Burriana")
+        verify(mockRouteRepository).searchInterestPlaceByToponym("Castellón de la Plana")
+        verify(mockRouteRepository).calculateRoute("-0.085748,39.888399", "-0.037787,39.987142")
+        verify(mockRepository).createRoute(mockedRoute)
 
 
     }

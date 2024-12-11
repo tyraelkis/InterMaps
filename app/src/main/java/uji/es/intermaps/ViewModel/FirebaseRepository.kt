@@ -5,6 +5,9 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchElementException
@@ -16,6 +19,7 @@ import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.Model.RetrofitConfig
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.TrasnportMethods
 import uji.es.intermaps.Model.User
@@ -28,7 +32,6 @@ import kotlin.coroutines.suspendCoroutine
 class FirebaseRepository: Repository {
     private val db = DataBase.db
     private val auth = DataBase.auth
-
 
     override suspend fun createUser(email: String, pswd: String): User {
         return suspendCoroutine { continuation ->
@@ -522,10 +525,9 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun createRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods): Route {
+    override suspend fun createRoute(route: Route): Route {
         val userEmail = auth.currentUser?.email
             ?: throw IllegalStateException("No hay un usuario autenticado")
-
         try {
             val documentSnapshot = db.collection("InterestPlace")
                 .document(userEmail)
@@ -536,13 +538,13 @@ class FirebaseRepository: Repository {
                 val interestPlaces =
                     documentSnapshot.get("interestPlaces") as? MutableList<Map<String, Any>>
                         ?: mutableListOf()
-                val foundOrigin = interestPlaces.find { place ->
+                interestPlaces.find { place ->
                     val actualToponym = place["toponym"] as? String ?: ""
-                    origin.equals(actualToponym)
+                    route.origin.equals(actualToponym)
                 } ?: throw NotSuchPlaceException()
-                val foundDestination = interestPlaces.find { place ->
+                interestPlaces.find { place ->
                     val actualToponym = place["toponym"] as? String ?: ""
-                    destination.equals(actualToponym)
+                    route.destination.equals(actualToponym)
                 } ?: throw NotSuchPlaceException()
             }
 
@@ -550,7 +552,7 @@ class FirebaseRepository: Repository {
             Log.e("createRoute", "Error al crear la ruta: ${e.message}", e)
             throw Exception("Error al crear la ruta: ${e.message}", e)
         }
-        TODO()
+        return route
     }
 
 }

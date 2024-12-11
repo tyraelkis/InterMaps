@@ -1,7 +1,9 @@
 package uji.es.intermaps.ViewModel
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
@@ -75,7 +77,17 @@ open class RouteRepository : ORSRepository {
         throw NotSuchPlaceException("Error en la llamada a la API para obtener las coordenadas")
     }
 
-    override suspend fun calculateRoute(origin: Coordinate, destination: Coordinate): Route {
-        TODO("Not yet implemented")
+    override suspend fun calculateRoute(origin: String, destination: String): Route {
+        lateinit var route: Route
+        CoroutineScope(Dispatchers.IO).launch {
+            val call = RetrofitConfig.createRetrofitOpenRouteService().calculateRoute(apiKey,origin,destination)
+            if (call.isSuccessful){
+                Log.d("createRoute", "Ruta creada exitosamente")
+                Log.d("ruta call", call.body().toString())
+            }else{
+                Log.e("createRoute", "Error al crear la ruta: ${call.message()}")
+            }
+        }
+        return route
     }
 }

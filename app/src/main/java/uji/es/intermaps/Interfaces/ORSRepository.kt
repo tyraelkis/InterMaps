@@ -7,5 +7,5 @@ import uji.es.intermaps.Model.Route
 interface ORSRepository {
     suspend fun searchInterestPlaceByCoordinates(coordinate: Coordinate):InterestPlace
     suspend fun searchInterestPlaceByToponym(toponym: String): InterestPlace
-    suspend fun calculateRoute(origin: Coordinate, destination: Coordinate): Route
+    suspend fun calculateRoute(origin: String, destination: String): Route
 }
