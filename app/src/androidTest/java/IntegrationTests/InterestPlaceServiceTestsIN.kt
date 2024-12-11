@@ -3,7 +3,6 @@ package IntegrationTests
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert
 import org.junit.Assert.assertTrue
 
 import org.junit.Before
@@ -24,7 +23,7 @@ import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.RouteRepository
 
 @RunWith(AndroidJUnit4::class)
-class InterestPlaceServiceTests {
+class InterestPlaceServiceTestsIN {
 
     @Mock
     var mockRepository: Repository = mock(Repository::class.java)

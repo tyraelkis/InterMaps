@@ -1,4 +1,0 @@
-package IntegrationTests
-
-class VehicleTests {
-}

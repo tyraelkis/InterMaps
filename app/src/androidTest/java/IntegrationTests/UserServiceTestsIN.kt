@@ -22,7 +22,7 @@ import uji.es.intermaps.Model.User
 import uji.es.intermaps.ViewModel.UserService
 
 @RunWith(AndroidJUnit4::class)
-class UserServiceTests {
+class UserServiceTestsIN {
     private lateinit var mockRepository: Repository
     private lateinit var userService: UserService
 

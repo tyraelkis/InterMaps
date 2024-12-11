@@ -5,19 +5,19 @@
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="viewInterestPlaceList_E1Valido_InterestPlaceListViewed()">
+      <SelectionState runConfigName="createVehicle_E3Invalid_errorOnCreatingVehicle()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="viewInterestPlaceList_E2Valido_emptyInterestPlaceListViewed()">
+      <SelectionState runConfigName="viewVehicleList_E1Valid_vehicleListViewed()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="createInterestPlaceByToponym_E1Invalid_InterestPlaceCreated()">
+      <SelectionState runConfigName="viewVehicleList_E2Valid_emptyVehicleListViewed()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="deleteInterestPlace_E1Valid_InterestPlaceDeleted()">
+      <SelectionState runConfigName="deleteVehicle_E1Valid_vehicleDeleted()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="deleteInterestPlace_E2Invalid_InterestPlaceDeleted()">
+      <SelectionState runConfigName="deleteVehicle_E2Invalid_vehicleNotDeleted()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

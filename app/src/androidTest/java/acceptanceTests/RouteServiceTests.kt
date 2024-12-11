@@ -7,25 +7,19 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
-import uji.es.intermaps.Exceptions.IncorrectDataException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
-import uji.es.intermaps.Exceptions.SessionNotStartedException
-import uji.es.intermaps.Exceptions.UnableToDeleteUserException
-import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.TrasnportMethods
 import uji.es.intermaps.Model.User
-import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.RouteService
 import uji.es.intermaps.ViewModel.UserService
 
 @RunWith(AndroidJUnit4::class)
-class RouteTests {
+class RouteServiceTests {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
     private var email: String = "prueba@uji.es"
