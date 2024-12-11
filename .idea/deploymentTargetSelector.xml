@@ -5,19 +5,19 @@
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="createInterestPlaceByToponym_E1Valido_InterestPlaceCreated()">
+      <SelectionState runConfigName="viewInterestPlaceList_E1Valido_InterestPlaceListViewed()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="createInterestPlace_E1Valid_InterestPlaceCreated()">
+      <SelectionState runConfigName="viewInterestPlaceList_E2Valido_emptyInterestPlaceListViewed()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="login_E2Invalid_errorOnLogin()">
+      <SelectionState runConfigName="createInterestPlaceByToponym_E1Invalid_InterestPlaceCreated()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="createInterestPlace_E3Invalid_errorOnCreatingInterestPlace()">
+      <SelectionState runConfigName="deleteInterestPlace_E1Valid_InterestPlaceDeleted()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="InterestPlaceServiceTests">
+      <SelectionState runConfigName="deleteInterestPlace_E2Invalid_InterestPlaceDeleted()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

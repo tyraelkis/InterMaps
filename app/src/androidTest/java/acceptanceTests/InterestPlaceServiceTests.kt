@@ -8,6 +8,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.anyString
+import org.mockito.Mockito.doAnswer
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
@@ -61,8 +63,6 @@ class InterestPlaceServiceTests {
     fun searchInterestPlaceByCoordinate_E1Valid_InterestPlaceFound(): Unit = runBlocking {
         val foundPlace: InterestPlace = interestPlaceService.searchInterestPlaceByCoordiante(interestPlace.coordinate)
         val resultado : Boolean = foundPlace.toponym.contains(interestPlace.toponym)
-        val coord = Coordinate(-18.665695, 35.529562)
-        interestPlaceService.createInterestPlaceCoordinates(coord)
         assertEquals(true, resultado)
     }
 
@@ -139,6 +139,11 @@ class InterestPlaceServiceTests {
         val res = db.doesInteresPlaceExists(interestPlaceTest.coordinate)
         interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
         assertEquals(true, res)
+    }
+
+    @Test(expected = NotSuchPlaceException::class)
+    fun  createInterestPlaceByToponym_E1Invalid_InterestPlaceCreated(): Unit = runBlocking {
+        interestPlaceService.createInterestPlaceFromToponym("Moztrambique")
     }
 
 
