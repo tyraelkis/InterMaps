@@ -275,5 +275,22 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
         }
         Spacer(modifier = Modifier.height(30.dp))
 
+        Button(
+            onClick = {
+                navController.navigate("createNewRoute")
+            },
+            modifier = Modifier
+                .width(350.dp)
+                .height(45.dp),
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Black
+            )
+        ) {
+            Text(
+                text = "Crear ruta",
+                fontSize = 20.sp,
+            )
+        }
     }
 }

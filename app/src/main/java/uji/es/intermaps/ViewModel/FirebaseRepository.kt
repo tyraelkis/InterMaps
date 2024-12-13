@@ -5,7 +5,12 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import uji.es.intermaps.APIParsers.RouteFeature
+import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
@@ -16,7 +21,9 @@ import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.Model.RetrofitConfig
 import uji.es.intermaps.Model.Route
+import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TrasnportMethods
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
@@ -24,11 +31,11 @@ import uji.es.intermaps.Model.VehicleFactory
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import kotlin.jvm.Throws
 
 class FirebaseRepository: Repository {
     private val db = DataBase.db
     private val auth = DataBase.auth
-
 
     override suspend fun createUser(email: String, pswd: String): User {
         return suspendCoroutine { continuation ->
@@ -522,10 +529,10 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun createRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods): Route {
+    override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TrasnportMethods,route: RouteFeature): Route {
         val userEmail = auth.currentUser?.email
             ?: throw IllegalStateException("No hay un usuario autenticado")
-
+        lateinit var resRoute: Route
         try {
             val documentSnapshot = db.collection("InterestPlace")
                 .document(userEmail)
@@ -536,21 +543,76 @@ class FirebaseRepository: Repository {
                 val interestPlaces =
                     documentSnapshot.get("interestPlaces") as? MutableList<Map<String, Any>>
                         ?: mutableListOf()
-                val foundOrigin = interestPlaces.find { place ->
+                interestPlaces.find { place ->
                     val actualToponym = place["toponym"] as? String ?: ""
                     origin.equals(actualToponym)
                 } ?: throw NotSuchPlaceException()
-                val foundDestination = interestPlaces.find { place ->
+                interestPlaces.find { place ->
                     val actualToponym = place["toponym"] as? String ?: ""
                     destination.equals(actualToponym)
                 } ?: throw NotSuchPlaceException()
             }
 
+
+            return suspendCoroutine { continuation ->
+                var tiempo =  route.properties.summary.duration;
+                if(tiempo >= 3600){
+                    tiempo = tiempo / 60 / 60
+                }else{
+                    tiempo = tiempo / 60
+                }
+
+                val newRoute = mapOf(
+                    "origin" to origin,
+                    "destination" to destination,
+                    "trasnportMethod" to trasnportMethods,
+                    "route" to convertToCoordinate(route.geometry),
+                    "distance" to route.properties.summary.distance / 1000,
+                    "duration" to tiempo,
+                    "cost" to 0.0,
+                    "routeType" to RouteTypes.RAPIDA,
+                    "fav" to false,
+                    "vehiclePlate" to ""
+                )
+                resRoute = Route(
+                    origin = origin,
+                    destination = destination,
+                    route = convertToCoordinate(route.geometry),
+                    distance = route.properties.summary.distance / 1000,
+                    duration = tiempo,
+                    trasnportMethod = trasnportMethods,
+                )
+                Log.d("coordenadas de la ruta",resRoute.route.toString())
+                val userDocument = db.collection("Route").document(userEmail)
+                //Intenta añadir a interestPlaces el nuevo lugar evitando duplicados con el FieldValue.arrayUnion
+                userDocument.update("routes", FieldValue.arrayUnion(newRoute))
+                    .addOnSuccessListener {
+                        continuation.resume(resRoute)
+                    }
+                    .addOnFailureListener { _ ->
+                        // Si falla porque el usuario aún no tiene lugares guardados crea el documento con el atributo interestPlaces y le añade el lugar
+                        userDocument.set(mapOf("routes" to listOf(newRoute)))
+                            .addOnSuccessListener {
+                                continuation.resume(resRoute)
+                            }
+                            .addOnFailureListener { e ->
+                                continuation.resumeWithException(e)
+                            }
+                    }
+            }
         } catch (e: Exception) {
             Log.e("createRoute", "Error al crear la ruta: ${e.message}", e)
             throw Exception("Error al crear la ruta: ${e.message}", e)
         }
-        TODO()
+        return resRoute
+    }
+
+    fun convertToCoordinate(lista: RouteGeometry):List<Coordinate>{
+        var listaCoordenadas: ArrayList<Coordinate> = ArrayList()
+        for (coordenada in lista.coordinates){
+            listaCoordenadas.add(Coordinate(latitude = coordenada[1], longitude = coordenada[0]))
+        }
+        return listaCoordenadas
     }
 
 }

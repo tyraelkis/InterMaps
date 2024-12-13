@@ -1,5 +1,8 @@
 package uji.es.intermaps.Model
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -50,4 +53,12 @@ object RetrofitConfig {
             .build()
         return retrofit.create(PrecioCarburanteAPI::class.java)
     }
+
+    fun getRetrofit():Retrofit{
+        return Retrofit.Builder()
+            .baseUrl("https://api.openrouteservice.org/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
 }

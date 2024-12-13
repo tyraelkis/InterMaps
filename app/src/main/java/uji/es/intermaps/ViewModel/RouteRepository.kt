@@ -1,19 +1,28 @@
 package uji.es.intermaps.ViewModel
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uji.es.intermaps.APIParsers.RouteFeature
+import uji.es.intermaps.APIParsers.RouteGeometry
+import uji.es.intermaps.APIParsers.RouteProperties
+import uji.es.intermaps.APIParsers.RouteResponse
+import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
+import uji.es.intermaps.Interfaces.ORSAPI
 import uji.es.intermaps.Interfaces.ORSRepository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.RetrofitConfig
 import uji.es.intermaps.Model.Route
+import uji.es.intermaps.Model.TrasnportMethods
 
 open class RouteRepository : ORSRepository {
     private val apiKey = "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23"
-
+    val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
     override suspend fun searchInterestPlaceByCoordinates(coordinate: Coordinate): InterestPlace {
         if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){
             throw NotValidCoordinatesException("Las coordenadas no son válidas")
@@ -75,7 +84,29 @@ open class RouteRepository : ORSRepository {
         throw NotSuchPlaceException("Error en la llamada a la API para obtener las coordenadas")
     }
 
-    override suspend fun calculateRoute(origin: Coordinate, destination: Coordinate): Route {
-        TODO("Not yet implemented")
+    override suspend fun calculateRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods):RouteFeature{
+        lateinit var call : retrofit2.Response<RouteResponse>
+        var route = RouteFeature(geometry = RouteGeometry(emptyList()), properties = RouteProperties(RouteSummary(distance = 0.0, duration = 0.0)))
+        try {
+            if (trasnportMethod.equals(TrasnportMethods.VEHICULO)) {
+                call = openRouteService.calculateRouteVehicle(apiKey, origin, destination)
+            } else if (trasnportMethod.equals(TrasnportMethods.BICICLETA)) {
+                call = openRouteService.calculateRouteBycicle(apiKey, origin, destination)
+            } else {
+                call = openRouteService.calculateRouteWalk(apiKey, origin, destination)
+            }
+            if (call.isSuccessful) {
+                Log.d("createRoute", "Ruta creada exitosamente")
+                route = call.body()!!.features[0]
+
+            } else {
+                Log.e("createRoute", "Error al crear la ruta: ${call.message()}")
+            }
+        }catch (e:Exception){
+            Log.e("createRoute", "Error al crear la ruta: ${e.message}")
+
+        }
+        return route
     }
+
 }
