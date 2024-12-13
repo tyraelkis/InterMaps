@@ -25,9 +25,25 @@ interface ORSAPI {
     ):ToponymToCoordORSAPIResponse
 
     @GET("v2/directions/driving-car")
-    suspend fun calculateRoute(
+    suspend fun calculateRouteVehicle(
         @Query("api_key") apiKey: String,
         @Query("start", encoded = true) origin: String,
         @Query("end", encoded = true) destination: String
     ):Response<RouteResponse>
+
+    @GET("v2/directions/foot-walking")
+    suspend fun calculateRouteWalk(
+        @Query("api_key") apiKey: String,
+        @Query("start", encoded = true) origin: String,
+        @Query("end", encoded = true) destination: String
+    ):Response<RouteResponse>
+
+    @GET("v2/directions/cycling-regular")
+    suspend fun calculateRouteBycicle(
+        @Query("api_key") apiKey: String,
+        @Query("start", encoded = true) origin: String,
+        @Query("end", encoded = true) destination: String
+    ):Response<RouteResponse>
+
+
 }

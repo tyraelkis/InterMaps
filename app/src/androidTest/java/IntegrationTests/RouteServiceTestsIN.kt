@@ -10,7 +10,13 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import uji.es.intermaps.APIParsers.RouteFeature
+import uji.es.intermaps.APIParsers.RouteGeometry
+import uji.es.intermaps.APIParsers.RouteProperties
+import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.Coordinate
+import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TrasnportMethods
@@ -56,13 +62,25 @@ class RouteServiceTestsIN {
             origin = "Burriana",
             destination = "Castellón de la Plana",
             trasnportMethod = TrasnportMethods.VEHICULO,
-             = emptyList(),
+            route = emptyList(),
             distance = 0.0,
             duration = 0.0,
             cost = 0.0,
             routeType = RouteTypes.RAPIDA,
             fav = false,
             vehiclePlate = "",
+        )
+
+        val mockedCall = RouteFeature(
+            geometry = RouteGeometry(
+                coordinates = emptyList()
+            ),
+            properties = RouteProperties(
+                RouteSummary(
+                    distance = 0.0,
+                    duration = 0.0
+                )
+            ),
         )
 
         `when`(mockRouteRepository.searchInterestPlaceByToponym("Burriana"))
@@ -79,11 +97,16 @@ class RouteServiceTestsIN {
                     toponym = "Castellón de la Plana",""
                 )
             )
-        `when`(mockRouteRepository.calculateRoute("-0.085748,39.888399", "-0.037787,39.987142"))
-            .thenReturn(mockedRoute)
+        `when`(mockRouteRepository.calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", trasnportMethod = TrasnportMethods.VEHICULO))
+            .thenReturn(mockedCall)
 
 
-        `when`(mockRepository.createRoute(mockedRoute))
+        `when`(mockRepository.createRoute(
+            origin = "Burriana",
+            destination = "Castellón de la Plana",
+            trasnportMethods = TrasnportMethods.VEHICULO,
+            route = mockedCall,
+        ))
             .thenReturn(mockedRoute)
 
         val routeTest = routeService.createRoute("Burriana", "Castellón de la Plana", TrasnportMethods.VEHICULO)
@@ -91,8 +114,12 @@ class RouteServiceTestsIN {
         assertEquals(mockedRoute, routeTest)
         verify(mockRouteRepository).searchInterestPlaceByToponym("Burriana")
         verify(mockRouteRepository).searchInterestPlaceByToponym("Castellón de la Plana")
-        verify(mockRouteRepository).calculateRoute("-0.085748,39.888399", "-0.037787,39.987142")
-        verify(mockRepository).createRoute(mockedRoute)
+        verify(mockRouteRepository).calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", trasnportMethod = TrasnportMethods.VEHICULO)
+        verify(mockRepository).createRoute(origin = "Burriana",
+            destination = "Castellón de la Plana",
+            trasnportMethods = TrasnportMethods.VEHICULO,
+            route = mockedCall
+        )
 
 
     }

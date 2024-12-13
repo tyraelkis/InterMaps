@@ -3,7 +3,7 @@ package uji.es.intermaps.Model
 data class Route(
     val origin: String,
     val destination: String,
-    val route: List<List<Double>>,
+    val route: List<Coordinate>,
     val distance: Double,
     val duration: Double,
     val cost: Double = 0.0,
