@@ -62,7 +62,7 @@ class RouteTests {
             origin = "Burriana",
             destination = "Castellón de la Plana",
             trasnportMethod = TrasnportMethods.VEHICULO,
-            route = emptyList(),
+             = emptyList(),
             distance = 0.0,
             duration = 0.0,
             cost = 0.0,

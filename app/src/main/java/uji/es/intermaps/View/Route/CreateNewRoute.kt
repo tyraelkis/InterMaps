@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
@@ -81,6 +84,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .background(
                 Color.White
             ),
@@ -302,25 +306,6 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
 
         Button(
             onClick = {
-                navController.navigate("interestPlaceCreationByToponym")
-            },
-            modifier = Modifier
-                .width(350.dp)
-                .height(45.dp),
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Black
-            )
-        ) {
-            Text(
-                text = "Añadir lugar por topónimo",
-                fontSize = 20.sp,
-            )
-        }
-        Spacer(modifier = Modifier.height(30.dp))
-
-        Button(
-            onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
                     routeService.createRoute(origin, destination, TrasnportMethods.VEHICULO)
                 }
@@ -334,7 +319,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
             )
         ) {
             Text(
-                text = "Añadir lugar por topónimo",
+                text = "Crear ruta",
                 fontSize = 20.sp,
             )
         }
