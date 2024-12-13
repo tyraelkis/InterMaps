@@ -23,5 +23,5 @@ interface Repository {
     suspend fun createVehicle(plate: String,type: String, consumption: Double): Vehicle
     suspend fun deleteVehicle(plate: String): Boolean
     suspend fun viewVehicleList(): List<Vehicle>
-    suspend fun createRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods): Route
+    suspend fun createRoute(Route: Route): Route
 }

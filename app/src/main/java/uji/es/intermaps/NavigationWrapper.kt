@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
+import uji.es.intermaps.View.Route.CreateNewRoute
 import uji.es.intermaps.View.home.HomeScreen
 import uji.es.intermaps.View.home.InitialScreen
 import uji.es.intermaps.View.home.MainMenu
@@ -95,6 +96,12 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             if (toponym != null) {
                 InterestPlaceSetAlias(navHostController,viewModel, toponym)
             }
+        }
+
+        composable(
+            route = "createNewRoute"
+        ) {
+            CreateNewRoute(auth, navHostController, viewModel)
         }
     }
 }

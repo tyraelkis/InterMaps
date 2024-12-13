@@ -1,9 +1,10 @@
-package uji.es.intermaps.View.interestPlace
+package uji.es.intermaps.View.Route
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
@@ -38,21 +41,31 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.Coordinate
+import uji.es.intermaps.Model.TrasnportMethods
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
+import uji.es.intermaps.ViewModel.RouteService
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 @Composable
-fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
+fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
     val interestPlaceService = InterestPlaceService(repository)
+    val routeService = RouteService(repository)
     var allPlaces by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
     val emailPrefix = user?.email?.substringBefore("@") ?: "Usuario"
+    var origin = ""
+    var destination = ""
+
 
     LaunchedEffect(user?.email) {
         if (user?.email != null) {
@@ -71,6 +84,7 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .background(
                 Color.White
             ),
@@ -86,9 +100,9 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
         ) {
             Text(
                 text = buildAnnotatedString {
-                        append("Lista de lugares de\n")
-                        append("\n")
-                        append(emailPrefix)
+                    append("Lista de lugares de\n")
+                    append("\n")
+                    append(emailPrefix)
                 },
                 color = Black,
                 fontSize = 26.sp,
@@ -231,9 +245,43 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                 fontSize = 20.sp,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .padding(horizontal = 8.dp)
+                                    .padding(horizontal = 8.dp),
                             )
                         }
+
+                        Button(
+                            onClick = {
+                                origin = notFavPlace.toponym
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Black
+                            )
+                        ) {
+                            Text(
+                                text = "Origen",
+                                fontSize = 16.sp,
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        Button(
+                            onClick = {
+                                destination = notFavPlace.toponym
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Black
+                            )
+                        ) {
+                            Text(
+                                text = "Destino",
+                                fontSize = 16.sp,
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Edit",
@@ -258,26 +306,9 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
 
         Button(
             onClick = {
-                navController.navigate("interestPlaceCreationByToponym")
-            },
-            modifier = Modifier
-                .width(350.dp)
-                .height(45.dp),
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Black
-            )
-        ) {
-            Text(
-                text = "Añadir lugar por topónimo",
-                fontSize = 20.sp,
-            )
-        }
-        Spacer(modifier = Modifier.height(30.dp))
-
-        Button(
-            onClick = {
-                navController.navigate("createNewRoute")
+                CoroutineScope(Dispatchers.IO).launch {
+                    routeService.createRoute(origin, destination, TrasnportMethods.VEHICULO)
+                }
             },
             modifier = Modifier
                 .width(350.dp)
@@ -292,5 +323,6 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                 fontSize = 20.sp,
             )
         }
+
     }
 }
