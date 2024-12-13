@@ -418,13 +418,13 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { showMenu = false }, //TODO Ir a vehículos
+                            .clickable { navController.navigate("vehicleList") }, //TODO Ir a vehículos
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            showMenu = false //TODO Ir a vehículos
+                            navController.navigate("vehicleList") //TODO Ir a vehículos
                         },
                         modifier = Modifier
                             .height(40.dp)
@@ -494,7 +494,6 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                     .background(
                         White,
                     ),
-                //verticalArrangement = Arrangement.Center, // Centra el contenido verticalmente
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (errorMessage.isEmpty()) { //Si no hay errores en la busqueda se muestran los datos
