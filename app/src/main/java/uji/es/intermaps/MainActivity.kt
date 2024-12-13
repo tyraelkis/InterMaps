@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
@@ -23,6 +22,7 @@ import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.ViewModel.UserViewModel
+import uji.es.intermaps.ViewModel.VehicleViewModel
 import uji.es.intermaps.ui.theme.InterMapsTheme
 
 class MainActivity : ComponentActivity() {
@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     Greeting(
                         modifier = Modifier.padding(innerPadding)
                     )
-                    NavigationWrapper(navHostController, auth, viewModel = InterestPlaceViewModel(interestPlaceService), viewModel1 = UserViewModel(userService, auth))
+                    NavigationWrapper(navHostController, auth, viewModelPlace = InterestPlaceViewModel(interestPlaceService), viewModelUser = UserViewModel(userService, auth), viewModelVehicle = VehicleViewModel())
 
                 }
             }

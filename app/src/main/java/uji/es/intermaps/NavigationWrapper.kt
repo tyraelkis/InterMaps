@@ -18,13 +18,16 @@ import uji.es.intermaps.View.interestPlace.InterestPlaceSetAlias
 import uji.es.intermaps.View.login.LoginScreen
 import uji.es.intermaps.View.signup.SignUpScreen
 import uji.es.intermaps.View.user.UserDataScreen
+import uji.es.intermaps.View.vehicle.VehicleCreate
+import uji.es.intermaps.View.vehicle.VehicleList
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.UserViewModel
+import uji.es.intermaps.ViewModel.VehicleViewModel
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
 @Composable
-fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, viewModel: InterestPlaceViewModel, viewModel1: UserViewModel) {
+fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, viewModelPlace: InterestPlaceViewModel, viewModelUser: UserViewModel, viewModelVehicle: VehicleViewModel) {
     
     NavHost(
         navController = navHostController,
@@ -48,39 +51,39 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         composable("home") {
             HomeScreen (
                 navHostController,
-                viewModel1
+                viewModelUser
             )
         }
         composable("mainMenu") {
             MainMenu (
                 auth,
                 navHostController,
-                viewModel
+                viewModelPlace
             )
         }
         composable("userDataScreen") {
             UserDataScreen(
                 auth,
                 navHostController,
-                viewModel1
+                viewModelUser
             )
         }
         composable("interestPlaceList") {
             InterestPlaceList(
                 auth,
                 navHostController,
-                viewModel
+                viewModelPlace
             )
         }
         composable(
             route = "interestPlaceCreation"
         ) {
-            InterestPlaceCreation(navHostController, viewModel)
+            InterestPlaceCreation(navHostController, viewModelPlace)
         }
         composable(
             route = "interestPlaceCreationByToponym"
         ) {
-            InterestPlaceCreationByToponym(viewModel)
+            InterestPlaceCreationByToponym(viewModelPlace)
         }
         composable(
             route = "interestPlaceSetAlias/{toponym}",
@@ -93,8 +96,38 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
                 URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
             }
             if (toponym != null) {
-                InterestPlaceSetAlias(navHostController,viewModel, toponym)
+                InterestPlaceSetAlias(navHostController,viewModelPlace, toponym)
             }
         }
+
+        composable("vehicleList") {
+            VehicleList(
+                auth,
+                navHostController,
+                viewModelVehicle
+            )
+        }
+
+        composable(
+            route = "vehicleCreate"
+        ) {
+            VehicleCreate(navHostController, viewModelVehicle)
+        }
+
+        /*
+        composable(
+            route = "vehicleEdit/{plate}",
+            arguments = listOf(
+                navArgument("plate") { type = NavType.StringType}
+            )
+        ) {
+                backStackEntry ->
+            val plate = backStackEntry.arguments?.getString("plate")?.let {
+                URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+            }
+            if (plate != null) {
+                VehicleEdit(navHostController, viewModelPlace, plate)
+            }
+        }*/
     }
 }
