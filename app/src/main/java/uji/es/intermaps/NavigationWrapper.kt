@@ -20,6 +20,7 @@ import uji.es.intermaps.View.login.LoginScreen
 import uji.es.intermaps.View.signup.SignUpScreen
 import uji.es.intermaps.View.user.UserDataScreen
 import uji.es.intermaps.View.vehicle.VehicleCreate
+import uji.es.intermaps.View.vehicle.VehicleEditDelete
 import uji.es.intermaps.View.vehicle.VehicleList
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.UserViewModel
@@ -121,9 +122,8 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             VehicleCreate(navHostController, viewModelVehicle)
         }
 
-        /* //TODO no borrar esto
         composable(
-            route = "vehicleEdit/{plate}",
+            route = "vehicleEditDelete/{plate}",
             arguments = listOf(
                 navArgument("plate") { type = NavType.StringType}
             )
@@ -133,8 +133,8 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
                 URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
             }
             if (plate != null) {
-                VehicleEdit(navHostController, viewModelPlace, plate)
+                VehicleEditDelete(navHostController, viewModelVehicle, plate)
             }
-        }*/
+        }
     }
 }

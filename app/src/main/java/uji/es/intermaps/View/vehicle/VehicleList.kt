@@ -149,10 +149,9 @@ fun VehicleList(auth: FirebaseAuth, navController: NavController, viewModel: Veh
                             modifier = Modifier
                                 .size(30.dp)
                                 .clickable { //TODO revisar
-                                    /*
                                     viewModel.updateVehicle(vehicle)
                                     val encodedPlate = URLEncoder.encode(vehicle.plate, StandardCharsets.UTF_8.toString())
-                                    navController.navigate("vehicleEdit/$encodedPlate")*/
+                                    navController.navigate("vehicleEditDelete/$encodedPlate")
                                 },
 
                             tint = Color(color = 0XFF007E70)
@@ -219,10 +218,9 @@ fun VehicleList(auth: FirebaseAuth, navController: NavController, viewModel: Veh
                             modifier = Modifier
                                 .size(30.dp)
                                 .clickable { //TODO revisar
-                                    /*
                                     viewModel.updateVehicle(notFavVehicle)
                                     val encodedPlate = URLEncoder.encode(notFavVehicle.plate, StandardCharsets.UTF_8.toString())
-                                    navController.navigate("vehicleEdit/$encodedPlate")*/
+                                    navController.navigate("vehicleEditDelete/$encodedPlate")
                                 },
                             tint = Black
                         )
@@ -235,7 +233,7 @@ fun VehicleList(auth: FirebaseAuth, navController: NavController, viewModel: Veh
         Spacer(modifier = Modifier.height(15.dp))
 
         Button(
-            onClick = {//TODO revisar
+            onClick = {
                 navController.navigate("vehicleCreate")
             },
             modifier = Modifier

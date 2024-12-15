@@ -5,9 +5,9 @@ import android.os.Parcelable
 
 abstract class Vehicle(
     val plate: String = "",
-    val type: String = "",
-    val consumption: Double= 0.0,
-    val fav: Boolean = false
+    var type: String = "",
+    var consumption: Double= 0.0,
+    var fav: Boolean = false
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
