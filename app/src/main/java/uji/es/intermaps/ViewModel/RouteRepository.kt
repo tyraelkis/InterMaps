@@ -146,7 +146,10 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
     }
 
 
-
+    override suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods): Double {
+        var coste = 0.0
+        return coste
+    }
 
     override suspend fun calculateFuelCostAverage(): Boolean {
         val openRouteService = RetrofitConfig.createRetrofitFuelPrice()

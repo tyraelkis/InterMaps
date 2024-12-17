@@ -42,7 +42,7 @@ class ElectricPriceWorker(context: Context, workerParams: WorkerParameters) : Co
 
 fun scheduleFuelPriceUpdate() {
     val calendar = Calendar.getInstance()
-    calendar.set(Calendar.HOUR_OF_DAY, 12)
+    calendar.set(Calendar.HOUR_OF_DAY, 10)
     calendar.set(Calendar.MINUTE, 0)
     calendar.set(Calendar.SECOND, 0)
 
@@ -54,10 +54,21 @@ fun scheduleFuelPriceUpdate() {
         .setInitialDelay(delay, TimeUnit.MILLISECONDS)
         .build()
 
-    val workRequest1 = PeriodicWorkRequestBuilder<ElectricPriceWorker>(1, TimeUnit.DAYS)
+    WorkManager.getInstance().enqueue(workRequest)
+}
+
+fun scheduleElectricPriceUpdate() {
+    val calendar = Calendar.getInstance()
+    calendar.set(Calendar.MINUTE, 0)
+    calendar.set(Calendar.SECOND, 0)
+
+    val initialDelay = calendar.timeInMillis - System.currentTimeMillis()
+
+    val delay = if (initialDelay > 0) initialDelay else initialDelay + TimeUnit.HOURS.toMillis(1)
+
+    val workRequest = PeriodicWorkRequestBuilder<ElectricPriceWorker>(1, TimeUnit.HOURS)
         .setInitialDelay(delay, TimeUnit.MILLISECONDS)
         .build()
 
     WorkManager.getInstance().enqueue(workRequest)
-    WorkManager.getInstance().enqueue(workRequest1)
 }
