@@ -1,19 +1,16 @@
 package uji.es.intermaps.Model
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import uji.es.intermaps.Interfaces.ORSAPI
-import uji.es.intermaps.Interfaces.PrecioCarburanteAPI
 import uji.es.intermaps.Interfaces.PrecioLuzAPI
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Query
 import okhttp3.logging.HttpLoggingInterceptor
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import uji.es.intermaps.Interfaces.FuelPriceAPI
 import java.util.concurrent.TimeUnit
-import android.util.Log
 
 
 object RetrofitConfig {
@@ -42,18 +39,34 @@ object RetrofitConfig {
     }
 
     fun createRetrofitPrecioLuz(): PrecioLuzAPI {
+        /*val okHttpsClient = OkHttpClient.Builder()
+            .connectTimeout(60, TimeUnit.SECONDS)  // Ajusta según sea necesario
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .build()*/
+
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.preciodelaluz.org/")
+            .baseUrl("https://apidatos.ree.es/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+
         return retrofit.create(PrecioLuzAPI::class.java)
     }
 
-    fun createRetrofitPrecioCarburante(): PrecioCarburanteAPI {
+     fun createRetrofitFuelPrice(): FuelPriceAPI {
         val retrofit = Retrofit.Builder()
             .baseUrl("https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-        return retrofit.create(PrecioCarburanteAPI::class.java)
+        return retrofit.create(FuelPriceAPI::class.java)
+
     }
+
+    fun getRetrofit():Retrofit{
+        return Retrofit.Builder()
+            .baseUrl("https://api.openrouteservice.org/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
 }

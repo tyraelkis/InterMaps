@@ -1,10 +1,6 @@
 package uji.es.intermaps
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -12,6 +8,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
+import uji.es.intermaps.View.Route.CreateNewRoute
+import uji.es.intermaps.View.Route.ViewRoute
 import uji.es.intermaps.View.home.HomeScreen
 import uji.es.intermaps.View.home.InitialScreen
 import uji.es.intermaps.View.home.MainMenu
@@ -21,181 +19,130 @@ import uji.es.intermaps.View.interestPlace.InterestPlaceList
 import uji.es.intermaps.View.interestPlace.InterestPlaceSetAlias
 import uji.es.intermaps.View.login.LoginScreen
 import uji.es.intermaps.View.signup.SignUpScreen
-import uji.es.intermaps.View.navBar.NavBar
 import uji.es.intermaps.View.user.UserDataScreen
+import uji.es.intermaps.View.vehicle.VehicleCreate
+import uji.es.intermaps.View.vehicle.VehicleEditDelete
+import uji.es.intermaps.View.vehicle.VehicleList
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
+import uji.es.intermaps.ViewModel.RouteViewModel
 import uji.es.intermaps.ViewModel.UserViewModel
+import uji.es.intermaps.ViewModel.VehicleViewModel
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 @Composable
-fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, viewModel: InterestPlaceViewModel, viewModel1: UserViewModel) {
-
-    val currentRoute = navHostController.currentBackStackEntryAsState().value?.destination?.route
-
-    Scaffold(
-        bottomBar = {
-            // Mostrar la barra de navegación solo en ciertas pantallas
-            if (currentRoute !in listOf("logIn", "signUp", "initial")) {
-                NavBar(
-                    currentRoute = currentRoute ?: "initial",
-                    onNavigate = { route ->
-                        if (route != currentRoute) { // Evitar recargar la misma ruta
-                            navHostController.navigate(route) {
-                                if (route == "home"){
-                                    popUpTo(navHostController.graph.startDestinationId){
-                                        inclusive = true
-                                    }
-                                }
-                                else{
-                                    popUpTo(navHostController.graph.startDestinationId){
-                                        saveState = true
-                                    }
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        }
-                    }
-                )
-            }
-        }
-    ) { padding ->
-        NavHost(
-            navController = navHostController,
-            startDestination = "initial",
-            modifier = Modifier.padding(padding)
+fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, viewModelPlace: InterestPlaceViewModel, viewModelUser: UserViewModel, viewModelVehicle: VehicleViewModel, viewModelRoute: RouteViewModel) {
+    
+    NavHost(
+        navController = navHostController,
+        startDestination = "initial",
         ) {
-            composable("initial") {
-                InitialScreen(
-                    navHostController
-                )
-            }
-            composable("logIn") {
-                LoginScreen(
-                    navHostController
-                )
-            }
-            composable("signUp") {
-                SignUpScreen(
-                    navHostController
-                )
-            }
-            composable("home") {
-                HomeScreen (
-                    navHostController,
-                    viewModel1
-                )
-            }
-            composable("mainMenu") {
-                MainMenu (
-                )
-            }
-            composable("userDataScreen") {
-                UserDataScreen(
-                    auth,
-                    navHostController,
-                    viewModel1
-                    )
-            }
-            composable("interestPlaceList") {
-                InterestPlaceList(
-                    auth,
-                    navHostController,
-                    viewModel
-                )
-            }
-            composable(
-                route = "interestPlaceCreation"
-
-            ) {
-                InterestPlaceCreation(viewModel)
-            }
-            composable(
-                route = "interestPlaceCreationByToponym"
-            ) {
-                InterestPlaceCreationByToponym(viewModel)
-            }
-            composable(
-                route = "interestPlaceSetAlias/{toponym}",
-                arguments = listOf(
-                    navArgument("toponym") { type = NavType.StringType}
-                )
-            ) {
-                    backStackEntry ->
-                val toponym = backStackEntry.arguments?.getString("toponym")
-                if (toponym != null) {
-                    InterestPlaceSetAlias(navHostController,viewModel, toponym)
-                }
-
-            }
-
-        }
-    }
-}
-    /*NavHost(navController = navHostController, startDestination = "initial") {
-        composable("initial"){
+        composable("initial") {
             InitialScreen(
-                navigateToLogin = {navHostController.navigate("logIn")},
-                navigateToSignUp = {navHostController.navigate("signUp")}
+                navHostController
             )
         }
-        composable("logIn"){
+        composable("logIn") {
             LoginScreen(
-                auth,
-                navigateToSignUp = {navHostController.navigate("signUp")},
-                navigateToHome = {navHostController.navigate("home")}
+                navHostController
             )
         }
         composable("signUp") {
             SignUpScreen(
-                auth,
-                navigateToLogin = {navHostController.navigate("logIn")},
-                navigateToHome = {navHostController.navigate("home")}
-
+                navHostController
             )
         }
-        composable("home"){
-            HomeSreen(
-                navigateToUserDataScreen = {navHostController.navigate("userDataScreen")},
-                navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")}
-                )
+        composable("home") {
+            HomeScreen (
+                navHostController,
+                viewModelUser
+            )
         }
         composable("mainMenu") {
             MainMenu (
-            )
-        }
-        composable("userDataScreen"){
-            UserDataScreen(
-                auth
-            )
-        }
-
-        composable("interestPlaceList"){
-            InterestPlaceList(navigateToInterestPlaceList = {navHostController.navigate("interestPlaceList")},
                 auth,
-                navigateToInterestPlaceSetAlias = {navHostController.navigate("interestPlaceSetAlias")},
-                navigateToInterestPlaceCreation = {navHostController.navigate("interestPlaceCreation")},
-                viewModel
+                navHostController,
+                viewModelPlace
+            )
+        }
+        composable("userDataScreen") {
+            UserDataScreen(
+                auth,
+                navHostController,
+                viewModelUser
+            )
+        }
+        composable("interestPlaceList") {
+            InterestPlaceList(
+                auth,
+                navHostController,
+                viewModelPlace
+            )
+        }
+        composable(
+            route = "interestPlaceCreation"
+        ) {
+            InterestPlaceCreation(navHostController, viewModelPlace)
+        }
+        composable(
+            route = "interestPlaceCreationByToponym"
+        ) {
+            InterestPlaceCreationByToponym(viewModelPlace)
+        }
+        composable(
+            route = "interestPlaceSetAlias/{toponym}",
+            arguments = listOf(
+                navArgument("toponym") { type = NavType.StringType}
+            )
+        ) {
+            backStackEntry ->
+            val toponym = backStackEntry.arguments?.getString("toponym")?.let {
+                URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+            }
+            if (toponym != null) {
+                InterestPlaceSetAlias(navHostController,viewModelPlace, toponym)
+            }
+        }
+
+        composable(
+            route = "createNewRoute"
+        ) {
+            CreateNewRoute(auth, navHostController, viewModelRoute)
+        }
+
+        composable("vehicleList") {
+            VehicleList(
+                auth,
+                navHostController,
+                viewModelVehicle
             )
         }
 
-        composable("interestPlaceCreation"){
-            InterestPlaceCreation(
-                viewModel
+        composable(
+            route = "vehicleCreate"
+        ) {
+            VehicleCreate(navHostController, viewModelVehicle)
+        }
+
+        composable(
+            route = "vehicleEditDelete/{plate}",
+            arguments = listOf(
+                navArgument("plate") { type = NavType.StringType}
             )
+        ) {
+                backStackEntry ->
+            val plate = backStackEntry.arguments?.getString("plate")?.let {
+                URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+            }
+            if (plate != null) {
+                VehicleEditDelete(navHostController, viewModelVehicle, plate)
+            }
         }
 
-        composable("interestPlaceSetAlias"){
-            InterestPlaceSetAlias(
-                viewModel
-            )
+        composable(
+            route="viewRoute"
+        ) {
+            ViewRoute(auth,navHostController, viewModelRoute)
         }
-
-        composable("mapaScreen"){
-            MapaScreen()
-        }
-
-    }*/
-
-
-
-
+    }
+}

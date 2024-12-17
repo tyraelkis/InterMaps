@@ -1,6 +1,5 @@
 package uji.es.intermaps.APIParsers
 
-import com.google.gson.annotations.SerializedName
 
 data class CoordToToponymORSAPIResponse(
     val features: List<PossiblePlace>

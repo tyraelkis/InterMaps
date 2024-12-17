@@ -1,6 +1,6 @@
 package uji.es.intermaps.View.interestPlace
 
-import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,9 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,21 +24,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,20 +44,15 @@ import androidx.compose.ui.unit.sp
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import uji.es.intermaps.Exceptions.NotValidCoordinatesException
-import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
-import androidx.compose.ui.input.key.Key
 import com.mapbox.geojson.Point.fromLngLat
-import kotlinx.coroutines.coroutineScope
-
-import uji.es.intermaps.Model.InterestPlace
+import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
+import com.mapbox.maps.viewannotation.geometry
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import uji.es.intermaps.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,14 +63,13 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
     var toponym by remember { mutableStateOf("") }
     var selectToponym by remember { mutableStateOf("") }
     var sePuedeAñadir by remember { mutableStateOf(false) }
-    var place by remember { mutableStateOf(InterestPlace) }
-    var interestPlaceService = InterestPlaceService(FirebaseRepository())
+    val interestPlaceService = InterestPlaceService(FirebaseRepository())
     val  coroutineScope = rememberCoroutineScope()
 
 
     CreateInterestPlaceCorrectPopUp(viewModel)
 
-    var mapViewportState = rememberMapViewportState {
+    val mapViewportState = rememberMapViewportState {
         setCameraOptions {
             zoom(11.0)
             center(fromLngLat(-0.0675, 39.9947)) // Coordenadas iniciales
@@ -88,6 +77,8 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
             bearing(0.0)
         }
     }
+
+    var clickedPoint by remember { mutableStateOf<Point?>(null) }
 
 
     Column(
@@ -111,13 +102,28 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                     .fillMaxWidth()
                     .weight(1f), // Ocupa la mitad del espacio
                 mapViewportState = mapViewportState
-            )
+            ) {
+                clickedPoint?.let { point ->
+                    ViewAnnotation(
+                        options = viewAnnotationOptions {
+                            geometry(point)
+                            allowOverlap(true)
+                        }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.marker_icon),
+                            contentDescription = "Marker",
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                }
+            }
         }
 
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Row (
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp),
@@ -125,7 +131,7 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Toponym",
+                text = "Topónimo",
                 color = Black,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
@@ -138,7 +144,7 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
             modifier = Modifier
                 .height(52.dp)
                 .width(350.dp)
-        ){
+        ) {
             TextField(
                 value = toponym,
                 onValueChange = { toponym = it },
@@ -146,9 +152,9 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                     .height(52.dp)
                     .fillMaxWidth()
                     .border(1.dp, Black, RoundedCornerShape(10.dp)),
-                placeholder = { Text("Escribe un toponimo", style = TextStyle(fontSize = 20.sp)) },
+                placeholder = { Text("Escribe un topónimo", style = TextStyle(fontSize = 20.sp)) },
                 colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color(0xFFFFFFF),
+                    containerColor = Color(0xFFFFFFFF),
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent
                 ),
@@ -156,7 +162,9 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
             )
 
         }
+
         Spacer(modifier = Modifier.height(8.dp))
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -168,12 +176,11 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                 Button(
                     onClick = {
                         coroutineScope.launch {
-                            var result =
-                                interestPlaceService.createInterestPlaceFromToponym(selectToponym)
+                            val result = interestPlaceService.createInterestPlaceFromToponym(selectToponym)
                             if (result != null) {
                                 viewModel.showCreateInterestPlaceCorrectPopUp()
-                            } else {
-                                viewModel.hideCreateInterestPlaceCorrectPopUp()
+                            }else{
+                                viewModel.showCreateInterestPlaceErrorPopUp()
                             }
                         }
                     },
@@ -186,6 +193,7 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                     Text(text = "Añadir lugar", color = White, fontSize = 14.sp)
                 }
             }
+
             Button(
                 onClick = {
                     viewModel.getLocationsByToponim(toponym)
@@ -195,36 +203,39 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                 colors = ButtonDefaults.buttonColors(containerColor = Black),
                 shape = RoundedCornerShape(10.dp),
 
-            ) {
+                ) {
                 Text(text = "Obtener lugares", color = White, fontSize = 14.sp)
             }
         }
 
-        Column (
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.Start
-        ){
-
+        ) {
             LazyColumn {
                 items(viewModel.locations.value.size) { index ->
                     Text(text = viewModel.locations.value[index].properties.label,
-                    modifier = Modifier
-                        .clickable {
-                            sePuedeAñadir = true
-                            selectToponym = viewModel.locations.value[index].properties.label
-                            val coordinates = viewModel.locations.value[index].geometry.coordinates
-                            mapViewportState.setCameraOptions {
-                                zoom(11.0)
-                                center(
-                                    fromLngLat(
-                                        coordinates[0],
-                                        coordinates[1]
+                        modifier = Modifier
+                            .clickable {
+                                sePuedeAñadir = true
+                                selectToponym = viewModel.locations.value[index].properties.label
+                                val coordinates =
+                                    viewModel.locations.value[index].geometry.coordinates
+                                mapViewportState.setCameraOptions {
+                                    zoom(11.0)
+                                    center(
+                                        fromLngLat(
+                                            coordinates[0],
+                                            coordinates[1]
+                                        )
                                     )
-                                ) // Coordenadas para centrar el mapa en la UJI, Castellón de la Plana
+                                }
+                                clickedPoint = fromLngLat(coordinates[0], coordinates[1]) //Establece la ubicación del marcador
                             }
-                        }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -290,7 +301,7 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
             }
         }
     }
-
+/*
     if (showPopupCreateError) {
         Box(
             modifier = Modifier
@@ -351,5 +362,8 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
         }
     }
 
+
+
+ */
     }
 }

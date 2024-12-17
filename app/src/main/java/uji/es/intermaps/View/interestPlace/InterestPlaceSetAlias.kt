@@ -27,19 +27,16 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -50,13 +47,13 @@ import androidx.navigation.NavController
 import com.mapbox.geojson.Point.fromLngLat
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
+import com.mapbox.maps.viewannotation.geometry
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
-import uji.es.intermaps.Model.Coordinate
-import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
@@ -64,28 +61,20 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 @Composable
 fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlaceViewModel, toponym: String){
     val place = viewModel.interestPlace
-    Log.d("Place", place.toString())
     val loading = viewModel.loading
     var showPopupAliasCorrecto by remember { mutableStateOf(false) }
     var showPopupAliasIncorrecto by remember { mutableStateOf(false) }
     //var newAlias by remember { mutableStateOf("") }
-    var repository: Repository = FirebaseRepository()
-    var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
+    val repository: Repository = FirebaseRepository()
+    val interestPlaceService = InterestPlaceService(repository)
     val  coroutineScope = rememberCoroutineScope()
     val long = place.coordinate.longitude
     val lat = place.coordinate.latitude
 
     DeleteInterestPlacePopUp(viewModel, navController)
     ModificationInterestPlacePopUp(viewModel)
+    ModificationInterestPlaceErrorPopUp(viewModel)
 
-    var mapViewportState = rememberMapViewportState {
-        setCameraOptions {
-            zoom(11.0)
-            center(fromLngLat(long,lat)) // Coordenadas iniciales
-            pitch(0.0)
-            bearing(0.0)
-        }
-    }
 
     LaunchedEffect(Unit) {
         viewModel.getInterestPlaceByToponym(toponym)
@@ -114,20 +103,23 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "${place.toponym ?: "Sin toponimo"} ",
+                    text = place.toponym,
                     color = Black,
-                    fontSize = 26.sp,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.height(15.dp))
+
+                Spacer(modifier = Modifier.height(10.dp))
+
                 Text(
-                    text = "(${place.coordinate.latitude}, ${place.coordinate.longitude})",
+                    text = "${place.coordinate.latitude}, ${place.coordinate.longitude}",
                     color = Black,
-                    fontSize = 26.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
-            Spacer(modifier = Modifier.height(15.dp))
+
+            Spacer(modifier = Modifier.height(25.dp))
 
             Box(
                 modifier = Modifier
@@ -138,52 +130,31 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                 MapboxMap(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    mapViewportState = mapViewportState
-                )
+                    mapViewportState = rememberMapViewportState {
+                        setCameraOptions {
+                            zoom(11.0)
+                            center(fromLngLat(long,lat))
+                            pitch(0.0)
+                            bearing(0.0)
+                        }
+                    }
+                ) {
+                    ViewAnnotation(
+                        options = viewAnnotationOptions {
+                            geometry(fromLngLat(place.coordinate.longitude, place.coordinate.latitude))
+                            allowOverlap(true)
+                        }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.marker_icon),
+                            contentDescription = "Marker",
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
-
-            /*Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp),
-                horizontalArrangement = Arrangement.Absolute.Left,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Toponimo",
-                    color = Black,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold
-                )
-            }*/
-            Spacer(modifier = Modifier.height(10.dp))
-
-            /*Box(
-                modifier = Modifier
-                    .height(52.dp)
-                    .width(350.dp)
-                    .background(Color(0xFFFFFFF), shape = RoundedCornerShape(10.dp))
-                    .border(
-                        width = 1.dp,
-                        color = Black,
-                        shape = RoundedCornerShape(10.dp) )
-                    .clip(RoundedCornerShape(10.dp))
-                    .padding(5.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                // Texto en el fondo
-                Text(
-                    text = "${place.toponym}",
-                    color = Black,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.CenterStart),
-                )
-            }
-            Spacer(modifier = Modifier.height(20.dp))*/
 
             Row (
                 modifier = Modifier
@@ -215,9 +186,9 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                         .height(52.dp)
                         .fillMaxWidth()
                         .border(1.dp, Black, RoundedCornerShape(10.dp)),
-                    placeholder = { Text("${place.alias}", style = TextStyle(fontSize = 20.sp)) },
+                    placeholder = { Text(place.alias, style = TextStyle(fontSize = 20.sp)) },
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color(0xFFFFFFF),
+                        containerColor = Color(0xFFFFFFFF),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent
                     ),
@@ -226,32 +197,37 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
             }
             Spacer(modifier = Modifier.height(8.dp))
 
+            Spacer(modifier = Modifier.weight(1f))
+
             Button(
                 onClick = {
                     coroutineScope.launch {
                         val newAlias = viewModel.newAlias
-                        if (interestPlaceService.setAlias(
-                                interestPlace = place,
-                                newAlias = newAlias
-                            )
-                        ) {
-                            showPopupAliasCorrecto = true
-                        } else {
-                            showPopupAliasIncorrecto = true
+                        try {
+                            if (interestPlaceService.setAlias(
+                                    interestPlace = place,
+                                    newAlias = newAlias
+                                )
+                            ) {
+                                viewModel.showUpdateInterestPlacePopUp()
+                            }
+                        }catch (e: Exception){
+                            viewModel.showUpdateInterestPlaceErrorPopUp()
                         }
+
                     }
                 } ,
                 modifier = Modifier
-                    .height(36.dp)
-                    .padding(horizontal = 32.dp, vertical = 1.dp)
-                    .align(AbsoluteAlignment.Right),
+                    .height(40.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp, vertical = 1.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Black),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text(text = "Editar", color = White, fontSize = 14.sp)
+                Text(text = "Confirmar cambios", color = White, fontSize = 18.sp)
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             Button(
                 onClick = {
@@ -259,15 +235,16 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                     viewModel.showDeleteInterestPlacePopUp()
                 } ,
                 modifier = Modifier
-                    .height(36.dp)
-                    .width(250.dp)
-                    .padding(horizontal = 32.dp, vertical = 1.dp)
-                    .align(Alignment.CenterHorizontally),
+                    .height(40.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp, vertical = 1.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Black),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text(text = "Eliminar lugar", color = White, fontSize = 14.sp)
+                Text(text = "Eliminar lugar", color = White, fontSize = 18.sp)
             }
+
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 

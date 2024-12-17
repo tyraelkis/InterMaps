@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "uji.es.intermaps"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "uji.es.intermaps"
@@ -49,6 +49,7 @@ android {
             excludes += setOf("/META-INF/{AL2.0,LGPL2.1}", "META-INF/LICENSE.md", "META-INF/LICENSE-notice.md")
         }
     }
+
 }
 
 dependencies {
@@ -89,5 +90,16 @@ dependencies {
     implementation(libs.okhttp.logging.interceptor)
     //implementation ("com.mapbox.maps:android:11.8.0")
     //implementation ("com.mapbox.extension:maps-compose:11.8.0")
+
+    // Mockito core para pruebas unitarias
+    testImplementation(libs.mockito.inline)
+
+    // Mockito-Kotlin para simplificar el uso en Kotlin
+    testImplementation(libs.mockito.kotlin)
+
+    // Mockito para pruebas instrumentadas
+    androidTestImplementation(libs.mockito.android)
+    implementation ("androidx.work:work-runtime-ktx:2.10.0")
+
 
 }

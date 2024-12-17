@@ -8,6 +8,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.anyString
+import org.mockito.Mockito.doAnswer
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
@@ -36,14 +38,11 @@ class InterestPlaceServiceTests {
     @Before
     fun setup(): Unit = runBlocking {
         userService.login(userTest.email, userTest.pswd)
-        /*val coord = Coordinate(-18.665695, 35.529562)
-        interestPlaceService.createInterestPlaceCoordinates(coord)*/
     }
 
     @After
     fun tearDown(): Unit = runBlocking {
         userService.signOut()
-
     }
 
     @Test
@@ -56,7 +55,7 @@ class InterestPlaceServiceTests {
     }
 
     @Test(expected = NotValidCoordinatesException::class)
-    fun createInterestPlace_E2Invalid_errorOnCreatingInterestPlace(): Unit = runBlocking {
+    fun createInterestPlace_E3Invalid_errorOnCreatingInterestPlace(): Unit = runBlocking {
         interestPlaceService.createInterestPlaceCoordinates(Coordinate(-1800.665695,35.529562))
     }
 
@@ -64,8 +63,6 @@ class InterestPlaceServiceTests {
     fun searchInterestPlaceByCoordinate_E1Valid_InterestPlaceFound(): Unit = runBlocking {
         val foundPlace: InterestPlace = interestPlaceService.searchInterestPlaceByCoordiante(interestPlace.coordinate)
         val resultado : Boolean = foundPlace.toponym.contains(interestPlace.toponym)
-        val coord = Coordinate(-18.665695, 35.529562)
-        interestPlaceService.createInterestPlaceCoordinates(coord)
         assertEquals(true, resultado)
     }
 
@@ -116,7 +113,7 @@ class InterestPlaceServiceTests {
     }
 
     @Test
-    fun viewInterestPlaceList_E2Invalido_emptyInterestPlaceListViewed(): Unit = runBlocking{
+    fun viewInterestPlaceList_E2Valido_emptyInterestPlaceListViewed(): Unit = runBlocking{
         userService.signOut()
         userService.login(emailEmpty, "123456BB")
         val res = interestPlaceService.viewInterestPlaceList()
@@ -144,19 +141,10 @@ class InterestPlaceServiceTests {
         assertEquals(true, res)
     }
 
-    @Test(expected = NotValidAliasException::class)
+    @Test(expected = NotSuchPlaceException::class)
     fun  createInterestPlaceByToponym_E1Invalid_InterestPlaceCreated(): Unit = runBlocking {
-        val interestPlaceTest : InterestPlace = interestPlaceService.createInterestPlaceFromToponym("Mozambique")
-        interestPlaceService.deleteInterestPlace(interestPlaceTest.coordinate)
+        interestPlaceService.createInterestPlaceFromToponym("Moztrambique")
     }
 
 
-    //@Test
-    fun sara_pruebas(): Unit = runBlocking{
-        userService.login("pruebas@sara.com", "Password")
-        val puntoDelete = Coordinate(39.9333300,-0.1000000)
-        interestPlaceService.createInterestPlaceCoordinates(puntoDelete)
-        val puntoDelete2 = Coordinate(54.9333300,-20.1000000)
-        interestPlaceService.createInterestPlaceCoordinates(puntoDelete2)
-    }
 }

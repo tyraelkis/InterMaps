@@ -38,9 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
-import uji.es.intermaps.ViewModel.FirebaseRepository
-import uji.es.intermaps.Interfaces.Repository
-import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.R
 import uji.es.intermaps.View.CustomDropdownMenu
 import uji.es.intermaps.ViewModel.UserViewModel
@@ -60,7 +57,7 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
     var selectedOptionTransport by remember { mutableStateOf(optionsRoutes[0]) }
 
     val user = auth.currentUser
-    var currentEmail by remember { mutableStateOf(user?.email.toString()) }
+    val currentEmail by remember { mutableStateOf(user?.email.toString()) }
 
     DeleteUserPopUp(viewModel, navController)
     ModificationUserPopUp(viewModel)
@@ -70,7 +67,7 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .background(Color.White),
+            .background(White),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(100.dp))
@@ -94,7 +91,7 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
             Spacer(modifier = Modifier.width(30.dp))
             Text(
                 text = currentEmail,
-                color = Color.Black,
+                color = Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -175,7 +172,7 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
                 .height(45.dp)
                 .width(350.dp)
                 .padding(horizontal = 32.dp, vertical = 1.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+            colors = ButtonDefaults.buttonColors(containerColor = Black),
             shape = RoundedCornerShape(10.dp)
         ) {
             Text(text = "Cerrar Sesión", color = White, fontSize = 20.sp)
@@ -184,7 +181,7 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
 
         Text(
             text = "Eliminar cuenta",
-            color = Color.Black,
+            color = Black,
             fontSize = 16.sp,
             modifier = Modifier
                 .clickable {
@@ -196,6 +193,8 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
                 textAlign = TextAlign.Center
             )
         )
+
+
     }
 
 }

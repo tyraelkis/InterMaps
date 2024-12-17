@@ -5,10 +5,10 @@
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="InterestPlaceServiceTests">
+      <SelectionState runConfigName="calculateFuelConsumition_E2Valid_consumitionCalculated()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="deleteInterestPlace_E1Valid_InterestPlaceDeleted()">
+      <SelectionState runConfigName="createRoute_E1Valid_routeIsCreated() (1)">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

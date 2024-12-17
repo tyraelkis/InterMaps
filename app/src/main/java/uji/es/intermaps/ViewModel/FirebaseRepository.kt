@@ -3,29 +3,40 @@ package uji.es.intermaps.ViewModel
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import okhttp3.internal.cookieToString
-import okhttp3.internal.toImmutableMap
+import uji.es.intermaps.APIParsers.RouteFeature
+import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
+import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
+import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.Model.RetrofitConfig
+import uji.es.intermaps.Model.Route
+import uji.es.intermaps.Model.TransportMethods
+import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.User
+import uji.es.intermaps.Model.Vehicle
+import uji.es.intermaps.Model.VehicleFactory
+import uji.es.intermaps.Model.VehicleTypes
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import kotlin.jvm.Throws
 
 class FirebaseRepository: Repository {
-    val db = DataBase.db
-    val auth = DataBase.auth
+    private val db = DataBase.db
+    private val auth = DataBase.auth
 
 
     override suspend fun createUser(email: String, pswd: String): User {
@@ -42,19 +53,24 @@ class FirebaseRepository: Repository {
                                 continuation.resumeWithException(e)
                             }
                     } else {
-                        val exception = task.exception
-                        if (exception is FirebaseAuthUserCollisionException) {
-                            continuation.resumeWithException(
-                                AccountAlreadyRegistredException("Ya existe una cuenta con este email")
-                            )
-                        } else if (exception is FirebaseAuthInvalidCredentialsException) {
-                            continuation.resumeWithException(
-                                IllegalArgumentException("El correo o la contraseña no tienen un formato válido")
-                            )
-                        } else {
-                            continuation.resumeWithException(
-                                exception ?: Exception("Error desconocido al crear el usuario.")
-                            )
+                        when (val exception = task.exception) {
+                            is FirebaseAuthUserCollisionException -> {
+                                continuation.resumeWithException(
+                                    AccountAlreadyRegistredException("Ya existe una cuenta con este email")
+                                )
+                            }
+
+                            is FirebaseAuthInvalidCredentialsException -> {
+                                continuation.resumeWithException(
+                                    IllegalArgumentException("El correo o la contraseña no tienen un formato válido")
+                                )
+                            }
+
+                            else -> {
+                                continuation.resumeWithException(
+                                    exception ?: Exception("Error desconocido al crear el usuario.")
+                                )
+                            }
                         }
                     }
                 }
@@ -177,69 +193,49 @@ class FirebaseRepository: Repository {
 
     override suspend fun setAlias(interestPlace: InterestPlace, newAlias: String): Boolean {
         val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        var result = false
+        val documentSnapshot = db.collection("InterestPlace")
+            .document(userEmail)
+            .get()
+            .await()
 
-        return try {
-            val documentSnapshot = db.collection("InterestPlace")
-                .document(userEmail)
-                .get()
-                .await()
+        if (documentSnapshot.exists()) {
+            val interestPlaces =
+                documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
 
-            if (documentSnapshot.exists()) {
-                val interestPlaces =
-                    documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
-
-                val foundPlace = (interestPlaces.find { place ->
-                    val coordinate = place["coordinate"] as? Map<String, Double>
-                    val latitude = coordinate?.get("latitude") ?: 0.0
-                    val longitude = coordinate?.get("longitude") ?: 0.0
+            val foundPlace = (interestPlaces.find { place ->
+                val coordinate = place["coordinate"] as? Map<String, Double>
+                val latitude = coordinate?.get("latitude") ?: 0.0
+                val longitude = coordinate?.get("longitude") ?: 0.0
 
 
-                    latitude == interestPlace.coordinate.latitude && longitude == interestPlace.coordinate.longitude
-                }?: throw NotSuchPlaceException("Lugar de interés no encontrado")).toMutableMap()
+                latitude == interestPlace.coordinate.latitude && longitude == interestPlace.coordinate.longitude
+            }?: throw NotSuchPlaceException("Lugar de interés no encontrado")).toMutableMap()
 
-                val updatedInterestPlaces = interestPlaces.map { place ->
-                    if (place == foundPlace) {
-                        place.toMutableMap().apply {
-                            this["alias"] = newAlias
-                        }
+
+            val updatedInterestPlaces = interestPlaces.map { place ->
+                if (place == foundPlace){
+                    place.toMutableMap().apply {
+                        this["alias"] = newAlias
                     }
+                } else {
+                    place
                 }
-                db.collection("InterestPlace")
-                    .document(userEmail)
-                    .update("interestPlaces", updatedInterestPlaces)
-                    .await()
-                true
-            } else {
-                false
             }
-        } catch (e: Exception) {
-            Log.e("setAlias", "Error updating alias: ${e.message}", e)
-            false
+
+            db.collection("InterestPlace")
+                .document(userEmail)
+                .update("interestPlaces", updatedInterestPlaces)
+                .await()
+            result = true
+        } else {
+            result = false
         }
+        return result
     }
 
 
     override suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
-        //Codigo original y funcional para crear lugar de interés
-        /*return suspendCoroutine { continuation ->
-            db.collection("InterestPlace").add(
-                mapOf(
-                    "coordinate" to coordinate,
-                    "toponym" to toponym,
-                    "alias" to alias,
-                    "fav" to false
-                )
-            ).addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    continuation.resume(InterestPlace(coordinate, toponym, alias, false))
-                } else {
-                    continuation.resumeWithException(task.exception ?: Exception("Error desconocido al almacenar el lugar de interés."))
-                }
-            }
-        }*/
-
-        //Código modificado para poder relacionar un usuario con sus lugares
-        //Siempre ocurre que el usuario no está autenticado pero la primera vez si que había funcionado así que no entiendo
         val email = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
         return suspendCoroutine { continuation ->
             val newPlace = mapOf(
@@ -275,7 +271,7 @@ class FirebaseRepository: Repository {
     override suspend fun getInterestPlaceByToponym(toponym: String): InterestPlace{
         val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
 
-        return try {
+        try {
             val documentSnapshot = db.collection("InterestPlace")
                 .document(userEmail)
                 .get()
@@ -288,8 +284,8 @@ class FirebaseRepository: Repository {
                     toponym.equals(actualToponym)
                 } ?: throw NotSuchPlaceException("Lugar de interés no encontrado")
 
-                var lat = (foundPlace["coordinate"] as Map<String, Double>)["latitude"] ?: 0.0
-                var long = (foundPlace["coordinate"] as Map<String, Double>)["longitude"] ?: 0.0
+                val lat = (foundPlace["coordinate"] as Map<String, Double>)["latitude"] ?: 0.0
+                val long = (foundPlace["coordinate"] as Map<String, Double>)["longitude"] ?: 0.0
                 return InterestPlace(
                     coordinate =  Coordinate(lat,long),
                     toponym = foundPlace["toponym"] as? String ?: "",
@@ -300,12 +296,11 @@ class FirebaseRepository: Repository {
                 throw Exception("No existe el documento para el usuario: $userEmail")
             }
         } catch (e: Exception) {
-            Log.e("GeneralError", "Ocurrió un error", e)
-            throw e
+            throw NotSuchPlaceException()
         }
     }
 
-    override suspend fun viewInterestPlaceData(interestPlaceCoordinate: Coordinate): InterestPlace {
+    override suspend fun viewInterestPlaceData(coordinate: Coordinate): InterestPlace {
         val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
 
         try {
@@ -318,16 +313,16 @@ class FirebaseRepository: Repository {
                 val interestPlaces = documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
 
                 val foundPlace = interestPlaces.find { place ->
-                    val coordinate = place["coordinate"] as? Map<String, Double>
-                    val latitude = coordinate?.get("latitude") ?: 0.0
-                    val longitude = coordinate?.get("longitude") ?: 0.0
+                    val interestPlaceCoordinate = place["coordinate"] as? Map<String, Double>
+                    val latitude = interestPlaceCoordinate?.get("latitude") ?: 0.0
+                    val longitude = interestPlaceCoordinate?.get("longitude") ?: 0.0
 
-                    latitude == interestPlaceCoordinate.latitude && longitude == interestPlaceCoordinate.longitude
+                    latitude == coordinate.latitude && longitude == coordinate.longitude
                 } ?: throw NotSuchPlaceException("Lugar de interés no encontrado")
 
                 // Construir el objeto InterestPlace a partir del mapa encontrado
                 return InterestPlace(
-                    coordinate = interestPlaceCoordinate,
+                    coordinate = coordinate,
                     toponym = foundPlace["toponym"] as? String ?: "",
                     alias = foundPlace["alias"] as? String ?: "",
                     fav = foundPlace["fav"] as? Boolean ?: false
@@ -419,6 +414,258 @@ class FirebaseRepository: Repository {
             false
         }
     }
+
+    override suspend fun createVehicle(plate: String, type: String, consumption: Double): Vehicle {
+        val email = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        return suspendCoroutine { continuation ->
+            val userDocument = db.collection("Vehicle").document(email)
+
+            userDocument.get()
+                .addOnSuccessListener { documentSnapshot ->
+                    val vehicles = documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
+
+                    // Verificar si ya existe un vehículo con la misma matrícula
+                    if (vehicles.any { it["plate"] == plate }) {
+                        continuation.resumeWithException(
+                            VehicleAlreadyExistsException("Ya existe un vehículo con la matrícula $plate")
+                        )
+                        return@addOnSuccessListener
+                    }
+
+                    // Crea el vehículo usando el Factory Method
+                    val vehicle = VehicleFactory.createVehicle(plate, type, consumption, false)
+
+                    // Mapa para almacenar el vehículo en Firebase
+                    val newVehicle = mapOf(
+                        "plate" to vehicle.plate,
+                        "type" to vehicle.type,
+                        "consumption" to vehicle.consumption,
+                        "fav" to vehicle.fav
+                    )
+
+                    // Agregar el nuevo vehículo a la colección
+                    userDocument.update("vehicles", FieldValue.arrayUnion(newVehicle))
+                        .addOnSuccessListener {
+                            continuation.resume(vehicle)
+                        }
+                        .addOnFailureListener { error ->
+                            // Si la actualización falla, intentar crear un nuevo documento
+                            userDocument.set(mapOf("vehicles" to listOf(newVehicle)))
+                                .addOnSuccessListener {
+                                    continuation.resume(vehicle)
+                                }
+                                .addOnFailureListener { e ->
+                                    continuation.resumeWithException(e)
+                                }
+                        }
+                }
+                .addOnFailureListener { e ->
+                    continuation.resumeWithException(e)
+                }
+        }
+    }
+
+    override suspend fun deleteVehicle(plate: String): Boolean {
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        val documentSnapshot = db.collection("Vehicle")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val vehicles = documentSnapshot.get("vehicles") as? MutableList<Map<String, Any>>
+                ?: mutableListOf()
+
+            val placeIndex = vehicles.indexOfFirst { vehicle ->
+                val vehiclePlate = vehicle["plate"] as? String ?: return@indexOfFirst false
+                vehiclePlate == plate
+            }
+
+            if (placeIndex == -1) {
+                throw NotSuchElementException("Vehículo no encontrado")
+            } //La excepción no tiene que ser cazada en este metodo sino en el servicio
+
+            vehicles.removeAt(placeIndex)
+
+            db.collection("Vehicle")
+                .document(userEmail)
+                .update("vehicles", vehicles)
+                .await()
+
+            return true
+        } else {
+            return false
+        }
+    }
+
+    override suspend fun viewVehicleList(): List<Vehicle> {
+        val userEmail =  auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        return try {
+            val documentSnapshot = db.collection("Vehicle")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                // Extraemos el array vehicles del documento
+                val vehicles = documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
+
+                // Convertimos cada elemento del array a Vehicle usando la fábrica
+                vehicles.map { vehicle ->
+                    VehicleFactory.createVehicle(
+                        vehicle["plate"] as String? ?: "",
+                        vehicle["type"] as String? ?: "",
+                        (vehicle["consumption"] as Number? ?: 0.0).toDouble(),
+                        vehicle["fav"] as Boolean? ?: false
+                    )
+                }
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            emptyList()  // En caso de error, retornamos una lista vacía
+        }
+    }
+
+
+
+    override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TransportMethods,routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route {
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+        lateinit var resRoute: Route
+        try {
+            val documentSnapshot = db.collection("InterestPlace")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                val interestPlaces =
+                    documentSnapshot.get("interestPlaces") as? MutableList<Map<String, Any>>
+                        ?: mutableListOf()
+                interestPlaces.find { place ->
+                    val actualToponym = place["toponym"] as? String ?: ""
+                    origin.equals(actualToponym)
+                } ?: throw NotSuchPlaceException()
+                interestPlaces.find { place ->
+                    val actualToponym = place["toponym"] as? String ?: ""
+                    destination.equals(actualToponym)
+                } ?: throw NotSuchPlaceException()
+            }
+
+
+            return suspendCoroutine { continuation ->
+                var tiempo =  route.properties.summary.duration;
+                if(tiempo >= 3600){
+                    tiempo = tiempo / 60 / 60
+                }else{
+                    tiempo = tiempo / 60
+                }
+
+                val newRoute = mapOf(
+                    "origin" to origin,
+                    "destination" to destination,
+                    "trasnportMethod" to trasnportMethods,
+                    "route" to convertToCoordinate(route.geometry),
+                    "distance" to route.properties.summary.distance / 1000,
+                    "duration" to tiempo,
+                    "cost" to 0.0,
+                    "routeType" to routeType,
+                    "fav" to false,
+                    "vehiclePlate" to vehiclePlate
+                )
+                resRoute = Route(
+                    origin = origin,
+                    destination = destination,
+                    route = convertToCoordinate(route.geometry),
+                    distance = route.properties.summary.distance / 1000,
+                    duration = tiempo,
+                    trasnportMethod = trasnportMethods,
+                    routeType = routeType,
+                    vehiclePlate = vehiclePlate
+                )
+                Log.d("coordenadas de la ruta",resRoute.route.toString())
+                val userDocument = db.collection("Route").document(userEmail)
+                //Intenta añadir a interestPlaces el nuevo lugar evitando duplicados con el FieldValue.arrayUnion
+                userDocument.update("routes", FieldValue.arrayUnion(resRoute))
+                    .addOnSuccessListener {
+                        continuation.resume(resRoute)
+                    }
+                    .addOnFailureListener { _ ->
+                        // Si falla porque el usuario aún no tiene lugares guardados crea el documento con el atributo interestPlaces y le añade el lugar
+                        userDocument.set(mapOf("routes" to listOf(resRoute)))
+                            .addOnSuccessListener {
+                                continuation.resume(resRoute)
+                            }
+                            .addOnFailureListener { e ->
+                                continuation.resumeWithException(e)
+                            }
+                    }
+            }
+        } catch (e: Exception) {
+            Log.e("createRoute", "Error al crear la ruta: ${e.message}", e)
+            throw Exception("Error al crear la ruta: ${e.message}", e)
+        }
+        return resRoute
+    }
+
+    fun convertToCoordinate(lista: RouteGeometry):List<Coordinate>{
+        var listaCoordenadas: ArrayList<Coordinate> = ArrayList()
+        for (coordenada in lista.coordinates){
+            listaCoordenadas.add(Coordinate(latitude = coordenada[1], longitude = coordenada[0]))
+        }
+        return listaCoordenadas
+    }
+
+
+    override suspend fun getAverageFuelPrices(): List<Double> {
+        try {
+            val userDocument = db.collection("FuelPrices").document("mediaPrecios").get().await()
+
+            if (userDocument.exists()) {
+                val gasolina95 = userDocument.getDouble("gasolina95")
+                val gasoilA = userDocument.getDouble("gasoleoA")
+
+                if (gasolina95 != null && gasoilA != null) {
+                    return listOf(gasolina95, gasoilA)
+                } else {
+                    return listOf(0.0)
+                }
+            } else {
+                return listOf(-1.0)
+            }
+        } catch (e: Exception) {
+            Log.e("FuelPrices", "Error al obtener los precios de combustible: ${e.message}")
+            return listOf(0.0)
+        }
+    }
+
+    override suspend fun getElectricPrice(): Double {
+        try {
+            val userDocument = db.collection("ElectricityPrices").document("precios").get().await()
+
+            if (userDocument.exists()) {
+                val precioLuz = userDocument.getDouble("precioLuz")
+
+                if (precioLuz != null ) {
+                    return precioLuz
+                } else {
+                    return 0.0
+                }
+            } else {
+                return -1.0
+            }
+        } catch (e: Exception) {
+            Log.e("ElectricityPrices", "Error al obtener los precios de la luz: ${e.message}")
+            return 0.0
+        }
+    }
+
+
 
 }
 
