@@ -533,7 +533,7 @@ class FirebaseRepository: Repository {
 
 
 
-    override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TransportMethods,route: RouteFeature): Route {
+    override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TransportMethods,routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route {
         val userEmail = auth.currentUser?.email
             ?: throw IllegalStateException("No hay un usuario autenticado")
         lateinit var resRoute: Route
@@ -574,9 +574,9 @@ class FirebaseRepository: Repository {
                     "distance" to route.properties.summary.distance / 1000,
                     "duration" to tiempo,
                     "cost" to 0.0,
-                    "routeType" to RouteTypes.RAPIDA,
+                    "routeType" to routeType,
                     "fav" to false,
-                    "vehiclePlate" to ""
+                    "vehiclePlate" to vehiclePlate
                 )
                 resRoute = Route(
                     origin = origin,
@@ -585,17 +585,19 @@ class FirebaseRepository: Repository {
                     distance = route.properties.summary.distance / 1000,
                     duration = tiempo,
                     trasnportMethod = trasnportMethods,
+                    routeType = routeType,
+                    vehiclePlate = vehiclePlate
                 )
                 Log.d("coordenadas de la ruta",resRoute.route.toString())
                 val userDocument = db.collection("Route").document(userEmail)
                 //Intenta añadir a interestPlaces el nuevo lugar evitando duplicados con el FieldValue.arrayUnion
-                userDocument.update("routes", FieldValue.arrayUnion(newRoute))
+                userDocument.update("routes", FieldValue.arrayUnion(resRoute))
                     .addOnSuccessListener {
                         continuation.resume(resRoute)
                     }
                     .addOnFailureListener { _ ->
                         // Si falla porque el usuario aún no tiene lugares guardados crea el documento con el atributo interestPlaces y le añade el lugar
-                        userDocument.set(mapOf("routes" to listOf(newRoute)))
+                        userDocument.set(mapOf("routes" to listOf(resRoute)))
                             .addOnSuccessListener {
                                 continuation.resume(resRoute)
                             }

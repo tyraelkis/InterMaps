@@ -5,6 +5,7 @@ import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
+import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
@@ -30,6 +31,8 @@ interface Repository {
         origin: String,
         destination: String,
         transportMethod: TransportMethods,
+        routeType: RouteTypes,
+        vehiclePlate: String = "",
         routeFeature: RouteFeature
     ): Route
 

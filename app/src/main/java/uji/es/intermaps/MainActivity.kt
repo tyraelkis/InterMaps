@@ -21,6 +21,8 @@ import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.RouteRepository
+import uji.es.intermaps.ViewModel.RouteService
+import uji.es.intermaps.ViewModel.RouteViewModel
 import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.ViewModel.UserViewModel
 import uji.es.intermaps.ViewModel.VehicleViewModel
@@ -41,6 +43,7 @@ class MainActivity : ComponentActivity() {
             val repository = FirebaseRepository()
             val interestPlaceService = InterestPlaceService(repository)
             val userService = UserService(repository)
+            val routeService = RouteService(repository)
             InterMapsTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
@@ -51,7 +54,8 @@ class MainActivity : ComponentActivity() {
                         auth,
                         InterestPlaceViewModel(interestPlaceService),
                         UserViewModel(userService, auth),
-                        VehicleViewModel()
+                        VehicleViewModel(),
+                        RouteViewModel(routeService = routeService )
                     )
 
                 }

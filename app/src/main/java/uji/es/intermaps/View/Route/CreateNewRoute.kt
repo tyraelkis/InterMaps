@@ -52,14 +52,14 @@ import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.RouteTypes
-import uji.es.intermaps.Model.TrasnportMethods
+import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.Vehicle
-import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.RouteService
+import uji.es.intermaps.ViewModel.RouteViewModel
 import uji.es.intermaps.ViewModel.VehicleService
 
 @Composable
-fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
+fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: RouteViewModel) {
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
     val interestPlaceService = InterestPlaceService(repository)
@@ -77,14 +77,16 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
     val toponyms = allPlaces.map { it.toponym }
     val plates = allVehicles.map { it.plate }
     var routeType by remember { mutableStateOf(RouteTypes.RAPIDA) }
-    var trasnportMethod by remember { mutableStateOf(TrasnportMethods.VEHICULO) }
+    var trasnportMethod by remember { mutableStateOf(TransportMethods.VEHICULO) }
     var vehicle by remember { mutableStateOf("") }
 
     val isButtonEnabled by remember{
-        derivedStateOf {
-            if(trasnportMethod == TrasnportMethods.VEHICULO){
+        if(trasnportMethod == TransportMethods.VEHICULO){
+            derivedStateOf {
                 origin.isNotEmpty() && destination.isNotEmpty() && vehicle.isNotEmpty()
-            }else{
+            }
+        }else{
+            derivedStateOf {
                 origin.isNotEmpty() && destination.isNotEmpty()
             }
         }
@@ -392,7 +394,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 onDismissRequest = { expandedTransport = false },
                 modifier = Modifier.background(Color.White)
             ) {
-                TrasnportMethods.entries.forEach { type ->
+                TransportMethods.entries.forEach { type ->
                     DropdownMenuItem(
                         text = {
                             Text(
@@ -415,7 +417,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
             }
         }
         //Vehiculo elegido
-        if(trasnportMethod == TrasnportMethods.VEHICULO) {
+        if(trasnportMethod == TransportMethods.VEHICULO) {
             Spacer(modifier = Modifier.height(18.dp))
             Row(
                 modifier = Modifier
@@ -494,9 +496,8 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
         Spacer(modifier = Modifier.height(32.dp))
         Button(
             onClick = {
-                CoroutineScope(Dispatchers.IO).launch {
-                    routeService.createRoute(origin, destination, TrasnportMethods.VEHICULO)
-                }
+                viewModel.updateRoute(origin, destination, trasnportMethod, routeType, vehicle)
+                navController.navigate("viewRoute")
             },
             enabled = isButtonEnabled,
             modifier = Modifier

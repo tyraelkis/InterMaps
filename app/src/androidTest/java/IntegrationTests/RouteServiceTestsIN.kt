@@ -101,7 +101,7 @@ class RouteTests {
                     toponym = "Castellón de la Plana",""
                 )
             )
-        `when`(mockRouteRepository.calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", trasnportMethod = TransportMethods.VEHICULO))
+        `when`(mockRouteRepository.calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", trasnportMethod = TransportMethods.VEHICULO,RouteTypes.RAPIDA))
             .thenReturn(mockedCall)
 
 
@@ -109,19 +109,23 @@ class RouteTests {
             origin = "Burriana",
             destination = "Castellón de la Plana",
             transportMethod = TransportMethods.VEHICULO,
+            routeType = RouteTypes.RAPIDA,
+            vehiclePlate = "",
             routeFeature = mockedCall
         ))
             .thenReturn(mockedRoute)
 
-        val routeTest = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO)
+        val routeTest = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
         // Comprobamos que la ruta fue creada correctamente
         assertEquals(mockedRoute, routeTest)
         verify(mockRouteRepository).searchInterestPlaceByToponym("Burriana")
         verify(mockRouteRepository).searchInterestPlaceByToponym("Castellón de la Plana")
-        verify(mockRouteRepository).calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", trasnportMethod = TransportMethods.VEHICULO)
+        verify(mockRouteRepository).calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", trasnportMethod = TransportMethods.VEHICULO,RouteTypes.RAPIDA)
         verify(mockRepository).createRoute(origin = "Burriana",
             destination = "Castellón de la Plana",
             transportMethod = TransportMethods.VEHICULO,
+            routeType = RouteTypes.RAPIDA,
+            vehiclePlate = "",
             routeFeature = mockedCall
         )
 
@@ -155,13 +159,13 @@ class RouteTests {
             vehiclePlate = "",
         )
 
-        `when`(mockRepository.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO, mockedCall))
+        `when`(mockRepository.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "", mockedCall))
             .thenReturn(mockedRoute)
 
-        val routeTest = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO)
+        val routeTest = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
         val consumition = routeTest.cost
 
-        verify(mockRepository).createRoute("Burriana", "Castellón", TransportMethods.VEHICULO, mockedCall)
+        verify(mockRepository).createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "",mockedCall)
 
         // Comprobamos que la ruta fue creada correctamente
         assertEquals(mockedRoute.cost, consumition)
