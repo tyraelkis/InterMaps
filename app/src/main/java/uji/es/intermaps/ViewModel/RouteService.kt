@@ -1,5 +1,7 @@
 package uji.es.intermaps.ViewModel
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -12,7 +14,7 @@ import uji.es.intermaps.Model.VehicleTypes
 
 open class RouteService(private val repository: Repository){
     public var routeRepository = RouteRepository()
-    suspend fun createRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods):Route {
+    suspend fun createRoute(origin: String, destination: String, trasnportMethod: TransportMethods):Route {
         if (origin.isEmpty() or destination.isEmpty()){
             throw NotValidPlaceException()
         }
@@ -24,7 +26,7 @@ open class RouteService(private val repository: Repository){
         val originString = "${originCoordinate.longitude},${originCoordinate.latitude}"
         val destinationString = "${destinationCoordinate.longitude},${destinationCoordinate.latitude}"
         val routeCall = routeRepository.calculateRoute(originString, destinationString, trasnportMethod)
-        val route = repository.createRoute(origin, destination, trasnportMethod, routeCall)
+        val route = repository.createRoute(origin, destination, trasnportMethod)
         return route
     }
 

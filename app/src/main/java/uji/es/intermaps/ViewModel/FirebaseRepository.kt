@@ -25,7 +25,6 @@ import uji.es.intermaps.Model.RetrofitConfig
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.RouteTypes
-import uji.es.intermaps.Model.TrasnportMethods
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.Model.VehicleFactory
@@ -532,7 +531,9 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TrasnportMethods,route: RouteFeature): Route {
+
+
+    override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TransportMethods,route: RouteFeature): Route {
         val userEmail = auth.currentUser?.email
             ?: throw IllegalStateException("No hay un usuario autenticado")
         lateinit var resRoute: Route

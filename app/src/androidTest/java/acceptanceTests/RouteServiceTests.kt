@@ -13,6 +13,7 @@ import org.junit.runner.RunWith
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
+import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Exceptions.UnregistredUserException
@@ -57,7 +58,7 @@ class RouteTests {
     fun createRoute_E1Valid_routeIsCreated(): Unit = runBlocking {
         interestPlaceService.createInterestPlaceFromToponym("Burriana")
         interestPlaceService.createInterestPlaceFromToponym("Castellón")
-        val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TrasnportMethods.VEHICULO)
+        val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO)
         val res = db.doesRouteExist(routeTest)
         routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod)
         assertEquals(true, res)

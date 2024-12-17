@@ -23,6 +23,7 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.RouteRepository
 import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.ViewModel.UserViewModel
+import uji.es.intermaps.ViewModel.VehicleViewModel
 import uji.es.intermaps.ViewModel.scheduleFuelPriceUpdate
 import uji.es.intermaps.ui.theme.InterMapsTheme
 
@@ -48,8 +49,9 @@ class MainActivity : ComponentActivity() {
                     NavigationWrapper(
                         navHostController,
                         auth,
-                        viewModel = InterestPlaceViewModel(interestPlaceService),
-                        viewModel1 = UserViewModel(userService, auth)
+                        InterestPlaceViewModel(interestPlaceService),
+                        UserViewModel(userService, auth),
+                        VehicleViewModel()
                     )
 
                 }

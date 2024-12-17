@@ -29,7 +29,8 @@ interface Repository {
     suspend fun createRoute(
         origin: String,
         destination: String,
-        trasnportMethod: TransportMethods
+        transportMethod: TransportMethods,
+        routeFeature: RouteFeature
     ): Route
 
     suspend fun getAverageFuelPrices(): List<Double>

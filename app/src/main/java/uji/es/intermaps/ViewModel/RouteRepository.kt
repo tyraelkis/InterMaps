@@ -1,8 +1,15 @@
 package uji.es.intermaps.ViewModel
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import uji.es.intermaps.APIParsers.RouteFeature
+import uji.es.intermaps.APIParsers.RouteGeometry
+import uji.es.intermaps.APIParsers.RouteProperties
+import uji.es.intermaps.APIParsers.RouteResponse
+import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Interfaces.ElectricityPriceRepository
@@ -85,13 +92,15 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         throw NotSuchPlaceException("Error en la llamada a la API para obtener las coordenadas")
     }
 
-    override suspend fun calculateRoute(origin: String, destination: String, trasnportMethod: TrasnportMethods):RouteFeature{
+    override suspend fun calculateRoute(origin: String, destination: String, trasnportMethod: TransportMethods) : RouteFeature {
         lateinit var call : retrofit2.Response<RouteResponse>
-        var route = RouteFeature(geometry = RouteGeometry(emptyList()), properties = RouteProperties(RouteSummary(distance = 0.0, duration = 0.0)))
+        var route = RouteFeature(geometry = RouteGeometry(emptyList()), properties = RouteProperties(
+            RouteSummary(distance = 0.0, duration = 0.0)
+        ))
         try {
-            if (trasnportMethod.equals(TrasnportMethods.VEHICULO)) {
+            if (trasnportMethod.equals(TransportMethods.VEHICULO)) {
                 call = openRouteService.calculateRouteVehicle(apiKey, origin, destination)
-            } else if (trasnportMethod.equals(TrasnportMethods.BICICLETA)) {
+            } else if (trasnportMethod.equals(TransportMethods.BICICLETA)) {
                 call = openRouteService.calculateRouteBycicle(apiKey, origin, destination)
             } else {
                 call = openRouteService.calculateRouteWalk(apiKey, origin, destination)
