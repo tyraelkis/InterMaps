@@ -48,8 +48,13 @@ open class RouteService(private val repository: Repository){
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun calculateElectricConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Boolean {
-        var res = false
-
+        var res: Boolean
+        if (transportMethod == TransportMethods.VEHICULO ){
+            throw NotValidTransportException()
+        } else {
+            routeRepository.calculateCaloriesConsumition(route, transportMethod)
+            res = true
+        }
         return res
     }
 
