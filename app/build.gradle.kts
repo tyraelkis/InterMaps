@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.junit.ktx)
+    implementation(libs.play.services.maps)
     testImplementation(project(":app"))
     androidTestImplementation(libs.androidx.junit.ktx.v115)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -83,6 +84,7 @@ dependencies {
     //Mapas
     implementation(libs.android)
     implementation(libs.maps.compose)
+
     //JUnit4
     testImplementation(libs.junit)
     androidTestImplementation(libs.junit)
