@@ -5,8 +5,6 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,25 +13,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,15 +39,11 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.graphics.Color.Companion.White
-import androidx.compose.ui.input.pointer.motionEventSpy
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.mapbox.maps.extension.style.expressions.dsl.generated.all
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -61,39 +51,57 @@ import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
-import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TrasnportMethods
-import uji.es.intermaps.View.CustomDropdownMenu
+import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.RouteService
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import uji.es.intermaps.ViewModel.VehicleService
 
 @Composable
 fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
     val interestPlaceService = InterestPlaceService(repository)
+    val vehicleService = VehicleService(repository)
     val routeService = RouteService(repository)
     var allPlaces by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
+    var allVehicles by remember { mutableStateOf<List<Vehicle>>(emptyList()) }
     var origin by remember { mutableStateOf("") }
     var destination by remember { mutableStateOf("") }
     var expandedOrigin by remember { mutableStateOf(false) }
     var expandedDestination by remember { mutableStateOf(false) }
     var expandedTransport by remember { mutableStateOf(false) }
     var expandedRoutes by remember { mutableStateOf(false) }
+    var expandedVehicles by remember { mutableStateOf(false) }
     val toponyms = allPlaces.map { it.toponym }
+    val plates = allVehicles.map { it.plate }
     var routeType by remember { mutableStateOf(RouteTypes.RAPIDA) }
     var trasnportMethod by remember { mutableStateOf(TrasnportMethods.VEHICULO) }
+    var vehicle by remember { mutableStateOf("") }
+
+    val isButtonEnabled by remember{
+        derivedStateOf {
+            if(trasnportMethod == TrasnportMethods.VEHICULO){
+                origin.isNotEmpty() && destination.isNotEmpty() && vehicle.isNotEmpty()
+            }else{
+                origin.isNotEmpty() && destination.isNotEmpty()
+            }
+        }
+    }
+
+
 
     LaunchedEffect(user?.email) {
         if (user?.email != null) {
             try {
                 val places = interestPlaceService.viewInterestPlaceList()
                 allPlaces = places
+                val vehicles = vehicleService.viewVehicleList()
+                allVehicles = vehicles
                 } catch (e: Exception) {
                 allPlaces = emptyList()
+                allVehicles = emptyList()
             }
         }
     }
@@ -406,6 +414,83 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
 
             }
         }
+        //Vehiculo elegido
+        if(trasnportMethod == TrasnportMethods.VEHICULO) {
+            Spacer(modifier = Modifier.height(18.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = ("Vehiculo"),
+                    color = Black,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Box(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp)
+                        .background(Color.White)
+                        .border(width = 1.dp, color = Color.Gray)
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable { expandedVehicles = true }
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = if (vehicle == "") {
+                            "Selecciona una opción"
+                        } else vehicle,
+                        color = Black,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Icon(
+                        Icons.Filled.ArrowDropDown,
+                        contentDescription = null, tint = Black,
+                        modifier = Modifier.rotate(if (expandedVehicles) 180f else 0f)
+                    )
+                }
+
+                // Menú desplegable
+                DropdownMenu(
+                    expanded = expandedVehicles,
+                    onDismissRequest = { expandedVehicles = false },
+                    modifier = Modifier.background(Color.White)
+                ) {
+                    plates.forEach { plate ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = plate,
+                                    modifier = Modifier
+                                        .clickable {
+                                            vehicle = plate
+                                            expandedVehicles = false
+                                        }
+                                )
+                            },
+                            onClick = {
+                                vehicle = plate
+                                expandedVehicles = false
+                            }
+                        )
+
+                    }
+
+                }
+            }
+        }
         Spacer(modifier = Modifier.height(32.dp))
         Button(
             onClick = {
@@ -413,6 +498,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                     routeService.createRoute(origin, destination, TrasnportMethods.VEHICULO)
                 }
             },
+            enabled = isButtonEnabled,
             modifier = Modifier
                 .width(350.dp)
                 .height(45.dp),
