@@ -33,7 +33,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
     
     NavHost(
         navController = navHostController,
-        startDestination = "initial",
+        startDestination = "logIn",
         ) {
         composable("initial") {
             InitialScreen(

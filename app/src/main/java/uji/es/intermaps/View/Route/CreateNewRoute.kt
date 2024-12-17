@@ -52,7 +52,7 @@ import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.RouteTypes
-import uji.es.intermaps.Model.TrasnportMethods
+import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.RouteService
@@ -77,12 +77,12 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
     val toponyms = allPlaces.map { it.toponym }
     val plates = allVehicles.map { it.plate }
     var routeType by remember { mutableStateOf(RouteTypes.RAPIDA) }
-    var trasnportMethod by remember { mutableStateOf(TrasnportMethods.VEHICULO) }
+    var transportMethod by remember { mutableStateOf(TransportMethods.VEHICULO) }
     var vehicle by remember { mutableStateOf("") }
 
     val isButtonEnabled by remember{
         derivedStateOf {
-            if(trasnportMethod == TrasnportMethods.VEHICULO){
+            if(transportMethod == TransportMethods.VEHICULO){
                 origin.isNotEmpty() && destination.isNotEmpty() && vehicle.isNotEmpty()
             }else{
                 origin.isNotEmpty() && destination.isNotEmpty()
@@ -375,7 +375,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = (trasnportMethod.toString()),
+                    text = (transportMethod.toString()),
                     color = Black,
                     modifier = Modifier.weight(1f)
                 )
@@ -392,20 +392,20 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 onDismissRequest = { expandedTransport = false },
                 modifier = Modifier.background(Color.White)
             ) {
-                TrasnportMethods.entries.forEach { type ->
+                TransportMethods.entries.forEach { type ->
                     DropdownMenuItem(
                         text = {
                             Text(
                                 text = type.toString(),
                                 modifier = Modifier
                                     .clickable {
-                                        trasnportMethod = type
+                                        transportMethod = type
                                         expandedTransport = false
                                     }
                             )
                         },
                         onClick = {
-                            trasnportMethod = type
+                            transportMethod = type
                             expandedTransport = false
                         }
                     )
@@ -415,7 +415,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
             }
         }
         //Vehiculo elegido
-        if(trasnportMethod == TrasnportMethods.VEHICULO) {
+        if(transportMethod == TransportMethods.VEHICULO) {
             Spacer(modifier = Modifier.height(18.dp))
             Row(
                 modifier = Modifier
@@ -495,7 +495,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
         Button(
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
-                    routeService.createRoute(origin, destination, TrasnportMethods.VEHICULO)
+                    routeService.createRoute(origin, destination, TransportMethods.VEHICULO)
                 }
             },
             enabled = isButtonEnabled,
