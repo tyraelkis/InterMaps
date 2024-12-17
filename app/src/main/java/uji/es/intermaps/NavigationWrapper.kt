@@ -142,7 +142,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         composable(
             route="viewRoute"
         ) {
-            ViewRoute(auth,navHostController, viewModelRoute)
+            ViewRoute(navHostController, viewModelRoute)
         }
     }
 }

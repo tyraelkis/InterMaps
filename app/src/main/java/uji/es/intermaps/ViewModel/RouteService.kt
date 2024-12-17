@@ -2,12 +2,14 @@ package uji.es.intermaps.ViewModel
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
@@ -30,6 +32,7 @@ open class RouteService(private val repository: Repository){
         val route = repository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate,routeCall)
         return route
     }
+
 
     fun deleteRoute(origin: String,destination: String, trasnportMethod: TransportMethods): Boolean {
         TODO()

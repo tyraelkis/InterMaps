@@ -9,7 +9,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
 import kotlinx.coroutines.launch
+import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
@@ -33,9 +35,5 @@ class RouteViewModel(private val routeService: RouteService): ViewModel() {
         }
 
     }
-
-
-
-
 
 }
