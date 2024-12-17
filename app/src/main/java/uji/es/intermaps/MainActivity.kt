@@ -20,9 +20,10 @@ import com.google.firebase.ktx.Firebase
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
+import uji.es.intermaps.ViewModel.RouteRepository
 import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.ViewModel.UserViewModel
-import uji.es.intermaps.ViewModel.VehicleViewModel
+import uji.es.intermaps.ViewModel.scheduleFuelPriceUpdate
 import uji.es.intermaps.ui.theme.InterMapsTheme
 
 class MainActivity : ComponentActivity() {
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseFirestore.setLoggingEnabled(true)
+        scheduleFuelPriceUpdate()
         auth = Firebase.auth
         enableEdgeToEdge()
         setContent {
@@ -43,7 +45,12 @@ class MainActivity : ComponentActivity() {
                     Greeting(
                         modifier = Modifier.padding(innerPadding)
                     )
-                    NavigationWrapper(navHostController, auth, viewModelPlace = InterestPlaceViewModel(interestPlaceService), viewModelUser = UserViewModel(userService, auth), viewModelVehicle = VehicleViewModel())
+                    NavigationWrapper(
+                        navHostController,
+                        auth,
+                        viewModel = InterestPlaceViewModel(interestPlaceService),
+                        viewModel1 = UserViewModel(userService, auth)
+                    )
 
                 }
             }

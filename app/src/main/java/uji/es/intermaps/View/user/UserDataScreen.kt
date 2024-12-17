@@ -193,6 +193,8 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
                 textAlign = TextAlign.Center
             )
         )
+
+
     }
 
 }

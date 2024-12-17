@@ -2,20 +2,24 @@ package IntegrationTests
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.MockitoAnnotations
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.APIParsers.RouteProperties
 import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
+import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
@@ -28,7 +32,7 @@ import uji.es.intermaps.ViewModel.RouteService
 import uji.es.intermaps.ViewModel.UserService
 
 @RunWith(AndroidJUnit4::class)
-class RouteServiceTestsIN {
+class RouteTests {
 
 
 
@@ -104,7 +108,7 @@ class RouteServiceTestsIN {
         `when`(mockRepository.createRoute(
             origin = "Burriana",
             destination = "Castellón de la Plana",
-            trasnportMethods = TrasnportMethods.VEHICULO,
+            transportMethods = TransportMethods.VEHICULO,
             route = mockedCall,
         ))
             .thenReturn(mockedRoute)
@@ -117,9 +121,39 @@ class RouteServiceTestsIN {
         verify(mockRouteRepository).calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", trasnportMethod = TrasnportMethods.VEHICULO)
         verify(mockRepository).createRoute(origin = "Burriana",
             destination = "Castellón de la Plana",
-            trasnportMethods = TrasnportMethods.VEHICULO,
+            transportMethods = TransportMethods.VEHICULO,
             route = mockedCall
         )
+
+
+    }
+
+    @Test
+    fun calculateFuelConsumition_E2Valid_consumitionCalculated():Unit = runBlocking() {
+
+        var mockedRoute = Route(
+            origin = "Burriana",
+            destination = "Castellón",
+            trasnportMethod = TransportMethods.VEHICULO,
+            route = emptyList(),
+            distance = 0.0,
+            duration = 0.0,
+            cost = 0.0,
+            routeType = RouteTypes.RAPIDA,
+            fav = false,
+            vehiclePlate = "",
+        )
+
+        `when`(mockRepository.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO))
+            .thenReturn(mockedRoute)
+
+        val routeTest = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO)
+        val consumition = routeTest.cost
+
+        verify(mockRepository).createRoute("Burriana", "Castellón", TransportMethods.VEHICULO)
+
+        // Comprobamos que la ruta fue creada correctamente
+        assertEquals(mockedRoute.cost, consumition)
 
 
     }

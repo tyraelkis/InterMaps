@@ -23,11 +23,13 @@ import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.RetrofitConfig
 import uji.es.intermaps.Model.Route
+import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TrasnportMethods
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.Model.VehicleFactory
+import uji.es.intermaps.Model.VehicleTypes
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -36,6 +38,7 @@ import kotlin.jvm.Throws
 class FirebaseRepository: Repository {
     private val db = DataBase.db
     private val auth = DataBase.auth
+
 
     override suspend fun createUser(email: String, pswd: String): User {
         return suspendCoroutine { continuation ->
@@ -614,6 +617,52 @@ class FirebaseRepository: Repository {
         }
         return listaCoordenadas
     }
+
+
+    override suspend fun getAverageFuelPrices(): List<Double> {
+        try {
+            val userDocument = db.collection("FuelPrices").document("mediaPrecios").get().await()
+
+            if (userDocument.exists()) {
+                val gasolina95 = userDocument.getDouble("gasolina95")
+                val gasoilA = userDocument.getDouble("gasoleoA")
+
+                if (gasolina95 != null && gasoilA != null) {
+                    return listOf(gasolina95, gasoilA)
+                } else {
+                    return listOf(0.0)
+                }
+            } else {
+                return listOf(-1.0)
+            }
+        } catch (e: Exception) {
+            Log.e("FuelPrices", "Error al obtener los precios de combustible: ${e.message}")
+            return listOf(0.0)
+        }
+    }
+
+    override suspend fun getElectricPrice(): Double {
+        try {
+            val userDocument = db.collection("ElectricityPrices").document("precios").get().await()
+
+            if (userDocument.exists()) {
+                val precioLuz = userDocument.getDouble("precioLuz")
+
+                if (precioLuz != null ) {
+                    return precioLuz
+                } else {
+                    return 0.0
+                }
+            } else {
+                return -1.0
+            }
+        } catch (e: Exception) {
+            Log.e("ElectricityPrices", "Error al obtener los precios de la luz: ${e.message}")
+            return 0.0
+        }
+    }
+
+
 
 }
 

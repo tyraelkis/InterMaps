@@ -1,6 +1,6 @@
 package uji.es.intermaps.Model
 
-enum class TrasnportMethods {
+enum class TransportMethods {
     APIE,
     VEHICULO,
     BICICLETA,

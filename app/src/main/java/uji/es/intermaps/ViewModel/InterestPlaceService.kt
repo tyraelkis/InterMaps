@@ -100,4 +100,6 @@ open class InterestPlaceService(private val repository: Repository) {
         return returnPlace
     }
 
+
+
 }

@@ -13,4 +13,3 @@ data class PossibleCoord(
 data class Geometry(
     val coordinates: List<Double>,
 )
-

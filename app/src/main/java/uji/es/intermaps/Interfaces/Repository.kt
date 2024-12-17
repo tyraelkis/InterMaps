@@ -5,9 +5,10 @@ import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
-import uji.es.intermaps.Model.TrasnportMethods
+import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
+import uji.es.intermaps.Model.VehicleTypes
 
 interface Repository {
     suspend fun createUser(email:String, pswd: String): User
@@ -25,5 +26,13 @@ interface Repository {
     suspend fun createVehicle(plate: String,type: String, consumption: Double): Vehicle
     suspend fun deleteVehicle(plate: String): Boolean
     suspend fun viewVehicleList(): List<Vehicle>
-    suspend fun createRoute(origin:String, destination: String,trasnportMethods: TrasnportMethods, route: RouteFeature): Route
+    suspend fun createRoute(
+        origin: String,
+        destination: String,
+        trasnportMethod: TransportMethods
+    ): Route
+
+    suspend fun getAverageFuelPrices(): List<Double>
+    suspend fun getElectricPrice(): Double
+
 }
