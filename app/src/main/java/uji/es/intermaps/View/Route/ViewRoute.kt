@@ -177,7 +177,12 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                     }
                     RouteDetailItem(label = "Tipo de ruta", value = "${routeType}")
                     RouteDetailItem(label = "Distancia", value = "${distance} km")
-                    RouteDetailItem(label = "Duración", value = "${duration} min")
+                    if (duration!! < 60){
+                        RouteDetailItem(label = "Duración", value = "${duration} min")
+                    }else{
+                        RouteDetailItem(label = "Duración", value = "${duration} horas")
+                    }
+
                     //RouteDetailItem(label = "Coste", value = "2€")
                 }
 
