@@ -60,8 +60,13 @@ open class RouteService(private val repository: Repository){
     }
 
     suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods ): Boolean {
-        var res= false
-
+        var res: Boolean
+        if (transportMethod == TransportMethods.VEHICULO ){
+            throw NotValidTransportException()
+        } else {
+            routeRepository.calculateCaloriesConsumition(route, transportMethod)
+            res = true
+        }
         return res
     }
 
