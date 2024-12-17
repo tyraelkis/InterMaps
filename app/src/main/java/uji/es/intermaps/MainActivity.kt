@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
@@ -21,8 +20,10 @@ import com.google.firebase.ktx.Firebase
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
+import uji.es.intermaps.ViewModel.RouteRepository
 import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.ViewModel.UserViewModel
+import uji.es.intermaps.ViewModel.scheduleFuelPriceUpdate
 import uji.es.intermaps.ui.theme.InterMapsTheme
 
 class MainActivity : ComponentActivity() {
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseFirestore.setLoggingEnabled(true)
+        scheduleFuelPriceUpdate()
         auth = Firebase.auth
         enableEdgeToEdge()
         setContent {
@@ -43,7 +45,12 @@ class MainActivity : ComponentActivity() {
                     Greeting(
                         modifier = Modifier.padding(innerPadding)
                     )
-                    NavigationWrapper(navHostController, auth, viewModel = InterestPlaceViewModel(interestPlaceService), viewModel1 = UserViewModel(userService, auth))
+                    NavigationWrapper(
+                        navHostController,
+                        auth,
+                        viewModel = InterestPlaceViewModel(interestPlaceService),
+                        viewModel1 = UserViewModel(userService, auth)
+                    )
 
                 }
             }

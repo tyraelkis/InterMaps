@@ -6,7 +6,7 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Query
 import uji.es.intermaps.APIParsers.CoordToToponymORSAPIResponse
-import uji.es.intermaps.APIParsers.RegionORSAPIResponse
+import uji.es.intermaps.APIParsers.FuelCostAverageORSAPIResponse
 import uji.es.intermaps.APIParsers.ToponymToCoordORSAPIResponse
 
 interface ORSAPI {
@@ -23,13 +23,6 @@ interface ORSAPI {
         @Query("api_key") apiKey: String,
         @Query("text") toponym: String
     ):ToponymToCoordORSAPIResponse
-
-
-    @GET("geocode/search")
-    suspend fun getRegionFromToponym(
-        @Query("api_key") apiKey: String,
-        @Query("text") toponym: String
-    ): RegionORSAPIResponse
 
 
     @POST("v2/directions/driving-car")

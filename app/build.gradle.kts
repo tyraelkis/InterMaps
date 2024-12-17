@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "uji.es.intermaps"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "uji.es.intermaps"
@@ -99,6 +99,7 @@ dependencies {
 
     // Mockito para pruebas instrumentadas
     androidTestImplementation(libs.mockito.android)
+    implementation ("androidx.work:work-runtime-ktx:2.10.0")
 
 
 }

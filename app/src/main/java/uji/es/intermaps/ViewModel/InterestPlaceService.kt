@@ -120,13 +120,6 @@ open class InterestPlaceService(private val repository: Repository) {
         return returnPlace
     }
 
-    suspend fun getRegion (toponym: String): Boolean{
-        var res = true
-        val provincia = routeRepository.getRegion(toponym)
-        if (provincia.isNullOrBlank()){
-            res = false
-        }
-        return res
-    }
+
 
 }

@@ -5,6 +5,8 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchElementException
@@ -33,62 +35,62 @@ class FirebaseRepository: Repository {
 
     override suspend fun createUser(email: String, pswd: String): User {
         return suspendCoroutine { continuation ->
-            auth.createUserWithEmailAndPassword(email, pswd)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val newUser = User(email, pswd)
-                        db.collection("Users").document(email).set(mapOf("email" to email))
-                            .addOnSuccessListener { _ ->
-                                continuation.resume(newUser) //Funciona como el return de la coroutine
-                            }
-                            .addOnFailureListener { e ->
-                                continuation.resumeWithException(e)
-                            }
-                    } else {
-                        when (val exception = task.exception) {
-                            is FirebaseAuthUserCollisionException -> {
-                                continuation.resumeWithException(
-                                    AccountAlreadyRegistredException("Ya existe una cuenta con este email")
-                                )
-                            }
+        auth.createUserWithEmailAndPassword(email, pswd)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val newUser = User(email, pswd)
+                    db.collection("Users").document(email).set(mapOf("email" to email))
+                        .addOnSuccessListener { _ ->
+                            continuation.resume(newUser) //Funciona como el return de la coroutine
+                        }
+                        .addOnFailureListener { e ->
+                            continuation.resumeWithException(e)
+                        }
+                } else {
+                    when (val exception = task.exception) {
+                        is FirebaseAuthUserCollisionException -> {
+                            continuation.resumeWithException(
+                                AccountAlreadyRegistredException("Ya existe una cuenta con este email")
+                            )
+                        }
 
-                            is FirebaseAuthInvalidCredentialsException -> {
-                                continuation.resumeWithException(
-                                    IllegalArgumentException("El correo o la contraseña no tienen un formato válido")
-                                )
-                            }
+                        is FirebaseAuthInvalidCredentialsException -> {
+                            continuation.resumeWithException(
+                                IllegalArgumentException("El correo o la contraseña no tienen un formato válido")
+                            )
+                        }
 
-                            else -> {
-                                continuation.resumeWithException(
-                                    exception ?: Exception("Error desconocido al crear el usuario.")
-                                )
-                            }
+                        else -> {
+                            continuation.resumeWithException(
+                                exception ?: Exception("Error desconocido al crear el usuario.")
+                            )
                         }
                     }
                 }
+            }
         }
     }
 
 
     override suspend fun loginUser(email: String, pswd: String): Boolean {
         return suspendCoroutine { continuation ->
-            auth.signInWithEmailAndPassword(email, pswd)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        continuation.resume(true)
+        auth.signInWithEmailAndPassword(email, pswd)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    continuation.resume(true)
+                } else {
+                    val exception = task.exception
+                    if (exception is FirebaseAuthInvalidCredentialsException) {
+                        continuation.resumeWithException(
+                            UnregistredUserException("Usuario o contraseña incorrectos")
+                        )
                     } else {
-                        val exception = task.exception
-                        if (exception is FirebaseAuthInvalidCredentialsException) {
-                            continuation.resumeWithException(
-                                UnregistredUserException("Usuario o contraseña incorrectos")
-                            )
-                        } else {
-                            continuation.resumeWithException(
-                                exception ?: Exception("Error desconocido al iniciar sesión.")
-                            )
-                        }
+                        continuation.resumeWithException(
+                            exception ?: Exception("Error desconocido al iniciar sesión.")
+                        )
                     }
                 }
+            }
         }
     }
 
@@ -458,6 +460,7 @@ class FirebaseRepository: Repository {
         }
     }
 
+
     override suspend fun deleteVehicle(plate: String): Boolean {
         val userEmail = auth.currentUser?.email
             ?: throw IllegalStateException("No hay un usuario autenticado")
@@ -554,9 +557,51 @@ class FirebaseRepository: Repository {
         TODO()
     }
 
-    override suspend fun calculateFuelConsumition(origin: String, destination: String, trasnportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
-        return 0.0
+
+    override suspend fun getAverageFuelPrices(): List<Double> {
+        try {
+            val userDocument = db.collection("FuelPrices").document("mediaPrecios").get().await()
+
+            if (userDocument.exists()) {
+                val gasolina95 = userDocument.getDouble("gasolina95")
+                val gasoilA = userDocument.getDouble("gasoleoA")
+
+                if (gasolina95 != null && gasoilA != null) {
+                    return listOf(gasolina95, gasoilA)
+                } else {
+                    return listOf(0.0)
+                }
+            } else {
+                return listOf(-1.0)
+            }
+        } catch (e: Exception) {
+            Log.e("FuelPrices", "Error al obtener los precios de combustible: ${e.message}")
+            return listOf(0.0)
+        }
     }
+
+    override suspend fun getElectricPrice(): Double {
+        try {
+            val userDocument = db.collection("ElectricityPrices").document("precios").get().await()
+
+            if (userDocument.exists()) {
+                val precioLuz = userDocument.getDouble("precioLuz")
+
+                if (precioLuz != null ) {
+                    return precioLuz
+                } else {
+                    return 0.0
+                }
+            } else {
+                return -1.0
+            }
+        } catch (e: Exception) {
+            Log.e("ElectricityPrices", "Error al obtener los precios de la luz: ${e.message}")
+            return 0.0
+        }
+    }
+
+
 
 }
 

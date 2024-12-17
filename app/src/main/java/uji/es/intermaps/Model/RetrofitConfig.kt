@@ -36,10 +36,17 @@ object RetrofitConfig {
     }
 
     fun createRetrofitPrecioLuz(): PrecioLuzAPI {
+        /*val okHttpsClient = OkHttpClient.Builder()
+            .connectTimeout(60, TimeUnit.SECONDS)  // Ajusta según sea necesario
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .build()*/
+
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.preciodelaluz.org/")
+            .baseUrl("https://apidatos.ree.es/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+
         return retrofit.create(PrecioLuzAPI::class.java)
     }
 

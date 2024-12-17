@@ -2,14 +2,10 @@ package uji.es.intermaps.Interfaces
 
 import retrofit2.http.GET
 import retrofit2.http.Query
-import uji.es.intermaps.APIParsers.RegionORSAPIResponse
-
+import uji.es.intermaps.APIParsers.FuelCostAverageORSAPIResponse
 
 interface FuelPriceAPI {
 
-    @GET("Listados/Provincias/")
-    suspend fun getRegionID(
-        @Query("text") region: String
-    ): RegionORSAPIResponse
-
+    @GET("EstacionesTerrestres")
+    suspend fun getFuelCostAverage(): FuelCostAverageORSAPIResponse
 }
