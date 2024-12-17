@@ -537,6 +537,8 @@ class FirebaseRepository: Repository {
         val userEmail = auth.currentUser?.email
             ?: throw IllegalStateException("No hay un usuario autenticado")
         lateinit var resRoute: Route
+        val coordinates = convertToCoordinate(route.geometry)
+
         try {
             val documentSnapshot = db.collection("InterestPlace")
                 .document(userEmail)
@@ -566,12 +568,19 @@ class FirebaseRepository: Repository {
                     tiempo = tiempo / 60
                 }
 
+
+                val iniEndCoordinates: MutableList<Coordinate> = mutableListOf()
+
+                iniEndCoordinates.add(coordinates.get(0))
+                iniEndCoordinates.add(coordinates.get(coordinates.size - 1))
+                var distance = String.format("%.2f", route.properties.summary.distance / 1000).toDouble()
+                tiempo = String.format("%.2f", route.properties.summary.duration / 60).toDouble()
                 val newRoute = mapOf(
                     "origin" to origin,
                     "destination" to destination,
                     "trasnportMethod" to trasnportMethods,
-                    "route" to convertToCoordinate(route.geometry),
-                    "distance" to route.properties.summary.distance / 1000,
+                    "route" to iniEndCoordinates,
+                    "distance" to distance,
                     "duration" to tiempo,
                     "cost" to 0.0,
                     "routeType" to routeType,
@@ -581,7 +590,7 @@ class FirebaseRepository: Repository {
                 resRoute = Route(
                     origin = origin,
                     destination = destination,
-                    route = convertToCoordinate(route.geometry),
+                    route = coordinates,
                     distance = route.properties.summary.distance / 1000,
                     duration = tiempo,
                     trasnportMethod = trasnportMethods,
@@ -591,13 +600,13 @@ class FirebaseRepository: Repository {
                 Log.d("coordenadas de la ruta",resRoute.route.toString())
                 val userDocument = db.collection("Route").document(userEmail)
                 //Intenta añadir a interestPlaces el nuevo lugar evitando duplicados con el FieldValue.arrayUnion
-                userDocument.update("routes", FieldValue.arrayUnion(resRoute))
+                userDocument.update("routes", FieldValue.arrayUnion(newRoute))
                     .addOnSuccessListener {
                         continuation.resume(resRoute)
                     }
                     .addOnFailureListener { _ ->
                         // Si falla porque el usuario aún no tiene lugares guardados crea el documento con el atributo interestPlaces y le añade el lugar
-                        userDocument.set(mapOf("routes" to listOf(resRoute)))
+                        userDocument.set(mapOf("routes" to listOf(newRoute)))
                             .addOnSuccessListener {
                                 continuation.resume(resRoute)
                             }
