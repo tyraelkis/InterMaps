@@ -24,6 +24,7 @@ import uji.es.intermaps.ViewModel.RouteRepository
 import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.ViewModel.UserViewModel
 import uji.es.intermaps.ViewModel.VehicleViewModel
+import uji.es.intermaps.ViewModel.scheduleElectricPriceUpdate
 import uji.es.intermaps.ViewModel.scheduleFuelPriceUpdate
 import uji.es.intermaps.ui.theme.InterMapsTheme
 
@@ -34,6 +35,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         FirebaseFirestore.setLoggingEnabled(true)
         scheduleFuelPriceUpdate()
+        scheduleElectricPriceUpdate()
         auth = Firebase.auth
         enableEdgeToEdge()
         setContent {
