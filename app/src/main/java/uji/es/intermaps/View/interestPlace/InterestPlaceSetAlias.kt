@@ -61,7 +61,6 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 @Composable
 fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlaceViewModel, toponym: String){
     val place = viewModel.interestPlace
-    Log.d("Place", place.toString())
     val loading = viewModel.loading
     var showPopupAliasCorrecto by remember { mutableStateOf(false) }
     var showPopupAliasIncorrecto by remember { mutableStateOf(false) }

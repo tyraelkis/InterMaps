@@ -108,7 +108,6 @@ class InterestPlaceViewModel(
         loading = true
         viewModelScope.launch {
             interestPlace = interestPlaceService.getInterestPlaceByToponym(toponym)
-            Log.i("interestplace", interestPlace.toString())
             if (interestPlace!= null){
                 loading = false
             }

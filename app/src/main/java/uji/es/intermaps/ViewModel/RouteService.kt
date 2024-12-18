@@ -2,19 +2,22 @@ package uji.es.intermaps.ViewModel
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.Route
+import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.VehicleTypes
 
 open class RouteService(private val repository: Repository){
     public var routeRepository = RouteRepository()
-    suspend fun createRoute(origin: String, destination: String, trasnportMethod: TransportMethods):Route {
+    suspend fun createRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String = ""):Route {
         if (origin.isEmpty() or destination.isEmpty()){
             throw NotValidPlaceException()
         }
@@ -25,10 +28,11 @@ open class RouteService(private val repository: Repository){
         val destinationCoordinate = routeRepository.searchInterestPlaceByToponym(destination).coordinate
         val originString = "${originCoordinate.longitude},${originCoordinate.latitude}"
         val destinationString = "${destinationCoordinate.longitude},${destinationCoordinate.latitude}"
-        val routeCall = routeRepository.calculateRoute(originString, destinationString, trasnportMethod)
-        val route = repository.createRoute(origin, destination, trasnportMethod, routeCall)
+        val routeCall = routeRepository.calculateRoute(originString, destinationString, transportMethod, routeType )
+        val route = repository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate,routeCall)
         return route
     }
+
 
     fun deleteRoute(origin: String,destination: String, trasnportMethod: TransportMethods): Boolean {
         TODO()

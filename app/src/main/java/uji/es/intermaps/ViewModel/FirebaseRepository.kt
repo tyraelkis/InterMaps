@@ -533,10 +533,12 @@ class FirebaseRepository: Repository {
 
 
 
-    override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TransportMethods,route: RouteFeature): Route {
+    override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TransportMethods,routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route {
         val userEmail = auth.currentUser?.email
             ?: throw IllegalStateException("No hay un usuario autenticado")
         lateinit var resRoute: Route
+        val coordinates = convertToCoordinate(route.geometry)
+
         try {
             val documentSnapshot = db.collection("InterestPlace")
                 .document(userEmail)
@@ -566,25 +568,34 @@ class FirebaseRepository: Repository {
                     tiempo = tiempo / 60
                 }
 
+
+                val iniEndCoordinates: MutableList<Coordinate> = mutableListOf()
+
+                iniEndCoordinates.add(coordinates.get(0))
+                iniEndCoordinates.add(coordinates.get(coordinates.size - 1))
+                var distance = String.format("%.2f", route.properties.summary.distance / 1000).toDouble()
+                tiempo = String.format("%.2f", route.properties.summary.duration / 60).toDouble()
                 val newRoute = mapOf(
                     "origin" to origin,
                     "destination" to destination,
                     "trasnportMethod" to trasnportMethods,
-                    "route" to convertToCoordinate(route.geometry),
-                    "distance" to route.properties.summary.distance / 1000,
+                    "route" to iniEndCoordinates,
+                    "distance" to distance,
                     "duration" to tiempo,
                     "cost" to 0.0,
-                    "routeType" to RouteTypes.RAPIDA,
+                    "routeType" to routeType,
                     "fav" to false,
-                    "vehiclePlate" to ""
+                    "vehiclePlate" to vehiclePlate
                 )
                 resRoute = Route(
                     origin = origin,
                     destination = destination,
-                    route = convertToCoordinate(route.geometry),
+                    route = coordinates,
                     distance = route.properties.summary.distance / 1000,
                     duration = tiempo,
                     trasnportMethod = trasnportMethods,
+                    routeType = routeType,
+                    vehiclePlate = vehiclePlate
                 )
                 Log.d("coordenadas de la ruta",resRoute.route.toString())
                 val userDocument = db.collection("Route").document(userEmail)

@@ -12,6 +12,7 @@ import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.Route
+import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.VehicleTypes
@@ -50,7 +51,7 @@ class RouteServiceTest {
     fun createRoute_E1Valid_routeIsCreated(): Unit = runBlocking {
         interestPlaceService.createInterestPlaceFromToponym("Burriana")
         interestPlaceService.createInterestPlaceFromToponym("Castellón")
-        val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO)
+        val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
         val res = db.doesRouteExist(routeTest)
         routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod)
         assertEquals(true, res)
@@ -58,34 +59,35 @@ class RouteServiceTest {
 
     @Test(expected = NotValidPlaceException::class)
     fun createRoute_E4Invalid_routeNotCreated(): Unit = runBlocking {
-        routeService.createRoute("Borriol", "Madrid", TransportMethods.VEHICULO)
+        routeService.createRoute("Borriol", "Madrid", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
 
     }
 
     @Test
     fun calculateFuelConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO)
+        val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,
+            RouteTypes.RAPIDA)
         val calculatedConsumition = routeService.calculateFuelConsumition(routeTest, TransportMethods.VEHICULO, VehicleTypes.GASOLINA)
         assertEquals(true, calculatedConsumition)
     }
 
     @Test(expected = NotValidTransportException::class)
     fun calculateFuelConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
-        val routeTest = routeService.createRoute("Galicia", "Castellón", TransportMethods.VEHICULO)
+        val routeTest = routeService.createRoute("Galicia", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
         routeService.calculateFuelConsumition(routeTest, TransportMethods.APIE, VehicleTypes.ELECTRICO)
 
     }
 
     @Test
     fun calculateElectricConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Burriana", "Valencia", TransportMethods.VEHICULO)
+        val routeTest: Route = routeService.createRoute("Burriana", "Valencia", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
         val calculatedConsumition = routeService.calculateElectricConsumition(routeTest, TransportMethods.VEHICULO, VehicleTypes.ELECTRICO)
         assertEquals(true, calculatedConsumition)
     }
 
     @Test(expected = NotValidTransportException::class)
     fun calculateElectricConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
-        val routeTest = routeService.createRoute("Galicia", "Valencia", TransportMethods.VEHICULO)
+        val routeTest = routeService.createRoute("Galicia", "Valencia", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
         routeService.calculateElectricConsumition(routeTest, TransportMethods.APIE, VehicleTypes.ELECTRICO)
 
     }

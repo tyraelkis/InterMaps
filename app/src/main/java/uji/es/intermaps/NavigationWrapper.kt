@@ -9,6 +9,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
 import uji.es.intermaps.View.Route.CreateNewRoute
+import uji.es.intermaps.View.Route.ViewRoute
 import uji.es.intermaps.View.home.HomeScreen
 import uji.es.intermaps.View.home.InitialScreen
 import uji.es.intermaps.View.home.MainMenu
@@ -23,13 +24,14 @@ import uji.es.intermaps.View.vehicle.VehicleCreate
 import uji.es.intermaps.View.vehicle.VehicleEditDelete
 import uji.es.intermaps.View.vehicle.VehicleList
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
+import uji.es.intermaps.ViewModel.RouteViewModel
 import uji.es.intermaps.ViewModel.UserViewModel
 import uji.es.intermaps.ViewModel.VehicleViewModel
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
 @Composable
-fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, viewModelPlace: InterestPlaceViewModel, viewModelUser: UserViewModel, viewModelVehicle: VehicleViewModel) {
+fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, viewModelPlace: InterestPlaceViewModel, viewModelUser: UserViewModel, viewModelVehicle: VehicleViewModel, viewModelRoute: RouteViewModel) {
     
     NavHost(
         navController = navHostController,
@@ -105,7 +107,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         composable(
             route = "createNewRoute"
         ) {
-            CreateNewRoute(auth, navHostController, viewModelPlace)
+            CreateNewRoute(auth, navHostController, viewModelRoute)
         }
 
         composable("vehicleList") {
@@ -135,6 +137,12 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             if (plate != null) {
                 VehicleEditDelete(navHostController, viewModelVehicle, plate)
             }
+        }
+
+        composable(
+            route="viewRoute"
+        ) {
+            ViewRoute(navHostController, viewModelRoute)
         }
     }
 }

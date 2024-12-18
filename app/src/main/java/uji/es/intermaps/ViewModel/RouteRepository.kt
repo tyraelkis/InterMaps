@@ -20,6 +20,7 @@ import uji.es.intermaps.Model.DataBase.db
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.RetrofitConfig
 import uji.es.intermaps.Model.Route
+import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.VehicleTypes
 import java.math.BigDecimal
@@ -92,7 +93,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         throw NotSuchPlaceException("Error en la llamada a la API para obtener las coordenadas")
     }
 
-    override suspend fun calculateRoute(origin: String, destination: String, trasnportMethod: TransportMethods) : RouteFeature {
+    override suspend fun calculateRoute(origin: String, destination: String, trasnportMethod: TransportMethods,routeType: RouteTypes) : RouteFeature {
         lateinit var call : retrofit2.Response<RouteResponse>
         var route = RouteFeature(geometry = RouteGeometry(emptyList()), properties = RouteProperties(
             RouteSummary(distance = 0.0, duration = 0.0)
