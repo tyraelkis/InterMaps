@@ -84,13 +84,13 @@ class InterestPlaceServiceTests {
     }
     
     @Test
-    fun editInterestPlace_E1Valido_setAliasToAPlaceOfInterest(): Unit = runBlocking {
+    fun setAlias_E1Valido_aliasChangedToAPlaceOfInterest(): Unit = runBlocking {
         val result: Boolean = interestPlaceService.setAlias(interestPlace, newAlias = "Mozambiquinho")
         assertEquals(true, result)
     }
 
     @Test(expected = NotValidAliasException::class)
-    fun editInterestPlace_E2Invalido_errorSetAliasToAPlaceOFInterest(): Unit = runBlocking{
+    fun setAlias_E2Invalido_errorChangingAliasToAPlaceOfInterest(): Unit = runBlocking{
         interestPlaceService.setAlias(interestPlace, newAlias = "@#//")
     }
 
