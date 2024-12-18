@@ -678,6 +678,9 @@ class FirebaseRepository: Repository {
         TODO()
     }
 
+    override suspend fun editVehicleData(plate: String, newType: VehicleTypes, newConsumption: Double): Boolean {
+        TODO()
+    }
 
 }
 

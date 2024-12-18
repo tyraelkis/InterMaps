@@ -26,6 +26,7 @@ class VehicleServiceTests {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
     private var vehicle: Vehicle = GasolineVehicle("9999GON", VehicleTypes.GASOLINA.type,9.0, false)
+    private var vehicleEditable: Vehicle = GasolineVehicle("7777SOD", VehicleTypes.GASOLINA.type,9.0, false)
     private var vehicleService: VehicleService = VehicleService(repository)
     private var email: String = "emaildeprueba@gmail.com" //Usuario con lista de lugares. Hay que añadirle un lugar
     private var emailEmpty: String = "emaildepruebaempty@gmail.com" //Usuario sin lista de lugares
@@ -90,7 +91,19 @@ class VehicleServiceTests {
 
     @Test (expected = NotSuchElementException::class)
     fun viewVehicleData_E2Valid_emptyVehicleDataViewed(): Unit = runBlocking {
-        val foundVehicle: Vehicle = vehicleService.viewVehicleData("8888GON")
+        vehicleService.viewVehicleData("8888GON")
     }
+
+    @Test
+    fun editVehicleData_E1Valid_vehicleDataEdited(): Unit = runBlocking {
+        val result: Boolean = vehicleService.editVehicleData(vehicleEditable.plate, VehicleTypes.DIESEL.type, 11.0)
+        assertEquals(true, result)
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun editVehicleData_E2Invalid_errorOnEditingVehicleData(): Unit = runBlocking {
+        vehicleService.editVehicleData("8888COD", VehicleTypes.DIESEL.type, 11.0)
+    }
+
 
 }
