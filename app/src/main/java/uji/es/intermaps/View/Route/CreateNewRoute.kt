@@ -495,9 +495,9 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
         Spacer(modifier = Modifier.height(32.dp))
         Button(
             onClick = {
-                CoroutineScope(Dispatchers.IO).launch {
-                    routeService.createRoute(origin, destination, TransportMethods.VEHICULO, routeType, vehicle)
-                }
+                viewModel.updateRoute(origin, destination, TransportMethods.VEHICULO, routeType, vehicle)
+                navController.navigate("viewRoute")
+
             },
             enabled = isButtonEnabled,
             modifier = Modifier
