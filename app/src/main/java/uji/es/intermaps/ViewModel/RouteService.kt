@@ -53,11 +53,21 @@ open class RouteService(private val repository: Repository){
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun calculateElectricConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Boolean {
         var res: Boolean
-        val routeRepository = RouteRepository()
-        if (transportMethod != TransportMethods.VEHICULO || vehicleType != VehicleTypes.ELECTRICO ){
+        if (transportMethod == TransportMethods.VEHICULO ){
             throw NotValidTransportException()
         } else {
-            routeRepository.calculateElectricConsumition(route, transportMethod, vehicleType,)
+            routeRepository.calculateCaloriesConsumition(route, transportMethod)
+            res = true
+        }
+        return res
+    }
+
+    suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods ): Boolean {
+        var res: Boolean
+        if (transportMethod == TransportMethods.VEHICULO ){
+            throw NotValidTransportException()
+        } else {
+            routeRepository.calculateCaloriesConsumition(route, transportMethod)
             res = true
         }
         return res

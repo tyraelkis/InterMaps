@@ -64,10 +64,6 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
     val endLong = endPoint?.longitude
     val endLat = endPoint?.latitude
 
-
-
-
-
     if (loading) {
         Column(
             modifier = Modifier.fillMaxSize(),

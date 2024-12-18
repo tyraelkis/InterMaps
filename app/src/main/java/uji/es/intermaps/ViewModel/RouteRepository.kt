@@ -147,7 +147,18 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
     }
 
 
-
+    override suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods): Double {
+        var coste = 0.0
+        val caloriasMediaBici = 45
+        val caloriasMediaCaminar = 62
+        if (transportMethod == TransportMethods.APIE){
+            coste = (route.distance/100) * caloriasMediaCaminar
+        }
+        if (transportMethod == TransportMethods.BICICLETA){
+            coste = (route.distance/100) * caloriasMediaBici
+        }
+        return coste
+    }
 
     override suspend fun calculateFuelCostAverage(): Boolean {
         val openRouteService = RetrofitConfig.createRetrofitFuelPrice()
