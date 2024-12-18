@@ -88,7 +88,9 @@ class VehicleServiceTests {
         assertEquals(vehicle.plate, foundVehicle.plate)
     }
 
-    @Test
-    fun
+    @Test (expected = NotSuchElementException::class)
+    fun viewVehicleData_E2Valid_emptyVehicleDataViewed(): Unit = runBlocking {
+        val foundVehicle: Vehicle = vehicleService.viewVehicleData("8888GON")
+    }
 
 }
