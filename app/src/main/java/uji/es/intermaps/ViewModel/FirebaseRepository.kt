@@ -674,6 +674,9 @@ class FirebaseRepository: Repository {
         }
     }
 
+    override suspend fun viewVehicleData(plate: String): Vehicle {
+        TODO()
+    }
 
 
 }

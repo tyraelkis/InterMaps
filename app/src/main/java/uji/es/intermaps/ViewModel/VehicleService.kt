@@ -44,4 +44,8 @@ class VehicleService(private val repository: Repository) {
     suspend fun viewVehicleList(): List<Vehicle>{
         return repository.viewVehicleList()
     }
+
+    suspend fun viewVehicleData(plate: String): Vehicle {
+        TODO()
+    }
 }

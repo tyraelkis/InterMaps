@@ -82,4 +82,13 @@ class VehicleServiceTests {
         vehicleService.deleteVehicle("8888COD")
     }
 
+    @Test
+    fun viewVehicleData_E1Valid_vehicleDataViewed(): Unit = runBlocking {
+        val foundVehicle: Vehicle = vehicleService.viewVehicleData(vehicle.plate)
+        assertEquals(vehicle.plate, foundVehicle.plate)
+    }
+
+    @Test
+    fun
+
 }

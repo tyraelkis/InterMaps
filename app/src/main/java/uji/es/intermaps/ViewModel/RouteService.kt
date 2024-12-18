@@ -2,7 +2,6 @@ package uji.es.intermaps.ViewModel
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
