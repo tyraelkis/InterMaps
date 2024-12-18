@@ -56,10 +56,11 @@ import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.RouteService
+import uji.es.intermaps.ViewModel.RouteViewModel
 import uji.es.intermaps.ViewModel.VehicleService
 
 @Composable
-fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
+fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: RouteViewModel) {
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
     val interestPlaceService = InterestPlaceService(repository)
@@ -495,7 +496,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
         Button(
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
-                    routeService.createRoute(origin, destination, TransportMethods.VEHICULO)
+                    routeService.createRoute(origin, destination, TransportMethods.VEHICULO, routeType, vehicle)
                 }
             },
             enabled = isButtonEnabled,
