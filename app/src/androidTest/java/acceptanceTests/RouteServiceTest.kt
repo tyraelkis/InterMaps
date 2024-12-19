@@ -93,14 +93,14 @@ class RouteServiceTest {
     }
     @Test
     fun calculateCaloriesConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Burriana", "Alicante", TransportMethods.VEHICULO)
+        val routeTest: Route = routeService.createRoute("Burriana", "Alicante", TransportMethods.VEHICULO, RouteTypes.RAPIDA)
         val calculatedConsumition = routeService.calculateCaloriesConsumition(routeTest, TransportMethods.VEHICULO)
         assertEquals(true, calculatedConsumition)
     }
 
     @Test (expected = NotValidTransportException::class)
     fun calculateCaloriesConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
-        val routeTest = routeService.createRoute("Galicia", "Alicante", TransportMethods.APIE)
+        val routeTest = routeService.createRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA)
         routeService.calculateCaloriesConsumition(routeTest, TransportMethods.VEHICULO)
 
     }

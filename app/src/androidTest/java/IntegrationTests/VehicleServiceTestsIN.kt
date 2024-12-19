@@ -78,4 +78,19 @@ class VehicleServiceTestsIN {
             .`when`(mockRepository).deleteVehicle(anyString())
         vehicleService.deleteVehicle("8888COD")
     }
+
+    @Test
+    fun viewVehicleData_E1Valid_vehicleDataIsViewed(): Unit = runBlocking{
+        `when`(mockRepository.viewVehicleData("9999GON")).thenReturn(vehicle)
+        val res = vehicleService.viewVehicleData("9999GON")
+        assertEquals(vehicle.plate, res.plate)
+        verify(mockRepository).viewVehicleData("9999GON")
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun viewVehicleData_E2Valid_emptyVehicleDataIsViewed(): Unit = runBlocking {
+        doAnswer{ throw NotSuchElementException("No existe ese vehículo") }
+            .`when`(mockRepository).viewVehicleData(anyString())
+        vehicleService.viewVehicleData("8888GON")
+    }
 }

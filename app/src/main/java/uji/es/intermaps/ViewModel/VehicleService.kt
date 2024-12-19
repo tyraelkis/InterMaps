@@ -47,7 +47,7 @@ class VehicleService(private val repository: Repository) {
     }
 
     suspend fun viewVehicleData(plate: String): Vehicle {
-        TODO()
+        return repository.viewVehicleData(plate)
     }
 
     suspend fun editVehicleData(plate: String, newType: VehicleTypes, newConsumption: Double): Boolean {
