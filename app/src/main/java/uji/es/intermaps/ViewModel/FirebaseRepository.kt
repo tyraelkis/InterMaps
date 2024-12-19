@@ -534,7 +534,56 @@ class FirebaseRepository: Repository {
         }
     }
 
+    override suspend fun viewVehicleData(plate: String): Vehicle {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
 
+        try {
+            val documentSnapshot = db.collection("Vehicle")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                val vehicleList = documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
+
+                val foundVehicle = vehicleList.find { vehicle ->
+                    val foundVehiclePlate = vehicle["plate"] as? String ?: ""
+
+                    plate == foundVehiclePlate
+                } ?: throw NotSuchElementException("No se ha encontrado el vehiculo")
+
+                if(foundVehicle["type"] == "gasolina"){
+                    return GasolineVehicle(
+                        plate = plate,
+                        consumption = foundVehicle["consumption"] as? Double ?: 0.0,
+                        type = VehicleTypes.GASOLINA.type,
+                        fav = foundVehicle["fav"] as? Boolean ?: false
+                    )
+                }else if (foundVehicle["type"] == "diesel"){
+                    return DieselVehicle(
+                        plate = plate,
+                        consumption = foundVehicle["consumption"] as? Double ?: 0.0,
+                        type = VehicleTypes.DIESEL.type,
+                        fav = foundVehicle["fav"] as? Boolean ?: false
+                    )
+                }else if (foundVehicle["type"] == "electrico"){
+                    return ElectricVehicle(
+                        plate = plate,
+                        consumption = foundVehicle["consumption"] as? Double ?: 0.0,
+                        type = VehicleTypes.ELECTRICO.type,
+                        fav = foundVehicle["fav"] as? Boolean ?: false
+                    )
+                }else{
+                    throw NotSuchElementException("El tipo de vehiculo no es valido")
+                }
+            } else {
+                throw Exception("No existe el documento para el usuario: $userEmail")
+            }
+        } catch (e: Exception) {
+            Log.e("GeneralError", "Ocurrió un error", e)
+            throw e
+        }
+    }
 
     override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TransportMethods,routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route {
         val userEmail = auth.currentUser?.email
@@ -674,57 +723,6 @@ class FirebaseRepository: Repository {
         } catch (e: Exception) {
             Log.e("ElectricityPrices", "Error al obtener los precios de la luz: ${e.message}")
             return 0.0
-        }
-    }
-
-    override suspend fun viewVehicleData(plate: String): Vehicle {
-        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
-
-        try {
-            val documentSnapshot = db.collection("Vehicle")
-                .document(userEmail)
-                .get()
-                .await()
-
-            if (documentSnapshot.exists()) {
-                val vehicleList = documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
-
-                val foundVehicle = vehicleList.find { vehicle ->
-                    val foundVehiclePlate = vehicle["plate"] as? String ?: ""
-
-                    plate == foundVehiclePlate
-                } ?: throw NotSuchElementException("No se ha encontrado el vehiculo")
-
-                if(foundVehicle["type"] == "gasolina"){
-                    return GasolineVehicle(
-                        plate = plate,
-                        consumption = foundVehicle["consumption"] as? Double ?: 0.0,
-                        type = VehicleTypes.GASOLINA.type,
-                        fav = foundVehicle["fav"] as? Boolean ?: false
-                    )
-                }else if (foundVehicle["type"] == "diesel"){
-                    return DieselVehicle(
-                        plate = plate,
-                        consumption = foundVehicle["consumption"] as? Double ?: 0.0,
-                        type = VehicleTypes.DIESEL.type,
-                        fav = foundVehicle["fav"] as? Boolean ?: false
-                    )
-                }else if (foundVehicle["type"] == "electrico"){
-                    return ElectricVehicle(
-                        plate = plate,
-                        consumption = foundVehicle["consumption"] as? Double ?: 0.0,
-                        type = VehicleTypes.ELECTRICO.type,
-                        fav = foundVehicle["fav"] as? Boolean ?: false
-                    )
-                }else{
-                    throw NotSuchElementException("El tipo de vehiculo no es valido")
-                }
-            } else {
-                throw Exception("No existe el documento para el usuario: $userEmail")
-            }
-        } catch (e: Exception) {
-            Log.e("GeneralError", "Ocurrió un error", e)
-            throw e
         }
     }
 
