@@ -39,5 +39,5 @@ interface Repository {
     suspend fun getAverageFuelPrices(): List<Double>
     suspend fun getElectricPrice(): Double
     suspend fun viewVehicleData(plate: String): Vehicle
-    suspend fun editVehicleData(plate: String, newType: VehicleTypes, newConsumption: Double): Boolean
+    suspend fun editVehicleData(plate: String, newType: VehicleTypes?, newConsumption: Double?): Boolean
 }

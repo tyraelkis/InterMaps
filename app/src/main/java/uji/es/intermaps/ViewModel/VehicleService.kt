@@ -51,6 +51,15 @@ class VehicleService(private val repository: Repository) {
     }
 
     suspend fun editVehicleData(plate: String, newType: VehicleTypes, newConsumption: Double): Boolean {
-        TODO()
+        if (newConsumption <= 0) {
+            throw IllegalArgumentException("El consumo debe ser un número positivo.")
+        }
+        if (newType != VehicleTypes.GASOLINA && newType != VehicleTypes.DIESEL && newType != VehicleTypes.ELECTRICO) {
+            throw IllegalArgumentException("El tipo de vehículo no es válido.")
+        }
+        if (!repository.editVehicleData(plate, newType, newConsumption)) {
+            return false
+        }
+        return true
     }
 }

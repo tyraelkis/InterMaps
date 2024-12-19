@@ -585,6 +585,83 @@ class FirebaseRepository: Repository {
         }
     }
 
+    override suspend fun editVehicleData(plate: String, newType: VehicleTypes?, newConsumption: Double?): Boolean {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        var result = false
+        val documentSnapshot = db.collection("Vehicle")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val vehicleList =
+                documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
+
+            val foundVehicle = (vehicleList.find { vehicle ->
+                val foundVehiclePlate = vehicle["plate"] as? String ?: ""
+
+                plate == foundVehiclePlate
+            }?: throw NotSuchElementException("Vehiculo no encontrado")).toMutableMap()
+
+            if (newType != null && newConsumption != null) {
+                val updatedVehicle = vehicleList.map { vehicle ->
+                    if (vehicle == foundVehicle){
+                        vehicle.toMutableMap().apply {
+                            this["type"] = newType
+                            this["consumption"] = newConsumption
+                        }
+                    } else {
+                        vehicle
+                    }
+                }
+
+                db.collection("Vehicle")
+                    .document(userEmail)
+                    .update("vehicles", updatedVehicle)
+                    .await()
+                result = true
+            }else if (newType != null){
+                val updatedVehicle = vehicleList.map { vehicle ->
+                    if (vehicle == foundVehicle){
+                        vehicle.toMutableMap().apply {
+                            this["type"] = newType
+                        }
+                    } else {
+                        vehicle
+                    }
+                }
+
+                db.collection("Vehicle")
+                    .document(userEmail)
+                    .update("vehicles", updatedVehicle)
+                    .await()
+                result = true
+            }else if (newConsumption != null){
+                val updatedVehicle = vehicleList.map { vehicle ->
+                    if (vehicle == foundVehicle){
+                        vehicle.toMutableMap().apply {
+                            this["consumption"] = newConsumption
+                        }
+                    } else {
+                        vehicle
+                    }
+                }
+
+                db.collection("Vehicle")
+                    .document(userEmail)
+                    .update("vehicles", updatedVehicle)
+                    .await()
+                result = true
+            }else{
+                return true
+            }
+        } else {
+            result = false
+        }
+        return result
+    }
+
     override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TransportMethods,routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route {
         val userEmail = auth.currentUser?.email
             ?: throw IllegalStateException("No hay un usuario autenticado")
@@ -726,9 +803,7 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun editVehicleData(plate: String, newType: VehicleTypes, newConsumption: Double): Boolean {
-        TODO()
-    }
+
 
 }
 
