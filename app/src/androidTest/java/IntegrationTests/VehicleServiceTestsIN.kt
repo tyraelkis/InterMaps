@@ -7,7 +7,9 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
+import org.mockito.Mockito.anyDouble
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
@@ -92,5 +94,20 @@ class VehicleServiceTestsIN {
         doAnswer{ throw NotSuchElementException("No existe ese vehículo") }
             .`when`(mockRepository).viewVehicleData(anyString())
         vehicleService.viewVehicleData("8888GON")
+    }
+
+    @Test
+    fun editVehicleData_E1Valid_vehicleDataEdited(): Unit = runBlocking {
+        `when`(mockRepository.editVehicleData("9999GON", VehicleTypes.DIESEL, 11.0)).thenReturn(true)
+        val res = vehicleService.editVehicleData("9999GON", VehicleTypes.DIESEL, 11.0)
+        assertEquals(true, res)
+        verify(mockRepository).editVehicleData("9999GON", VehicleTypes.DIESEL, 11.0)
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun editVehicleData_E2Invalid_errorOnEditingVehicleData(): Unit = runBlocking {
+        doAnswer{ throw NotSuchElementException("No existe ese vehículo") }
+            .`when`(mockRepository).editVehicleData(anyString(), any(VehicleTypes::class.java), anyDouble())
+        vehicleService.editVehicleData("8888COD", VehicleTypes.DIESEL, 11.0)
     }
 }
