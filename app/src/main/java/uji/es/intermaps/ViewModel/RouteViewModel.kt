@@ -36,5 +36,4 @@ class RouteViewModel(private val routeService: RouteService): ViewModel() {
 
     }
 
-
 }

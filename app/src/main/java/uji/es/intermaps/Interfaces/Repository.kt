@@ -38,7 +38,5 @@ interface Repository {
 
     suspend fun getAverageFuelPrices(): List<Double>
     suspend fun getElectricPrice(): Double
-    suspend fun getVehicleType(plate: String): VehicleTypes
-
 
 }

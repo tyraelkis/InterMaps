@@ -27,7 +27,6 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.RouteViewModel
 import uji.es.intermaps.ViewModel.UserViewModel
 import uji.es.intermaps.ViewModel.VehicleViewModel
-import uji.es.intermaps.View.Route.ViewRoute
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 

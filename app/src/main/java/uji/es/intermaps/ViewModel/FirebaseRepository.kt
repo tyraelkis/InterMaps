@@ -674,36 +674,8 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun getVehicleType(plate: String): VehicleTypes {
-        val email = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
 
-        return suspendCoroutine { continuation ->
-            val userDocument = db.collection("Vehicle").document(email)
 
-            userDocument.get()
-                .addOnSuccessListener { documentSnapshot ->
-                    val vehicles = documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
-
-                    // Find the vehicle by plate
-                    val vehicleMap = vehicles.find { it["plate"] == plate }
-                        ?: throw NotSuchElementException("Vehículo no encontrado con la matrícula $plate")
-
-                    // Extract the type from the vehicle data
-                    val type = vehicleMap["type"] as? String
-                        ?: throw IllegalArgumentException("Tipo de vehículo no encontrado")
-
-                    // Map the string type to the VehicleTypes enum
-                    val vehicleType = VehicleTypes.values().find { it.type == type }
-                        ?: throw IllegalArgumentException("Tipo de vehículo inválido: $type")
-
-                    continuation.resume(vehicleType)
-                }
-                .addOnFailureListener { e ->
-                    continuation.resumeWithException(e)
-                }
-        }
-
-    }
 }
 
 

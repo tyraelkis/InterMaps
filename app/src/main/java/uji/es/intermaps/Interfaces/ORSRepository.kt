@@ -13,8 +13,8 @@ interface ORSRepository {
     suspend fun searchInterestPlaceByCoordinates(coordinate: Coordinate):InterestPlace
     suspend fun searchInterestPlaceByToponym(toponym: String): InterestPlace
     suspend fun calculateRoute(origin: String, destination: String, trasnportMethod: TransportMethods,routeType: RouteTypes) : RouteFeature
-    suspend fun calculateFuelConsumition(route: Route, transportMethod: TransportMethods): Double
-    suspend fun calculateElectricConsumition(route: Route, transportMethod: TransportMethods): Double
+    suspend fun calculateFuelConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double
+    suspend fun calculateElectricConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double
     suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods): Double
 
 }

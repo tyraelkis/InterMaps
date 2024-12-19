@@ -3,7 +3,6 @@ package uji.es.intermaps.ViewModel
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Vehicle
-import uji.es.intermaps.Model.VehicleTypes
 
 class VehicleService(private val repository: Repository) {
     //Igual hace falta crear un repositorio aparte como en InterestPlace
@@ -44,9 +43,5 @@ class VehicleService(private val repository: Repository) {
 
     suspend fun viewVehicleList(): List<Vehicle>{
         return repository.viewVehicleList()
-    }
-
-    suspend fun getVehicleType(plate: String): VehicleTypes {
-        return repository.getVehicleType(plate)
     }
 }
