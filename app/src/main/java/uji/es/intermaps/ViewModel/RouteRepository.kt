@@ -22,6 +22,7 @@ import uji.es.intermaps.Model.RetrofitConfig
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
+import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.Model.VehicleTypes
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -120,28 +121,37 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         return route
     }
 
-    override suspend fun calculateFuelConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
+
+    override suspend fun calculateFuelConsumition(route: Route, transportMethod: TransportMethods): Double {
         val repository = FirebaseRepository()
         val routeService = RouteService(repository)
+        val vehicleService = VehicleService(repository)
         var coste = 0.0
         val consumoMedioGasolina95_l_por_100km = 7.0
         val consumoMedioGasoleoA_l_por_100km = 5.0
-        if (transportMethod == TransportMethods.VEHICULO && vehicleType == VehicleTypes.GASOLINA ){
+        val plate = route.vehiclePlate
+
+        if (transportMethod == TransportMethods.VEHICULO && vehicleService.getVehicleType(plate) == VehicleTypes.GASOLINA ){
             coste = (route.distance/100) * consumoMedioGasolina95_l_por_100km * routeService.getFuelCostAverage().get(0)
+            route.cost = coste
         }
-        if (transportMethod == TransportMethods.VEHICULO && vehicleType == VehicleTypes.DIESEL){
+        if (transportMethod == TransportMethods.VEHICULO && vehicleService.getVehicleType(plate) == VehicleTypes.DIESEL ){
             coste = (route.distance/100) * consumoMedioGasoleoA_l_por_100km * routeService.getFuelCostAverage().get(1)
+            route.cost = coste
         }
         return coste
     }
 
-    override suspend fun calculateElectricConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
+    override suspend fun calculateElectricConsumition(route: Route, transportMethod: TransportMethods): Double {
         val repository = FirebaseRepository()
         val routeService = RouteService(repository)
+        val vehicleService = VehicleService(repository)
         var coste = 0.0
         val consumoMediokWh_por_100km = 7.0
-        if (transportMethod == TransportMethods.VEHICULO && vehicleType == VehicleTypes.ELECTRICO ){
+        val plate = route.vehiclePlate
+        if (transportMethod == TransportMethods.VEHICULO && vehicleService.getVehicleType(plate) == VehicleTypes.ELECTRICO  ){
             coste = (route.distance/100) * consumoMediokWh_por_100km * (routeService.getElctricCost()/1000)
+            route.cost = coste
         }
         return coste
     }
@@ -149,13 +159,15 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
 
     override suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods): Double {
         var coste = 0.0
-        val caloriasMediaBici = 45
-        val caloriasMediaCaminar = 62
+        val caloriasMediaBici = 50
+        val caloriasMediaCaminar = 16
         if (transportMethod == TransportMethods.APIE){
-            coste = (route.distance/100) * caloriasMediaCaminar
+            coste = (route.distance * caloriasMediaCaminar)/1000
+            route.cost = coste
         }
         if (transportMethod == TransportMethods.BICICLETA){
-            coste = (route.distance/100) * caloriasMediaBici
+            coste = (route.distance * caloriasMediaBici)/1000
+            route.cost = coste
         }
         return coste
     }

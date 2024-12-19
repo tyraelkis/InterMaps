@@ -81,27 +81,34 @@ class RouteServiceTest {
     @Test
     fun calculateElectricConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Burriana", "Valencia", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
-        val calculatedConsumition = routeService.calculateElectricConsumition(routeTest, TransportMethods.VEHICULO, VehicleTypes.ELECTRICO)
+        val calculatedConsumition = routeService.calculateElectricConsumition(routeTest, TransportMethods.VEHICULO)
         assertEquals(true, calculatedConsumition)
     }
 
     @Test(expected = NotValidTransportException::class)
     fun calculateElectricConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
         val routeTest = routeService.createRoute("Galicia", "Valencia", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
-        routeService.calculateElectricConsumition(routeTest, TransportMethods.APIE, VehicleTypes.ELECTRICO)
+        routeService.calculateElectricConsumition(routeTest, TransportMethods.APIE)
 
     }
     @Test
     fun calculateCaloriesConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Burriana", "Alicante", TransportMethods.VEHICULO)
+        val routeTest: Route = routeService.createRoute("Burriana", "Alicante", TransportMethods.VEHICULO, RouteTypes.RAPIDA)
         val calculatedConsumition = routeService.calculateCaloriesConsumition(routeTest, TransportMethods.VEHICULO)
         assertEquals(true, calculatedConsumition)
     }
 
     @Test (expected = NotValidTransportException::class)
     fun calculateCaloriesConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
-        val routeTest = routeService.createRoute("Galicia", "Alicante", TransportMethods.APIE)
+        val routeTest = routeService.createRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA)
         routeService.calculateCaloriesConsumition(routeTest, TransportMethods.VEHICULO)
+
+    }
+
+    //@Test
+    fun putFuelCostAverage_E4Valid_averageCalculated(): Unit = runBlocking {
+        val average = routeService.putFuelCostAverage()
+        assertEquals(true, average)
 
     }
 

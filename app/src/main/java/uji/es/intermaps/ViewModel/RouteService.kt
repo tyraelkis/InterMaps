@@ -2,7 +2,6 @@ package uji.es.intermaps.ViewModel
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -38,37 +37,35 @@ open class RouteService(private val repository: Repository){
         TODO()
     }
 
-    suspend fun calculateFuelConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Boolean {
-        var res :Boolean
+    suspend fun calculateFuelConsumition(route: Route, transportMethod: TransportMethods): Double {
+        var res = 0.0
         val routeRepository = RouteRepository()
+        val vehicleType = repository.getVehicleType(route.vehiclePlate)
         if (transportMethod != TransportMethods.VEHICULO || vehicleType == VehicleTypes.ELECTRICO ){
             throw NotValidTransportException()
         } else {
-            routeRepository.calculateFuelConsumition(route, transportMethod, vehicleType,)
-            res = true
+            res = routeRepository.calculateFuelConsumition(route, transportMethod)
         }
        return res
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun calculateElectricConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Boolean {
-        var res: Boolean
+    suspend fun calculateElectricConsumition(route: Route, transportMethod: TransportMethods): Double {
+        var res = 0.0
         if (transportMethod == TransportMethods.VEHICULO ){
             throw NotValidTransportException()
         } else {
-            routeRepository.calculateCaloriesConsumition(route, transportMethod)
-            res = true
+            res = routeRepository.calculateCaloriesConsumition(route, transportMethod)
         }
         return res
     }
 
-    suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods ): Boolean {
-        var res: Boolean
+    suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods ): Double {
+        var res = 0.0
         if (transportMethod == TransportMethods.VEHICULO ){
             throw NotValidTransportException()
         } else {
-            routeRepository.calculateCaloriesConsumition(route, transportMethod)
-            res = true
+            res = routeRepository.calculateCaloriesConsumition(route, transportMethod)
         }
         return res
     }
