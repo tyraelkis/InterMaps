@@ -96,13 +96,13 @@ class VehicleServiceTests {
 
     @Test
     fun editVehicleData_E1Valid_vehicleDataEdited(): Unit = runBlocking {
-        val result: Boolean = vehicleService.editVehicleData(vehicleEditable.plate, VehicleTypes.DIESEL, 11.0)
+        val result: Boolean = vehicleService.editVehicleData(vehicleEditable.plate, VehicleTypes.DIESEL.type, 11.0)
         assertEquals(true, result)
     }
 
     @Test (expected = NotSuchElementException::class)
     fun editVehicleData_E2Invalid_errorOnEditingVehicleData(): Unit = runBlocking {
-        vehicleService.editVehicleData("8888COD", VehicleTypes.DIESEL, 11.0)
+        vehicleService.editVehicleData("8888COD", VehicleTypes.DIESEL.type, 11.0)
     }
 
 

@@ -5,9 +5,6 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.APIParsers.RouteGeometry
@@ -20,22 +17,16 @@ import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
-import uji.es.intermaps.Model.DieselVehicle
-import uji.es.intermaps.Model.ElectricVehicle
-import uji.es.intermaps.Model.GasolineVehicle
 import uji.es.intermaps.Model.InterestPlace
-import uji.es.intermaps.Model.RetrofitConfig
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.Model.VehicleFactory
-import uji.es.intermaps.Model.VehicleTypes
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
-import kotlin.jvm.Throws
 
 class FirebaseRepository: Repository {
     private val db = DataBase.db
@@ -552,30 +543,13 @@ class FirebaseRepository: Repository {
                     plate == foundVehiclePlate
                 } ?: throw NotSuchElementException("No se ha encontrado el vehiculo")
 
-                if(foundVehicle["type"] == "gasolina"){
-                    return GasolineVehicle(
-                        plate = plate,
-                        consumption = foundVehicle["consumption"] as? Double ?: 0.0,
-                        type = VehicleTypes.GASOLINA.type,
-                        fav = foundVehicle["fav"] as? Boolean ?: false
-                    )
-                }else if (foundVehicle["type"] == "diesel"){
-                    return DieselVehicle(
-                        plate = plate,
-                        consumption = foundVehicle["consumption"] as? Double ?: 0.0,
-                        type = VehicleTypes.DIESEL.type,
-                        fav = foundVehicle["fav"] as? Boolean ?: false
-                    )
-                }else if (foundVehicle["type"] == "electrico"){
-                    return ElectricVehicle(
-                        plate = plate,
-                        consumption = foundVehicle["consumption"] as? Double ?: 0.0,
-                        type = VehicleTypes.ELECTRICO.type,
-                        fav = foundVehicle["fav"] as? Boolean ?: false
-                    )
-                }else{
-                    throw NotSuchElementException("El tipo de vehiculo no es valido")
-                }
+                return VehicleFactory.createVehicle(
+                    foundVehicle["plate"] as String? ?: "",
+                    foundVehicle["type"] as String? ?: "",
+                    (foundVehicle["consumption"] as Number? ?: 0.0).toDouble(),
+                    foundVehicle["fav"] as Boolean? ?: false
+                )
+
             } else {
                 throw Exception("No existe el documento para el usuario: $userEmail")
             }
@@ -585,7 +559,7 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override suspend fun editVehicleData(plate: String, newType: VehicleTypes?, newConsumption: Double?): Boolean {
+    override suspend fun editVehicleData(plate: String, newType: String, newConsumption: Double): Boolean {
         val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
 
         var result = false
@@ -604,58 +578,23 @@ class FirebaseRepository: Repository {
                 plate == foundVehiclePlate
             }?: throw NotSuchElementException("Vehiculo no encontrado")).toMutableMap()
 
-            if (newType != null && newConsumption != null) {
-                val updatedVehicle = vehicleList.map { vehicle ->
-                    if (vehicle == foundVehicle){
-                        vehicle.toMutableMap().apply {
-                            this["type"] = newType
-                            this["consumption"] = newConsumption
-                        }
-                    } else {
-                        vehicle
+            val updatedVehicle = vehicleList.map { vehicle ->
+                if (vehicle == foundVehicle){
+                    vehicle.toMutableMap().apply {
+                        this["type"] = newType
+                        this["consumption"] = newConsumption
                     }
+                } else {
+                    vehicle
                 }
-
-                db.collection("Vehicle")
-                    .document(userEmail)
-                    .update("vehicles", updatedVehicle)
-                    .await()
-                result = true
-            }else if (newType != null){
-                val updatedVehicle = vehicleList.map { vehicle ->
-                    if (vehicle == foundVehicle){
-                        vehicle.toMutableMap().apply {
-                            this["type"] = newType
-                        }
-                    } else {
-                        vehicle
-                    }
-                }
-
-                db.collection("Vehicle")
-                    .document(userEmail)
-                    .update("vehicles", updatedVehicle)
-                    .await()
-                result = true
-            }else if (newConsumption != null){
-                val updatedVehicle = vehicleList.map { vehicle ->
-                    if (vehicle == foundVehicle){
-                        vehicle.toMutableMap().apply {
-                            this["consumption"] = newConsumption
-                        }
-                    } else {
-                        vehicle
-                    }
-                }
-
-                db.collection("Vehicle")
-                    .document(userEmail)
-                    .update("vehicles", updatedVehicle)
-                    .await()
-                result = true
-            }else{
-                return true
             }
+
+            db.collection("Vehicle")
+                .document(userEmail)
+                .update("vehicles", updatedVehicle)
+                .await()
+            result = true
+
         } else {
             result = false
         }

@@ -50,11 +50,11 @@ class VehicleService(private val repository: Repository) {
         return repository.viewVehicleData(plate)
     }
 
-    suspend fun editVehicleData(plate: String, newType: VehicleTypes, newConsumption: Double): Boolean {
+    suspend fun editVehicleData(plate: String, newType: String, newConsumption: Double): Boolean {
         if (newConsumption <= 0) {
             throw IllegalArgumentException("El consumo debe ser un número positivo.")
         }
-        if (newType != VehicleTypes.GASOLINA && newType != VehicleTypes.DIESEL && newType != VehicleTypes.ELECTRICO) {
+        if (newType != VehicleTypes.GASOLINA.type && newType != VehicleTypes.DIESEL.type && newType != VehicleTypes.ELECTRICO.type) {
             throw IllegalArgumentException("El tipo de vehículo no es válido.")
         }
         if (!repository.editVehicleData(plate, newType, newConsumption)) {

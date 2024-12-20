@@ -39,25 +39,20 @@ import androidx.compose.ui.graphics.Color.Companion.LightGray
 import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-import uji.es.intermaps.ViewModel.FirebaseRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
 import uji.es.intermaps.Model.VehicleTypes
-import uji.es.intermaps.ViewModel.VehicleService
 import uji.es.intermaps.ViewModel.VehicleViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VehicleCreate(navController: NavController, viewModel: VehicleViewModel) {
-    val vehicleService = VehicleService(FirebaseRepository())
     var showPopupCreateSucces by remember { mutableStateOf(false) }
 
     var plate by remember { mutableStateOf("") }
@@ -270,15 +265,11 @@ fun VehicleCreate(navController: NavController, viewModel: VehicleViewModel) {
         Button(
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        vehicleService.createVehicle(plate, type, consumption)
-                        showPopupCreateSucces = true
-                    } catch (e: IllegalArgumentException) {
-                        errorMessage = e.message.toString()
-                    } catch (e: VehicleAlreadyExistsException) {
-                        errorMessage = e.message.toString()
-                    } catch (e: Exception) {
-                        errorMessage = e.message.toString()
+                    viewModel.createVehicle(plate, type, consumption)
+                    CoroutineScope(Dispatchers.Main).launch {
+                        errorMessage = viewModel.getErrorMessage()
+                        if (errorMessage.isEmpty())
+                            showPopupCreateSucces = viewModel.getShowPopupCreateSucces()
                     }
                 }
             },
@@ -335,7 +326,7 @@ fun VehicleCreate(navController: NavController, viewModel: VehicleViewModel) {
                             containerColor = Black
                         )
                     ) {
-                        Text(text = "Aceptar", fontSize = 16.sp,)
+                        Text(text = "Aceptar", fontSize = 16.sp)
                     }
                 }
             }

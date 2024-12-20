@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,23 +45,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
-import uji.es.intermaps.ViewModel.FirebaseRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
 import uji.es.intermaps.Model.VehicleTypes
-import uji.es.intermaps.ViewModel.VehicleService
 import uji.es.intermaps.ViewModel.VehicleViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VehicleEditDelete(navController: NavController, viewModel: VehicleViewModel, plate: String) {
-    val vehicleService = VehicleService(FirebaseRepository())
     var showPopupEditSucces by remember { mutableStateOf(false) }
     var showPopupDeleteConfirm by remember { mutableStateOf(false) }
 
-    val vehicle by remember { mutableStateOf(viewModel.getVehicle()) }
+    var vehicle by remember { mutableStateOf(viewModel.getVehicle()) }
+    var consumption by remember { mutableStateOf(vehicle.consumption.toString()) }
+    LaunchedEffect(plate) {
+        vehicle = viewModel.getVehicleData(plate)
+    }
 
     var expanded by remember { mutableStateOf(false) }
     val vehicleOptions = listOf(VehicleTypes.GASOLINA.type, VehicleTypes.DIESEL.type, VehicleTypes.ELECTRICO.type)
@@ -171,8 +172,9 @@ fun VehicleEditDelete(navController: NavController, viewModel: VehicleViewModel,
         Spacer(modifier = Modifier.height(8.dp))
 
         TextField(
-            value = vehicle.consumption.toString(),
+            value = consumption,
             onValueChange = {
+                consumption = it
                 vehicle.consumption = it.toDoubleOrNull() ?: 0.0
             },
             modifier = Modifier
@@ -218,14 +220,14 @@ fun VehicleEditDelete(navController: NavController, viewModel: VehicleViewModel,
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Button( // TODO futuro botón editar campos
+        Button(
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        //vehicleService.editVehicle()
-                        showPopupEditSucces = true
-                    } catch (e: Exception) {
-                        errorMessage = e.message.toString()
+                    viewModel.editVehicleData(vehicle.plate, vehicle.type, vehicle.consumption)
+                    CoroutineScope(Dispatchers.Main).launch {
+                        errorMessage = viewModel.getErrorMessage()
+                        if (errorMessage.isEmpty())
+                            showPopupEditSucces = viewModel.getShowPopupEditSucces()
                     }
                 }
             },
@@ -279,7 +281,8 @@ fun VehicleEditDelete(navController: NavController, viewModel: VehicleViewModel,
                     color = White,
                     fontSize = 26.sp,
                     textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    lineHeight = 36.sp
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -307,17 +310,11 @@ fun VehicleEditDelete(navController: NavController, viewModel: VehicleViewModel,
                     Button(
                         onClick = {
                             CoroutineScope(Dispatchers.IO).launch {
-                                try {
-                                    vehicleService.deleteVehicle(plate)
-                                    CoroutineScope(Dispatchers.Main).launch {
+                                viewModel.deleteVehicle(plate)
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    errorMessage = viewModel.getErrorMessage()
+                                    if (errorMessage.isEmpty())
                                         navController.navigate("vehicleList")
-                                    }
-                                } catch (e: IllegalArgumentException) {
-                                    errorMessage = e.message.toString()
-                                } catch (e: VehicleAlreadyExistsException) {
-                                    errorMessage = e.message.toString()
-                                } catch (e: Exception) {
-                                    errorMessage = e.message.toString()
                                 }
                             }
                         },
@@ -328,6 +325,48 @@ fun VehicleEditDelete(navController: NavController, viewModel: VehicleViewModel,
                     ) {
                         Text(text = "Sí", fontSize = 16.sp)
                     }
+                }
+            }
+        }
+    }
+
+    if (showPopupEditSucces) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 350.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color(0XFF007E70))
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = "Se ha modificado correctamente el vehículo ${plate}",
+                    color = White,
+                    fontSize = 26.sp,
+                    textAlign = TextAlign.Center,
+                    fontWeight = FontWeight.SemiBold,
+                    lineHeight = 36.sp
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Button(
+                    onClick = {
+                        navController.navigate("vehicleList")
+                        },
+                    modifier = Modifier.weight(1f)
+                        .padding(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Black),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text(text = "Aceptar", fontSize = 16.sp)
                 }
             }
         }

@@ -98,16 +98,16 @@ class VehicleServiceTestsIN {
 
     @Test
     fun editVehicleData_E1Valid_vehicleDataEdited(): Unit = runBlocking {
-        `when`(mockRepository.editVehicleData("9999GON", VehicleTypes.DIESEL, 11.0)).thenReturn(true)
-        val res = vehicleService.editVehicleData("9999GON", VehicleTypes.DIESEL, 11.0)
+        `when`(mockRepository.editVehicleData("9999GON", VehicleTypes.DIESEL.type, 11.0)).thenReturn(true)
+        val res = vehicleService.editVehicleData("9999GON", VehicleTypes.DIESEL.type, 11.0)
         assertEquals(true, res)
-        verify(mockRepository).editVehicleData("9999GON", VehicleTypes.DIESEL, 11.0)
+        verify(mockRepository).editVehicleData("9999GON", VehicleTypes.DIESEL.type, 11.0)
     }
 
     @Test (expected = NotSuchElementException::class)
     fun editVehicleData_E2Invalid_errorOnEditingVehicleData(): Unit = runBlocking {
         doAnswer{ throw NotSuchElementException("No existe ese vehículo") }
-            .`when`(mockRepository).editVehicleData(anyString(), any(VehicleTypes::class.java), anyDouble())
-        vehicleService.editVehicleData("8888COD", VehicleTypes.DIESEL, 11.0)
+            .`when`(mockRepository).editVehicleData(anyString(), anyString(), anyDouble())
+        vehicleService.editVehicleData("8888COD", VehicleTypes.DIESEL.type, 11.0)
     }
 }
