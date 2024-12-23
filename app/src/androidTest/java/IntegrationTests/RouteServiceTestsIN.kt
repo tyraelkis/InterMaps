@@ -115,7 +115,7 @@ class RouteTests {
             route = mockedCall
         )).thenReturn(mockedRoute)
 
-        val routeTest = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
+        val routeTest = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
         // Comprobamos que la ruta fue creada correctamente
         assertEquals(mockedRoute, routeTest)
         verify(mockRouteRepository).searchInterestPlaceByToponym("Burriana")
@@ -170,10 +170,6 @@ class RouteTests {
 
         val vehicleType = VehicleTypes.GASOLINA
         val consumPerKm = 7.0
-        `when`(routeService.getVehicleTypeAndConsump(mockedRoute).first)
-            .thenReturn(vehicleType)
-        `when`(routeService.getVehicleTypeAndConsump(mockedRoute).second)
-            .thenReturn(consumPerKm)
 
         val expectedCost = mockedRoute.distance * consumPerKm
         `when`(mockRouteRepository.calculateConsumition(mockedRoute, TransportMethods.VEHICULO, vehicleType))

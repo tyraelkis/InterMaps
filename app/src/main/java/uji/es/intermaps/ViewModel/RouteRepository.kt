@@ -173,7 +173,8 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                 coste = (route.distance/100) * consumo * (routeService.getElctricCost()/1000)
                 costeRounded = BigDecimal(coste).setScale(3, RoundingMode.HALF_UP).toDouble()
             }
-            saveRouteCostToDatabase(route.origin, route.destination, costeRounded)
+            route.cost = costeRounded
+            //saveRouteCostToDatabase(route.origin, route.destination, costeRounded)
         }
         return costeRounded
     }
@@ -190,7 +191,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             coste = route.distance * caloriasMediaBici
         }
         val costeRounded = BigDecimal(coste).setScale(1, RoundingMode.HALF_UP).toDouble()
-        saveRouteCostToDatabase(route.origin, route.destination, costeRounded)
+        route.cost = costeRounded
         return costeRounded
     }
 

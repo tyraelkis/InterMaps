@@ -19,7 +19,7 @@ import uji.es.intermaps.Model.VehicleTypes
 open class RouteService(private val repository: Repository){
     public var routeRepository = RouteRepository()
 
-    suspend fun createRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String = ""):Route {
+    suspend fun createRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String):Route {
         if (origin.isEmpty() or destination.isEmpty()){
             throw NotValidPlaceException()
         }

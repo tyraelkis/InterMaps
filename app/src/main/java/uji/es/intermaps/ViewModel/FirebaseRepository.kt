@@ -602,27 +602,25 @@ class FirebaseRepository: Repository {
         return result
     }
 
-
     override suspend fun saveRouteToDatabase(route: Route) {
-        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
         try {
+            val userDocument = db.collection("Route").document(userEmail)
+
             val documentSnapshot = db.collection("InterestPlace")
                 .document(userEmail)
                 .get()
                 .await()
 
-            if (documentSnapshot.exists()) {
-                val interestPlaces =
-                    documentSnapshot.get("interestPlaces") as? MutableList<Map<String, Any>> ?: mutableListOf()
-                interestPlaces.find { place ->
-                    val actualToponym = place["toponym"] as? String ?: ""
-                    route.origin == actualToponym
-                } ?: throw NotSuchPlaceException()
-                interestPlaces.find { place ->
-                    val actualToponym = place["toponym"] as? String ?: ""
-                    route.destination == actualToponym
-                } ?: throw NotSuchPlaceException()
-            }
+            val interestPlaces = documentSnapshot.get("interestPlaces") as? List<Map<String, Any>>
+                ?: throw NotSuchPlaceException("El usuario no tiene lugares de interés registrados.")
+
+            interestPlaces.find { it["toponym"] == route.origin }
+                ?: throw NotSuchPlaceException("El origen no es un lugar de interés.")
+            interestPlaces.find { it["toponym"] == route.destination }
+                ?: throw NotSuchPlaceException("El destino no es un lugar de interés.")
 
             val newRoute = mapOf(
                 "origin" to route.origin,
@@ -636,20 +634,20 @@ class FirebaseRepository: Repository {
                 "fav" to false,
                 "vehiclePlate" to route.vehiclePlate
             )
-
-            val userDocument = db.collection("Route").document(userEmail)
-            suspendCoroutine { continuation ->
-                userDocument.update("routes", FieldValue.arrayUnion(newRoute))
-                    .addOnFailureListener { _ ->
-                        userDocument.set(mapOf("routes" to listOf(newRoute)))
-                            .addOnFailureListener { e ->
-                                continuation.resumeWithException(e)
-                            }
-                    }
+            val documentData = userDocument.get().await()
+            if (documentData.exists()) {
+                userDocument.update("routes", FieldValue.arrayUnion(newRoute)).await()
+            } else {
+                userDocument.set(mapOf("routes" to listOf(newRoute))).await()
             }
+
+            Log.d("saveRouteToDatabase", "Ruta guardada exitosamente.")
+        } catch (e: NotSuchPlaceException) {
+            Log.e("saveRouteToDatabase", "Error en los lugares de interés: ${e.message}")
+            throw e
         } catch (e: Exception) {
-            Log.e("saveRouteToDatabase", "Error al guardar la ruta: ${e.message}", e)
-            throw Exception("Error al guardar la ruta: ${e.message}", e)
+            Log.e("saveRouteToDatabase", "Error desconocido: ${e.message}", e)
+            throw e
         }
     }
 
@@ -710,8 +708,6 @@ class FirebaseRepository: Repository {
                 .document(userEmail)
                 .get()
                 .await()
-
-            Log.d("VehicleService", "Documento recuperado: ${documentSnapshot.data}")
 
             if (documentSnapshot.exists()) {
                 val vehicles = documentSnapshot.get("vehicles") as? List<Map<String, Any>>

@@ -5,10 +5,16 @@
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="InterestPlaceServiceTests">
+      <SelectionState runConfigName="saveRoute_E2Valid_routeSaved()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="saveRoute_E2Valid_routeSaved()">
+      <SelectionState runConfigName="saveRoute_E4Valid_routeSaved()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="createVehicle_E3Invalid_errorOnCreatingVehicle()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="createInterestPlaceByToponym_E1Valid_InterestPlaceCreated()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
