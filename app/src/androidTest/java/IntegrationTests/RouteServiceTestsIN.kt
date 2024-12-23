@@ -68,7 +68,7 @@ class RouteTests {
             trasnportMethod = TransportMethods.VEHICULO,
             route = emptyList(),
             distance = 0.0,
-            duration = 0.0,
+            duration = 0.0.toString(),
             cost = 0.0,
             routeType = RouteTypes.RAPIDA,
             fav = false,
@@ -152,7 +152,7 @@ class RouteTests {
             trasnportMethod = TransportMethods.VEHICULO,
             route = emptyList(),
             distance = 0.0,
-            duration = 0.0,
+            duration = 0.0.toString(),
             cost = 0.0,
             routeType = RouteTypes.RAPIDA,
             fav = false,
@@ -166,6 +166,47 @@ class RouteTests {
         val consumition = routeTest.cost
 
         verify(mockRepository).createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "",mockedCall)
+
+        // Comprobamos que la ruta fue creada correctamente
+        assertEquals(mockedRoute.cost, consumition)
+
+
+    }
+
+    @Test
+    fun calculateCaloriesConsumition_E3Valid_consumitionCalculated():Unit = runBlocking() {
+        val mockedCall = RouteFeature(
+            geometry = RouteGeometry(
+                coordinates = emptyList()
+            ),
+            properties = RouteProperties(
+                RouteSummary(
+                    distance = 0.0,
+                    duration = 0.0
+                )
+            ),
+        )
+
+        var mockedRoute = Route(
+            origin = "Burriana",
+            destination = "Castellón",
+            trasnportMethod = TransportMethods.APIE,
+            route = emptyList(),
+            distance = 0.0,
+            duration = 0.0.toString(),
+            cost = 0.0,
+            routeType = RouteTypes.RAPIDA,
+            fav = false,
+            vehiclePlate = "",
+        )
+
+        `when`(mockRepository.createRoute("Burriana", "Castellón", TransportMethods.APIE,RouteTypes.RAPIDA, "", mockedCall))
+            .thenReturn(mockedRoute)
+
+        val routeTest = routeService.createRoute("Burriana", "Castellón", TransportMethods.APIE, RouteTypes.RAPIDA)
+        val consumition = routeTest.cost
+
+        verify(mockRepository).createRoute("Burriana", "Castellón", TransportMethods.APIE,RouteTypes.RAPIDA, "", mockedCall)
 
         // Comprobamos que la ruta fue creada correctamente
         assertEquals(mockedRoute.cost, consumition)

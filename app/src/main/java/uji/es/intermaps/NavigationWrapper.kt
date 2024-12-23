@@ -35,7 +35,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
     
     NavHost(
         navController = navHostController,
-        startDestination = "initial",
+        startDestination = "logIn",
         ) {
         composable("initial") {
             InitialScreen(
@@ -107,7 +107,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         composable(
             route = "createNewRoute"
         ) {
-            CreateNewRoute(auth, navHostController, viewModelRoute)
+            CreateNewRoute(auth,navHostController, viewModelRoute)
         }
 
         composable("vehicleList") {

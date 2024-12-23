@@ -5,9 +5,9 @@ data class Route(
     val destination: String,
     val route: List<Coordinate>,
     val distance: Double,
-    val duration: Double,
-    val cost: Double = 0.0,
+    val duration: String,
+    var cost: Double = 0.0,
     val routeType: RouteTypes = RouteTypes.RAPIDA,
     val fav: Boolean = false,
-    val trasnportMethod: TransportMethods = TransportMethods.VEHICULO,
+    val trasnportMethod: TransportMethods,
     val vehiclePlate: String = "")
