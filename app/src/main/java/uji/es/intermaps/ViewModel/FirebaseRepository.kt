@@ -601,11 +601,13 @@ class FirebaseRepository: Repository {
         return result
     }
 
-    override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TransportMethods,routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route {
-        val userEmail = auth.currentUser?.email
-            ?: throw IllegalStateException("No hay un usuario autenticado")
+    override suspend fun createRoute(origin: String, destination:String, trasnportMethods: TransportMethods,routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
         lateinit var resRoute: Route
         val coordinates = convertToCoordinate(route.geometry)
+        if (coordinates.isEmpty()) {
+            throw IllegalArgumentException("No se generaron coordenadas válidas para la ruta")
+        }
 
         try {
             val documentSnapshot = db.collection("InterestPlace")
@@ -615,8 +617,7 @@ class FirebaseRepository: Repository {
 
             if (documentSnapshot.exists()) {
                 val interestPlaces =
-                    documentSnapshot.get("interestPlaces") as? MutableList<Map<String, Any>>
-                        ?: mutableListOf()
+                    documentSnapshot.get("interestPlaces") as? MutableList<Map<String, Any>> ?: mutableListOf()
                 interestPlaces.find { place ->
                     val actualToponym = place["toponym"] as? String ?: ""
                     origin.equals(actualToponym)
@@ -627,29 +628,30 @@ class FirebaseRepository: Repository {
                 } ?: throw NotSuchPlaceException()
             }
 
-
             return suspendCoroutine { continuation ->
-                var tiempo =  route.properties.summary.duration;
-                if(tiempo >= 3600){
-                    tiempo = tiempo / 60 / 60
-                }else{
-                    tiempo = tiempo / 60
-                }
+                var tiempo = route.properties.summary.duration
 
+                route.properties.summary.duration = tiempo/60
+                var horas = (tiempo/3600).toInt()
+                val minutos = ((tiempo %3600) /60).toInt()
 
                 val iniEndCoordinates: MutableList<Coordinate> = mutableListOf()
 
                 iniEndCoordinates.add(coordinates.get(0))
                 iniEndCoordinates.add(coordinates.get(coordinates.size - 1))
                 var distance = String.format("%.2f", route.properties.summary.distance / 1000).toDouble()
-                tiempo = String.format("%.2f", route.properties.summary.duration / 60).toDouble()
+                var dur = "$minutos min"
+                if (horas != 0){
+                    dur = "$horas h $minutos min"
+                }
+
                 val newRoute = mapOf(
                     "origin" to origin,
                     "destination" to destination,
                     "trasnportMethod" to trasnportMethods,
                     "route" to iniEndCoordinates,
                     "distance" to distance,
-                    "duration" to tiempo,
+                    "duration" to dur,
                     "cost" to 0.0,
                     "routeType" to routeType,
                     "fav" to false,
@@ -660,7 +662,7 @@ class FirebaseRepository: Repository {
                     destination = destination,
                     route = coordinates,
                     distance = route.properties.summary.distance / 1000,
-                    duration = tiempo,
+                    duration = dur,
                     trasnportMethod = trasnportMethods,
                     routeType = routeType,
                     vehiclePlate = vehiclePlate
@@ -739,6 +741,45 @@ class FirebaseRepository: Repository {
         } catch (e: Exception) {
             Log.e("ElectricityPrices", "Error al obtener los precios de la luz: ${e.message}")
             return 0.0
+        }
+    }
+
+    override suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double> {
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        return try {
+            val documentSnapshot = db.collection("Vehicle")
+                .document(userEmail)
+                .get()
+                .await()
+
+            Log.d("VehicleService", "Documento recuperado: ${documentSnapshot.data}")
+
+            if (documentSnapshot.exists()) {
+                val vehicles = documentSnapshot.get("vehicles") as? List<Map<String, Any>>
+                    ?: throw IllegalArgumentException("No se encontró el campo 'vehicles' en el documento")
+
+                // Busca el vehículo con la matrícula especificada
+                val vehicle = vehicles.find { it["plate"] == route.vehiclePlate }
+                    ?: throw IllegalArgumentException("No se encontró un vehículo con la matrícula '${route.vehiclePlate}'")
+
+                val typeString = vehicle["type"] as? String
+                    ?: throw IllegalArgumentException("No se encontró el campo 'type' para el vehículo '${route.vehiclePlate}'")
+
+                val vehicleType = VehicleTypes.values().find { it.type == typeString }
+                    ?: throw IllegalArgumentException("El tipo de vehículo '$typeString' no es válido")
+
+                val consumption = vehicle["consumption"] as? Double
+                    ?: throw IllegalArgumentException("No se encontró el campo 'consumption' para el vehículo '${route.vehiclePlate}'")
+
+                Pair(vehicleType, consumption)
+            } else {
+                throw IllegalArgumentException("El documento del vehículo no existe")
+            }
+        } catch (e: Exception) {
+            Log.e("VehicleService", "Error al obtener el tipo y consumo del vehículo: ${e.message}")
+            throw e
         }
     }
 

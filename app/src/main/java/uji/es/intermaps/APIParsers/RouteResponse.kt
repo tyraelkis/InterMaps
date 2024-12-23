@@ -18,7 +18,7 @@ data class RouteFeature(
 
 data class RouteGeometry(
     @SerializedName("coordinates")
-    val coordinates: List<List<Double>> // Lista de coordenadas del recorrido
+    val coordinates: List<List<Double>>
 )
 
 data class RouteProperties(
@@ -29,5 +29,5 @@ data class RouteSummary(
     @SerializedName("distance")
     val distance: Double,
     @SerializedName("duration")
-    val duration: Double
+    var duration: Double
 )

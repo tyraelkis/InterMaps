@@ -52,6 +52,8 @@ class RouteServiceTest {
         interestPlaceService.createInterestPlaceFromToponym("Burriana")
         interestPlaceService.createInterestPlaceFromToponym("Castellón")
         val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
+        val vehicleType = routeService.getVehicleTypeAndConsump(routeTest).first
+        routeService.calculateConsumition(routeTest, routeTest.trasnportMethod, vehicleType)
         val res = db.doesRouteExist(routeTest)
         routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod)
         assertEquals(true, res)
@@ -64,33 +66,20 @@ class RouteServiceTest {
     }
 
     @Test
-    fun calculateFuelConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
+    fun calculateConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,
             RouteTypes.RAPIDA)
-        val calculatedConsumition = routeService.calculateFuelConsumition(routeTest, TransportMethods.VEHICULO, VehicleTypes.GASOLINA)
+        val calculatedConsumition = routeService.calculateConsumition(routeTest, TransportMethods.VEHICULO, VehicleTypes.GASOLINA)
         assertEquals(true, calculatedConsumition)
     }
 
     @Test(expected = NotValidTransportException::class)
-    fun calculateFuelConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
+    fun calculateConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
         val routeTest = routeService.createRoute("Galicia", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
-        routeService.calculateFuelConsumition(routeTest, TransportMethods.APIE, VehicleTypes.ELECTRICO)
+        routeService.calculateConsumition(routeTest, TransportMethods.APIE, VehicleTypes.ELECTRICO)
 
     }
 
-    @Test
-    fun calculateElectricConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Burriana", "Valencia", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
-        val calculatedConsumition = routeService.calculateElectricConsumition(routeTest, TransportMethods.VEHICULO, VehicleTypes.ELECTRICO)
-        assertEquals(true, calculatedConsumition)
-    }
-
-    @Test(expected = NotValidTransportException::class)
-    fun calculateElectricConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
-        val routeTest = routeService.createRoute("Galicia", "Valencia", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
-        routeService.calculateElectricConsumition(routeTest, TransportMethods.APIE, VehicleTypes.ELECTRICO)
-
-    }
     @Test
     fun calculateCaloriesConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Burriana", "Alicante", TransportMethods.VEHICULO, RouteTypes.RAPIDA)

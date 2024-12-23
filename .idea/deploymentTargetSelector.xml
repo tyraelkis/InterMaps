@@ -14,6 +14,12 @@
       <SelectionState runConfigName="VehicleServiceTestsIN">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="putFuelCostAverage_E4Valid_averageCalculated()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="createRoute_E1Valid_routeIsCreated()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>
