@@ -38,5 +38,4 @@ interface Repository {
 
     suspend fun getAverageFuelPrices(): List<Double>
     suspend fun getElectricPrice(): Double
-
-}
+    suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double> }
