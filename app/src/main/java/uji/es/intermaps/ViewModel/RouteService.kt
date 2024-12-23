@@ -40,7 +40,6 @@ open class RouteService(private val repository: Repository){
 
     suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
         var res = 0.0
-        val routeRepository = RouteRepository()
         if (transportMethod != TransportMethods.VEHICULO ){
             throw NotValidTransportException()
         } else {
