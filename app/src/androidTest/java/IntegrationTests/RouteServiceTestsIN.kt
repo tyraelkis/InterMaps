@@ -211,6 +211,28 @@ class RouteTests {
         // Comprobamos que la ruta fue creada correctamente
         assertEquals(mockedRoute.cost, consumition)
 
+    }
 
+    @Test
+    fun createRouteWithType_E1Valid_routeIsCalculated(): Unit = runBlocking {
+        val mockedCall = RouteFeature(
+            geometry = RouteGeometry(
+                coordinates = emptyList()
+            ),
+            properties = RouteProperties(
+                RouteSummary(
+                    distance = 1200.0,
+                    duration = 1100.0
+                )
+            ),
+        )
+        `when`(mockRouteRepository.calculateRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.CORTA))
+            .thenReturn(mockedCall)
+
+        val routeTest = routeService.createTypeRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.CORTA)
+
+        assertEquals(Pair(true, mockedCall), routeTest)
+
+        verify(mockRouteRepository).calculateRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.CORTA)
     }
 }

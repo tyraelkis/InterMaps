@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.Repository
@@ -92,6 +93,10 @@ open class RouteService(private val repository: Repository){
 
     suspend fun getElctricCost():Double {
         return repository.getElectricPrice()
+    }
+
+    suspend fun createTypeRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes?):Pair<Boolean,RouteFeature> {
+        TODO()
     }
 
 

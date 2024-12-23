@@ -7,6 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import uji.es.intermaps.Exceptions.NoValidTypeException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.Repository
@@ -39,18 +40,21 @@ class RouteServiceTest {
         userService.login(userTest.email, userTest.pswd)
         interestPlaceService.createInterestPlaceFromToponym("Valencia")
         interestPlaceService.createInterestPlaceFromToponym("Vila-real")
+        interestPlaceService.createInterestPlaceFromToponym("Burriana")
+        interestPlaceService.createInterestPlaceFromToponym("Castellón")
     }
+
     @After
     fun tearDown(): Unit = runBlocking {
         interestPlaceService.deleteInterestPlace(interestPlaceService.getInterestPlaceByToponym("Valencia").coordinate)
         interestPlaceService.deleteInterestPlace(interestPlaceService.getInterestPlaceByToponym("Vila-real").coordinate)
+        interestPlaceService.deleteInterestPlace(interestPlaceService.getInterestPlaceByToponym("Burriana").coordinate)
+        interestPlaceService.deleteInterestPlace(interestPlaceService.getInterestPlaceByToponym("Castellón").coordinate)
         userService.signOut()
     }
 
     @Test
     fun createRoute_E1Valid_routeIsCreated(): Unit = runBlocking {
-        interestPlaceService.createInterestPlaceFromToponym("Burriana")
-        interestPlaceService.createInterestPlaceFromToponym("Castellón")
         val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
         val res = db.doesRouteExist(routeTest)
         assertEquals(true, res)
@@ -102,6 +106,17 @@ class RouteServiceTest {
         val routeTest = routeService.createRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA)
         routeService.calculateCaloriesConsumition(routeTest, TransportMethods.VEHICULO)
 
+    }
+
+    @Test
+    fun createRouteWithType_E1Valid_routeIsCalculated(): Unit = runBlocking {
+        val routeTest = routeService.createTypeRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.CORTA)
+        assertEquals(true, routeTest.first)
+    }
+
+    @Test(expected = NoValidTypeException::class)
+    fun createRouteWithType_E2Invalid_routeNotCalculated(): Unit = runBlocking {
+        val routeTest = routeService.createTypeRoute("Burriana", "Castellón", TransportMethods.VEHICULO,null)
     }
 
 }
