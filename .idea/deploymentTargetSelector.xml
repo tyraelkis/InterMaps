@@ -5,10 +5,13 @@
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="calculateFuelConsumition_E2Valid_consumitionCalculated()">
+      <SelectionState runConfigName="createRoute_E1Valid_routeIsCreated() (1)">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="createRoute_E1Valid_routeIsCreated() (1)">
+      <SelectionState runConfigName="createRoute_E1Valid_routeIsCreated() (2)">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="createRoute_E4Invalid_routeNotCreated()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
