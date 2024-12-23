@@ -2,21 +2,19 @@
 <project version="4">
   <component name="deploymentTargetSelector">
     <selectionStates>
-      <SelectionState runConfigName="app">
+      <SelectionState runConfigName="deleteRoute_E4Valid_routeDeleted()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="saveRoute_E2Valid_routeSaved()">
+      <SelectionState runConfigName="RouteServiceTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="saveRoute_E4Valid_routeSaved()">
+      <SelectionState runConfigName="deleteRoute_E4Invalid_routeDeleted()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="createVehicle_E3Invalid_errorOnCreatingVehicle()">
+      <SelectionState runConfigName="deleteRoute_E2Valid_routeDeleted()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="createRoute_E1Valid_routeIsCreated() (1)">
-      <SelectionState runConfigName="saveRoute_E4Valid_routeSaved()">
-      <SelectionState runConfigName="createInterestPlaceByToponym_E1Valid_InterestPlaceCreated()">
+      <SelectionState runConfigName="calculateCaloriesConsumition_E3Valid_consumitionCalculated()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

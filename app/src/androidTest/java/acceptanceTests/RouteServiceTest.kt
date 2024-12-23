@@ -57,7 +57,7 @@ class RouteServiceTest {
         val vehicleType = routeService.getVehicleTypeAndConsump(routeTest).first
         routeService.calculateConsumition(routeTest, routeTest.trasnportMethod, vehicleType)
         val res = db.doesRouteExist(routeTest)
-        routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod)
+        routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod, routeTest.vehiclePlate)
         assertEquals(true, res)
     }
 
@@ -103,6 +103,7 @@ class RouteServiceTest {
     fun saveRoute_E4Valid_routeSaved(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Castello de la Plana, VC, Spain", "Borriana, VC, Spain", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
         val res = routeService.putRoute(routeTest)
+        routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod, routeTest.vehiclePlate)
         assertEquals(true, res)
     }
 
@@ -114,15 +115,16 @@ class RouteServiceTest {
 
     @Test
     fun deleteRoute_E4Valid_routeDeleted(): Unit = runBlocking {
-        interestPlaceService.createInterestPlaceFromToponym("Castellón")
-        val routeTest: Route = routeService.createRoute("Castellón", "Valencia", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
-        val res = routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod)
+        val routeTest: Route = routeService.createRoute("Castello de la Plana, VC, Spain", "Borriana, VC, Spain", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
+        routeService.putRoute(routeTest)
+        val res = routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod, routeTest.vehiclePlate)
         assertEquals(true, res)
     }
 
-    @Test (expected = NoSuchElementException::class)
+    @Test (expected = NotValidPlaceException::class)
     fun deleteRoute_E4Invalid_routeDeleted(): Unit = runBlocking {
-        routeService.deleteRoute("Barcelona", "Alicante", TransportMethods.VEHICULO)
+        val routeTest: Route = routeService.createRoute("Castellón", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
+        routeService.deleteRoute("Castellón", "Castellón", TransportMethods.VEHICULO, routeTest.vehiclePlate)
     }
 
 

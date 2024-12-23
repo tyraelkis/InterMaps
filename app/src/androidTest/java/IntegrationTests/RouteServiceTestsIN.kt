@@ -209,7 +209,6 @@ class RouteTests {
 
     @Test
     fun deleteRoute_E2Valid_routeDeleted(): Unit = runBlocking {
-        // Crear un mock de la ruta que se eliminará
         val mockedRoute = Route(
             origin = "Burriana",
             destination = "Castellón de la Plana",
@@ -223,21 +222,29 @@ class RouteTests {
             vehiclePlate = "1234XYZ"
         )
 
-        // Configurar el mock para que acepte la eliminación
-        doNothing().`when`(mockRouteRepository).deleteRoute(
-            origin = mockedRoute.origin,
-            destination = mockedRoute.destination,
-            trasnportMethod = mockedRoute.trasnportMethod
+        `when`(
+            mockRepository.deleteRoute(
+                origin = mockedRoute.origin,
+                destination = mockedRoute.destination,
+                trasnportMethod = mockedRoute.trasnportMethod,
+                vehiclePlate = mockedRoute.vehiclePlate
+            )
+        ).thenReturn(true)
+
+        val result = routeService.deleteRoute(
+            mockedRoute.origin,
+            mockedRoute.destination,
+            mockedRoute.trasnportMethod,
+            mockedRoute.vehiclePlate
         )
 
-        // Llamar al servicio para eliminar la ruta
-        routeService.deleteRoute(mockedRoute.origin, mockedRoute.destination, mockedRoute.trasnportMethod)
-
-        // Verificar que el método en el repositorio fue llamado con los parámetros correctos
-        verify(mockRouteRepository).deleteRoute(
+        verify(mockRepository).deleteRoute(
             origin = mockedRoute.origin,
             destination = mockedRoute.destination,
-            trasnportMethod = mockedRoute.trasnportMethod
+            trasnportMethod = mockedRoute.trasnportMethod,
+            vehiclePlate = mockedRoute.vehiclePlate
         )
+
+        assertEquals(true, result)
     }
 }

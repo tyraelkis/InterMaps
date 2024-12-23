@@ -267,10 +267,6 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         }
     }
 
-    override suspend fun deleteRoute (origin: String,destination: String, trasnportMethod: TransportMethods){
-
-    }
-
 
     private fun saveFuelCostAverageToDatabase(averages: List<Double>) {
         val fuelPricesDocument = db.collection("FuelPrices").document("mediaPrecios")
