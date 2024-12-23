@@ -11,6 +11,7 @@ import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
+import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
@@ -620,11 +621,11 @@ class FirebaseRepository: Repository {
                 interestPlaces.find { place ->
                     val actualToponym = place["toponym"] as? String ?: ""
                     origin.equals(actualToponym)
-                } ?: throw NotSuchPlaceException()
+                } ?: throw NotValidPlaceException()
                 interestPlaces.find { place ->
                     val actualToponym = place["toponym"] as? String ?: ""
                     destination.equals(actualToponym)
-                } ?: throw NotSuchPlaceException()
+                } ?: throw NotValidPlaceException()
             }
 
 
@@ -685,7 +686,7 @@ class FirebaseRepository: Repository {
             }
         } catch (e: Exception) {
             Log.e("createRoute", "Error al crear la ruta: ${e.message}", e)
-            throw Exception("Error al crear la ruta: ${e.message}", e)
+            throw NotValidPlaceException("Error al crear la ruta: ${e.message}")
         }
         return resRoute
     }

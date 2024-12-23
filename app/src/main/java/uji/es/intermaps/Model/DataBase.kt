@@ -94,6 +94,35 @@ object DataBase {
     }
 
     suspend fun doesRouteExist(route: Route): Boolean{
-        TODO()
+        return try {
+            val userEmail = auth.currentUser?.email?: throw IllegalStateException("No hay un usuario autenticado")
+            val documentSnapshot = db.collection("Route")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (!documentSnapshot.exists()) {
+                return false
+            }
+
+            val routes = documentSnapshot.get("routes") as? List<Map<String, Any>> ?: emptyList()
+
+            routes.any { actualRoute ->
+                val routeOrigin = actualRoute["origin"] ?: return@any false
+                val routeDestination = actualRoute["destination"] ?: return@any false
+                val routeType = actualRoute["routeType"] ?: return@any false
+                val transportMethods = actualRoute["trasnportMethod"] ?: return@any false
+                if (transportMethods == "VEHICULO") {
+                    val vehiclePlate = actualRoute["vehiclePlate"] ?: return@any false
+                    routeOrigin == route.origin && routeDestination == route.destination && routeType == route.routeType.toString() && transportMethods == route.trasnportMethod.toString() && vehiclePlate == route.vehiclePlate
+                }else{
+                    routeOrigin == route.origin && routeDestination == route.destination && routeType == route.routeType.toString() && transportMethods == route.trasnportMethod.toString()
+                }
+
+            }
+        } catch (exception: Exception) {
+            Log.e("doesRouteExists", "Error al verificar la ruta: ${exception.message}", exception)
+            false
+        }
     }
 }

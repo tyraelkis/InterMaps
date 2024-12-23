@@ -51,9 +51,8 @@ class RouteServiceTest {
     fun createRoute_E1Valid_routeIsCreated(): Unit = runBlocking {
         interestPlaceService.createInterestPlaceFromToponym("Burriana")
         interestPlaceService.createInterestPlaceFromToponym("Castellón")
-        val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
+        val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
         val res = db.doesRouteExist(routeTest)
-        routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod)
         assertEquals(true, res)
     }
 
