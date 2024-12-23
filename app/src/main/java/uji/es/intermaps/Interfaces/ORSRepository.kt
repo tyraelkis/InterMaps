@@ -14,5 +14,7 @@ interface ORSRepository {
     suspend fun calculateRoute(origin: String, destination: String, trasnportMethod: TransportMethods,routeType: RouteTypes) : RouteFeature
     suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double
     suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods): Double
-
+    suspend fun createRoute( origin: String, destination: String,
+                             transportMethods: TransportMethods,
+                             routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route
 }

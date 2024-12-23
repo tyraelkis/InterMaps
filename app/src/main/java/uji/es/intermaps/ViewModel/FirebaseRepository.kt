@@ -602,98 +602,13 @@ class FirebaseRepository: Repository {
         return result
     }
 
-    override suspend fun createRoute(origin: String, destination:String, trasnportMethods: TransportMethods,routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route {
-        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
-        lateinit var resRoute: Route
-        val coordinates = convertToCoordinate(route.geometry)
-        if (coordinates.isEmpty()) {
-            throw IllegalArgumentException("No se generaron coordenadas válidas para la ruta")
-        }
 
-        try {
-            val documentSnapshot = db.collection("InterestPlace")
-                .document(userEmail)
-                .get()
-                .await()
+    override suspend fun saveRouteToDatabase(route: Route) {
 
-            if (documentSnapshot.exists()) {
-                val interestPlaces =
-                    documentSnapshot.get("interestPlaces") as? MutableList<Map<String, Any>> ?: mutableListOf()
-                interestPlaces.find { place ->
-                    val actualToponym = place["toponym"] as? String ?: ""
-                    origin.equals(actualToponym)
-                } ?: throw NotSuchPlaceException()
-                interestPlaces.find { place ->
-                    val actualToponym = place["toponym"] as? String ?: ""
-                    destination.equals(actualToponym)
-                } ?: throw NotSuchPlaceException()
-            }
-
-            return suspendCoroutine { continuation ->
-                var tiempo = route.properties.summary.duration
-
-                route.properties.summary.duration = tiempo/60
-                var horas = (tiempo/3600).toInt()
-                val minutos = ((tiempo %3600) /60).toInt()
-
-                val iniEndCoordinates: MutableList<Coordinate> = mutableListOf()
-
-                iniEndCoordinates.add(coordinates.get(0))
-                iniEndCoordinates.add(coordinates.get(coordinates.size - 1))
-                var distance = String.format("%.2f", route.properties.summary.distance / 1000).toDouble()
-                var dur = "$minutos min"
-                if (horas != 0){
-                    dur = "$horas h $minutos min"
-                }
-
-                val newRoute = mapOf(
-                    "origin" to origin,
-                    "destination" to destination,
-                    "trasnportMethod" to trasnportMethods,
-                    "route" to iniEndCoordinates,
-                    "distance" to distance,
-                    "duration" to dur,
-                    "cost" to 0.0,
-                    "routeType" to routeType,
-                    "fav" to false,
-                    "vehiclePlate" to vehiclePlate
-                )
-                resRoute = Route(
-                    origin = origin,
-                    destination = destination,
-                    route = coordinates,
-                    distance = route.properties.summary.distance / 1000,
-                    duration = dur,
-                    trasnportMethod = trasnportMethods,
-                    routeType = routeType,
-                    vehiclePlate = vehiclePlate
-                )
-                Log.d("coordenadas de la ruta",resRoute.route.toString())
-                val userDocument = db.collection("Route").document(userEmail)
-                //Intenta añadir a interestPlaces el nuevo lugar evitando duplicados con el FieldValue.arrayUnion
-                userDocument.update("routes", FieldValue.arrayUnion(newRoute))
-                    .addOnSuccessListener {
-                        continuation.resume(resRoute)
-                    }
-                    .addOnFailureListener { _ ->
-                        // Si falla porque el usuario aún no tiene lugares guardados crea el documento con el atributo interestPlaces y le añade el lugar
-                        userDocument.set(mapOf("routes" to listOf(newRoute)))
-                            .addOnSuccessListener {
-                                continuation.resume(resRoute)
-                            }
-                            .addOnFailureListener { e ->
-                                continuation.resumeWithException(e)
-                            }
-                    }
-            }
-        } catch (e: Exception) {
-            Log.e("createRoute", "Error al crear la ruta: ${e.message}", e)
-            throw Exception("Error al crear la ruta: ${e.message}", e)
-        }
-        return resRoute
     }
 
-    fun convertToCoordinate(lista: RouteGeometry):List<Coordinate>{
+
+    override fun convertToCoordinate(lista: RouteGeometry):List<Coordinate>{
         var listaCoordenadas: ArrayList<Coordinate> = ArrayList()
         for (coordenada in lista.coordinates){
             listaCoordenadas.add(Coordinate(latitude = coordenada[1], longitude = coordenada[0]))
@@ -727,18 +642,13 @@ class FirebaseRepository: Repository {
     override suspend fun getElectricPrice(): Double {
         try {
             val userDocument = db.collection("ElectricityPrices").document("precios").get().await()
-
             if (userDocument.exists()) {
                 val precioLuz = userDocument.getDouble("precioLuz")
-
                 if (precioLuz != null ) {
                     return precioLuz
-                } else {
-                    return 0.0
-                }
-            } else {
-                return -1.0
-            }
+                } else { return 0.0 }
+            } else { return -1.0 }
+
         } catch (e: Exception) {
             Log.e("ElectricityPrices", "Error al obtener los precios de la luz: ${e.message}")
             return 0.0
@@ -761,7 +671,6 @@ class FirebaseRepository: Repository {
                 val vehicles = documentSnapshot.get("vehicles") as? List<Map<String, Any>>
                     ?: throw IllegalArgumentException("No se encontró el campo 'vehicles' en el documento")
 
-                // Busca el vehículo con la matrícula especificada
                 val vehicle = vehicles.find { it["plate"] == route.vehiclePlate }
                     ?: throw IllegalArgumentException("No se encontró un vehículo con la matrícula '${route.vehiclePlate}'")
 
@@ -783,6 +692,7 @@ class FirebaseRepository: Repository {
             throw e
         }
     }
+
 
 
 

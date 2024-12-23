@@ -43,6 +43,7 @@ import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
 import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import uji.es.intermaps.Model.Route
 import uji.es.intermaps.R
 
 @Composable
@@ -157,15 +158,15 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                     LocationCard("${destination}", "Imagen 2")
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 // Datos adicionales
-                Text(
+                /*Text(
                     text = "Datos adicionales",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     modifier = Modifier.padding(start = 16.dp)
-                )
+                )*/
 
                 Column(modifier = Modifier.padding(16.dp)) {
                     RouteDetailItem(label = "Método de transporte", value = "${transportMethod}")
@@ -189,7 +190,9 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                 // Botón Guardar ruta
                 Button(
                     onClick = {
-                        //la idea es que lleve a la lista de rutas, cuando este creada
+                        viewModel.route.value?.let { currentRoute ->
+                            viewModel.saveRoute(currentRoute) // Llama al método del ViewModel
+                        }
                         navController.navigate("home")
                     },
                     modifier = Modifier
@@ -199,7 +202,7 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = "Ver rutas",
+                        text = "Guardar ruta",
                         color = Color.White,
                         fontSize = 18.sp
                     )

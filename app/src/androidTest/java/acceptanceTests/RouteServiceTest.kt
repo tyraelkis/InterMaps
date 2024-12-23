@@ -94,4 +94,17 @@ class RouteServiceTest {
 
     }
 
+    @Test
+    fun saveRoute_E4Valid_routeSaved(): Unit = runBlocking {
+        val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
+        val res = routeService.putRoute(routeTest)
+        assertEquals(true, res)
+    }
+
+    @Test (expected = NotValidPlaceException::class)
+    fun saveRoute_E4Invalid_noRouteSaved(): Unit = runBlocking {
+        val routeTest: Route = routeService.createRoute("Burriana", "Burriana", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
+        routeService.putRoute(routeTest)
+    }
+
 }

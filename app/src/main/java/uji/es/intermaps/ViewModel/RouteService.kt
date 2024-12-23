@@ -6,6 +6,7 @@ import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.Repository
@@ -17,6 +18,7 @@ import uji.es.intermaps.Model.VehicleTypes
 
 open class RouteService(private val repository: Repository){
     public var routeRepository = RouteRepository()
+
     suspend fun createRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String = ""):Route {
         if (origin.isEmpty() or destination.isEmpty()){
             throw NotValidPlaceException()
@@ -29,7 +31,7 @@ open class RouteService(private val repository: Repository){
         val originString = "${originCoordinate.longitude},${originCoordinate.latitude}"
         val destinationString = "${destinationCoordinate.longitude},${destinationCoordinate.latitude}"
         val routeCall = routeRepository.calculateRoute(originString, destinationString, transportMethod, routeType )
-        val route = repository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate,routeCall)
+        val route = routeRepository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate, routeCall)
         return route
     }
 
@@ -58,6 +60,18 @@ open class RouteService(private val repository: Repository){
         return res
     }
 
+    suspend fun putRoute(route: Route): Boolean {
+        if (route.origin.isEmpty() or route.destination.isEmpty()){
+            throw NotValidPlaceException()
+        }
+        if (route.origin == route.destination){
+            throw NotValidPlaceException()
+        }
+        repository.saveRouteToDatabase(route)
+        return true
+
+    }
+
 
     suspend fun putFuelCostAverage():Boolean {
         val routeRepository = RouteRepository()
@@ -82,6 +96,11 @@ open class RouteService(private val repository: Repository){
 
     suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double> {
         return repository.getVehicleTypeAndConsump(route)
+    }
+
+    fun convertToCoordinate(geometry: RouteGeometry): List<Coordinate> {
+        return repository.convertToCoordinate(geometry)
+
     }
 
 
