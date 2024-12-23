@@ -40,6 +40,7 @@ class RouteServiceTest {
         userService.login(userTest.email, userTest.pswd)
         interestPlaceService.createInterestPlaceFromToponym("Valencia")
         interestPlaceService.createInterestPlaceFromToponym("Vila-real")
+
     }
     @After
     fun tearDown(): Unit = runBlocking {
@@ -110,5 +111,8 @@ class RouteServiceTest {
         val routeTest: Route = routeService.createRoute("Valencia", "Valencia", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
         routeService.putRoute(routeTest)
     }
+
+
+
 
 }
