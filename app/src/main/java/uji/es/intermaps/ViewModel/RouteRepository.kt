@@ -267,29 +267,10 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         }
     }
 
-    private fun saveRouteCostToDatabase(origin: String, destination: String, cost: Double) {
-        val userEmail = auth.currentUser?.email
-            ?: throw IllegalStateException("No hay un usuario autenticado")
+    override suspend fun deleteRoute (origin: String,destination: String, trasnportMethod: TransportMethods){
 
-        val routesDocument = db.collection("Route").document(userEmail)
-        routesDocument.get().addOnSuccessListener { documentSnapshot ->
-            if (documentSnapshot.exists()) {
-                val routes = documentSnapshot.get("routes") as? MutableList<Map<String, Any>>
-                    ?: throw IllegalArgumentException("No se encontró el campo 'routes' en el documento")
-                val routeId = routes.indexOfFirst {
-                    it["origin"] == origin && it["destination"] == destination
-                }
-
-                if (routeId in routes.indices) {
-                    val updatedRoute = routes[routeId].toMutableMap()
-                    updatedRoute["cost"] = cost
-                    routes[routeId] = updatedRoute
-
-                    routesDocument.update("routes", routes)
-                }
-            }
-        }
     }
+
 
     private fun saveFuelCostAverageToDatabase(averages: List<Double>) {
         val fuelPricesDocument = db.collection("FuelPrices").document("mediaPrecios")

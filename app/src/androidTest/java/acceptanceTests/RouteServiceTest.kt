@@ -112,6 +112,18 @@ class RouteServiceTest {
         routeService.putRoute(routeTest)
     }
 
+    @Test
+    fun deleteRoute_E4Valid_routeDeleted(): Unit = runBlocking {
+        interestPlaceService.createInterestPlaceFromToponym("Castellón")
+        val routeTest: Route = routeService.createRoute("Castellón", "Valencia", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
+        val res = routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod)
+        assertEquals(true, res)
+    }
+
+    @Test (expected = NoSuchElementException::class)
+    fun deleteRoute_E4Invalid_routeDeleted(): Unit = runBlocking {
+        routeService.deleteRoute("Barcelona", "Alicante", TransportMethods.VEHICULO)
+    }
 
 
 

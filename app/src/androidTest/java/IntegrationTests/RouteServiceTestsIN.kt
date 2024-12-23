@@ -9,6 +9,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -204,5 +205,39 @@ class RouteTests {
 
         assertEquals(expectedCalories, calories, 0.1)
         verify(mockRouteRepository).calculateCaloriesConsumition(mockedRoute, TransportMethods.APIE)
+    }
+
+    @Test
+    fun deleteRoute_E2Valid_routeDeleted(): Unit = runBlocking {
+        // Crear un mock de la ruta que se eliminará
+        val mockedRoute = Route(
+            origin = "Burriana",
+            destination = "Castellón de la Plana",
+            trasnportMethod = TransportMethods.VEHICULO,
+            route = emptyList(),
+            distance = 25.0,
+            duration = "30 min",
+            cost = 0.0,
+            routeType = RouteTypes.RAPIDA,
+            fav = false,
+            vehiclePlate = "1234XYZ"
+        )
+
+        // Configurar el mock para que acepte la eliminación
+        doNothing().`when`(mockRouteRepository).deleteRoute(
+            origin = mockedRoute.origin,
+            destination = mockedRoute.destination,
+            trasnportMethod = mockedRoute.trasnportMethod
+        )
+
+        // Llamar al servicio para eliminar la ruta
+        routeService.deleteRoute(mockedRoute.origin, mockedRoute.destination, mockedRoute.trasnportMethod)
+
+        // Verificar que el método en el repositorio fue llamado con los parámetros correctos
+        verify(mockRouteRepository).deleteRoute(
+            origin = mockedRoute.origin,
+            destination = mockedRoute.destination,
+            trasnportMethod = mockedRoute.trasnportMethod
+        )
     }
 }
