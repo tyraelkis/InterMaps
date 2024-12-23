@@ -16,6 +16,7 @@ import uji.es.intermaps.Interfaces.ElectricityPriceRepository
 import uji.es.intermaps.Interfaces.FuelPriceRepository
 import uji.es.intermaps.Interfaces.ORSRepository
 import uji.es.intermaps.Model.Coordinate
+import uji.es.intermaps.Model.DataBase.auth
 import uji.es.intermaps.Model.DataBase.db
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.RetrofitConfig
@@ -120,30 +121,29 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         return route
     }
 
-    override suspend fun calculateFuelConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
+    override suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
         val repository = FirebaseRepository()
         val routeService = RouteService(repository)
         var coste = 0.0
-        val consumoMedioGasolina95_l_por_100km = 7.0
-        val consumoMedioGasoleoA_l_por_100km = 5.0
-        if (transportMethod == TransportMethods.VEHICULO && vehicleType == VehicleTypes.GASOLINA ){
-            coste = (route.distance/100) * consumoMedioGasolina95_l_por_100km * routeService.getFuelCostAverage().get(0)
-        }
-        if (transportMethod == TransportMethods.VEHICULO && vehicleType == VehicleTypes.DIESEL){
-            coste = (route.distance/100) * consumoMedioGasoleoA_l_por_100km * routeService.getFuelCostAverage().get(1)
-        }
-        return coste
-    }
+        var costeRounded = 0.0
+        val consumo = routeService.getVehicleTypeAndConsump(route).second
+        if (transportMethod == TransportMethods.VEHICULO){
+            if (vehicleType == VehicleTypes.GASOLINA ){
+                coste = (route.distance/100) * consumo * routeService.getFuelCostAverage().get(0)
+                costeRounded = BigDecimal(coste).setScale(3, RoundingMode.HALF_UP).toDouble()
 
-    override suspend fun calculateElectricConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
-        val repository = FirebaseRepository()
-        val routeService = RouteService(repository)
-        var coste = 0.0
-        val consumoMediokWh_por_100km = 7.0
-        if (transportMethod == TransportMethods.VEHICULO && vehicleType == VehicleTypes.ELECTRICO ){
-            coste = (route.distance/100) * consumoMediokWh_por_100km * (routeService.getElctricCost()/1000)
+            }
+            else if (vehicleType == VehicleTypes.DIESEL){
+                coste = (route.distance/100) * consumo * routeService.getFuelCostAverage().get(1)
+                costeRounded = BigDecimal(coste).setScale(3, RoundingMode.HALF_UP).toDouble()
+            }
+            else if (vehicleType == VehicleTypes.ELECTRICO ){
+                coste = (route.distance/100) * consumo * (routeService.getElctricCost()/1000)
+                costeRounded = BigDecimal(coste).setScale(3, RoundingMode.HALF_UP).toDouble()
+            }
+            saveRouteCostToDatabase(route.origin, route.destination, costeRounded)
         }
-        return coste
+        return costeRounded
     }
 
 
@@ -152,12 +152,14 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         val caloriasMediaBici = 45
         val caloriasMediaCaminar = 62
         if (transportMethod == TransportMethods.APIE){
-            coste = (route.distance/100) * caloriasMediaCaminar
+            coste = route.distance * caloriasMediaCaminar
         }
         if (transportMethod == TransportMethods.BICICLETA){
-            coste = (route.distance/100) * caloriasMediaBici
+            coste = route.distance * caloriasMediaBici
         }
-        return coste
+        val costeRounded = BigDecimal(coste).setScale(1, RoundingMode.HALF_UP).toDouble()
+        saveRouteCostToDatabase(route.origin, route.destination, costeRounded)
+        return costeRounded
     }
 
     override suspend fun calculateFuelCostAverage(): Boolean {
@@ -191,6 +193,30 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             return false
         }
 
+    }
+
+    private fun saveRouteCostToDatabase(origin: String, destination: String, cost: Double) {
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        val routesDocument = db.collection("Route").document(userEmail)
+        routesDocument.get().addOnSuccessListener { documentSnapshot ->
+            if (documentSnapshot.exists()) {
+                val routes = documentSnapshot.get("routes") as? MutableList<Map<String, Any>>
+                    ?: throw IllegalArgumentException("No se encontró el campo 'routes' en el documento")
+                val routeId = routes.indexOfFirst {
+                    it["origin"] == origin && it["destination"] == destination
+                }
+
+                if (routeId in routes.indices) {
+                    val updatedRoute = routes[routeId].toMutableMap()
+                    updatedRoute["cost"] = cost
+                    routes[routeId] = updatedRoute
+
+                    routesDocument.update("routes", routes)
+                }
+            }
+        }
     }
 
     private fun saveFuelCostAverageToDatabase(averages: List<Double>) {

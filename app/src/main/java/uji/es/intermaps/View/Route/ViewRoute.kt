@@ -55,6 +55,7 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
     val routePoints = viewModel.route.value?.route
     val distance = viewModel.route.value?.distance
     val duration = viewModel.route.value?.duration
+    val cost = viewModel.route.value?.cost
     val vehiclePlate = viewModel.route.value?.vehiclePlate
     val loading = viewModel.loading
     val startPoint:Coordinate? = routePoints?.get(0)
@@ -140,7 +141,7 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
 
                 // Información de la ruta
                 Text(
-                    text = "${origin} -->${destination}",
+                    text = "${origin} → ${destination}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     modifier = Modifier.padding(start = 16.dp)
@@ -173,13 +174,14 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                     }
                     RouteDetailItem(label = "Tipo de ruta", value = "${routeType}")
                     RouteDetailItem(label = "Distancia", value = "${distance} km")
-                    if (duration!! < 60){
-                        RouteDetailItem(label = "Duración", value = "${duration} min")
-                    }else{
-                        RouteDetailItem(label = "Duración", value = "${duration} horas")
-                    }
+                    RouteDetailItem(label = "Duración", value = "${duration}")
 
-                    //RouteDetailItem(label = "Coste", value = "2€")
+                    if (transportMethod == TransportMethods.VEHICULO){
+                        RouteDetailItem(label = "Coste", value = "${cost} €")
+                    }
+                    else{
+                        RouteDetailItem(label = "Coste", value = "${cost} kcal")
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
