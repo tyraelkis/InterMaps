@@ -24,6 +24,7 @@ import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.Model.VehicleFactory
+import uji.es.intermaps.Model.VehicleTypes
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
