@@ -604,7 +604,53 @@ class FirebaseRepository: Repository {
 
 
     override suspend fun saveRouteToDatabase(route: Route) {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        try {
+            val documentSnapshot = db.collection("InterestPlace")
+                .document(userEmail)
+                .get()
+                .await()
 
+            if (documentSnapshot.exists()) {
+                val interestPlaces =
+                    documentSnapshot.get("interestPlaces") as? MutableList<Map<String, Any>> ?: mutableListOf()
+                interestPlaces.find { place ->
+                    val actualToponym = place["toponym"] as? String ?: ""
+                    route.origin == actualToponym
+                } ?: throw NotSuchPlaceException()
+                interestPlaces.find { place ->
+                    val actualToponym = place["toponym"] as? String ?: ""
+                    route.destination == actualToponym
+                } ?: throw NotSuchPlaceException()
+            }
+
+            val newRoute = mapOf(
+                "origin" to route.origin,
+                "destination" to route.destination,
+                "trasnportMethod" to route.trasnportMethod,
+                "route" to route.route.take(2),
+                "distance" to route.distance,
+                "duration" to route.duration,
+                "cost" to route.cost,
+                "routeType" to route.routeType,
+                "fav" to false,
+                "vehiclePlate" to route.vehiclePlate
+            )
+
+            val userDocument = db.collection("Route").document(userEmail)
+            suspendCoroutine { continuation ->
+                userDocument.update("routes", FieldValue.arrayUnion(newRoute))
+                    .addOnFailureListener { _ ->
+                        userDocument.set(mapOf("routes" to listOf(newRoute)))
+                            .addOnFailureListener { e ->
+                                continuation.resumeWithException(e)
+                            }
+                    }
+            }
+        } catch (e: Exception) {
+            Log.e("saveRouteToDatabase", "Error al guardar la ruta: ${e.message}", e)
+            throw Exception("Error al guardar la ruta: ${e.message}", e)
+        }
     }
 
 
