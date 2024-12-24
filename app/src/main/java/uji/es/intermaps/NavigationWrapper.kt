@@ -1,5 +1,7 @@
 package uji.es.intermaps
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -30,6 +32,7 @@ import uji.es.intermaps.ViewModel.VehicleViewModel
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, viewModelPlace: InterestPlaceViewModel, viewModelUser: UserViewModel, viewModelVehicle: VehicleViewModel, viewModelRoute: RouteViewModel) {
     
