@@ -25,6 +25,7 @@ import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.User
+import uji.es.intermaps.Model.VehicleTypes
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.RouteRepository
@@ -68,7 +69,7 @@ class RouteTests {
             trasnportMethod = TransportMethods.VEHICULO,
             route = emptyList(),
             distance = 0.0,
-            duration = 0.0,
+            duration = 0.0.toString(),
             cost = 0.0,
             routeType = RouteTypes.RAPIDA,
             fav = false,
@@ -101,75 +102,107 @@ class RouteTests {
                     toponym = "Castellón de la Plana",""
                 )
             )
-        `when`(mockRouteRepository.calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", trasnportMethod = TransportMethods.VEHICULO,RouteTypes.RAPIDA))
+        `when`(mockRouteRepository.calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", transportMethod = TransportMethods.VEHICULO,RouteTypes.RAPIDA))
             .thenReturn(mockedCall)
 
 
-        `when`(mockRepository.createRoute(
+        `when`(mockRouteRepository.createRoute(
             origin = "Burriana",
             destination = "Castellón de la Plana",
             transportMethod = TransportMethods.VEHICULO,
             routeType = RouteTypes.RAPIDA,
             vehiclePlate = "",
-            routeFeature = mockedCall
-        ))
-            .thenReturn(mockedRoute)
+            route = mockedCall
+        )).thenReturn(mockedRoute)
 
-        val routeTest = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
+        val routeTest = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
         // Comprobamos que la ruta fue creada correctamente
         assertEquals(mockedRoute, routeTest)
         verify(mockRouteRepository).searchInterestPlaceByToponym("Burriana")
         verify(mockRouteRepository).searchInterestPlaceByToponym("Castellón de la Plana")
-        verify(mockRouteRepository).calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", trasnportMethod = TransportMethods.VEHICULO,RouteTypes.RAPIDA)
-        verify(mockRepository).createRoute(origin = "Burriana",
+        verify(mockRouteRepository).calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", transportMethod = TransportMethods.VEHICULO,RouteTypes.RAPIDA)
+        verify(mockRouteRepository).createRoute(origin = "Burriana",
             destination = "Castellón de la Plana",
             transportMethod = TransportMethods.VEHICULO,
             routeType = RouteTypes.RAPIDA,
             vehiclePlate = "",
-            routeFeature = mockedCall
+            route = mockedCall
         )
 
 
     }
 
     @Test
-    fun calculateFuelConsumition_E2Valid_consumitionCalculated():Unit = runBlocking() {
-        val mockedCall = RouteFeature(
-            geometry = RouteGeometry(
-                coordinates = emptyList()
-            ),
-            properties = RouteProperties(
-                RouteSummary(
-                    distance = 0.0,
-                    duration = 0.0
-                )
-            ),
-        )
-
-        var mockedRoute = Route(
+    fun saveRoute_E2Valid_routeSaved(): Unit = runBlocking {
+        val mockedRoute = Route(
             origin = "Burriana",
-            destination = "Castellón",
+            destination = "Castellón de la Plana",
             trasnportMethod = TransportMethods.VEHICULO,
             route = emptyList(),
-            distance = 0.0,
-            duration = 0.0,
+            distance = 25.0,
+            duration = "30 min",
             cost = 0.0,
             routeType = RouteTypes.RAPIDA,
             fav = false,
-            vehiclePlate = "",
+            vehiclePlate = "1234XYZ"
         )
 
-        `when`(mockRepository.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "", mockedCall))
-            .thenReturn(mockedRoute)
+        `when`(mockRepository.saveRouteToDatabase(mockedRoute)).thenReturn(Unit)
+        routeService.putRoute(mockedRoute)
+        verify(mockRepository).saveRouteToDatabase(mockedRoute)
 
-        val routeTest = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA)
-        val consumition = routeTest.cost
+    }
 
-        verify(mockRepository).createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "",mockedCall)
+    @Test
+    fun calculateFuelConsumition_E2Valid_consumitionCalculated(): Unit = runBlocking {
+        val mockedRoute = Route(
+            origin = "Burriana",
+            destination = "Castellón de la Plana",
+            trasnportMethod = TransportMethods.VEHICULO,
+            route = emptyList(),
+            distance = 25.0,
+            duration = "30 min",
+            cost = 0.0,
+            routeType = RouteTypes.RAPIDA,
+            fav = false,
+            vehiclePlate = "1234XYZ"
+        )
 
-        // Comprobamos que la ruta fue creada correctamente
-        assertEquals(mockedRoute.cost, consumition)
+        val vehicleType = VehicleTypes.GASOLINA
+        val consumPerKm = 7.0
 
+        val expectedCost = mockedRoute.distance * consumPerKm
+        `when`(mockRouteRepository.calculateConsumition(mockedRoute, TransportMethods.VEHICULO, vehicleType))
+            .thenReturn(expectedCost)
 
+        val consumition = routeService.calculateConsumition(mockedRoute, TransportMethods.VEHICULO, vehicleType)
+
+        assertEquals(expectedCost, consumition, 0.1)
+        verify(mockRouteRepository).calculateConsumition(mockedRoute, TransportMethods.VEHICULO, vehicleType)
+    }
+
+    @Test
+    fun calculateCaloriesConsumition_E3Valid_consumitionCalculated(): Unit = runBlocking {
+        val mockedRoute = Route(
+            origin = "Burriana",
+            destination = "Castellón de la Plana",
+            trasnportMethod = TransportMethods.APIE,
+            route = emptyList(),
+            distance = 10.0, // 10 km de distancia como ejemplo
+            duration = "2 h",
+            cost = 0.0, // Inicialmente 0, se calculará en el test
+            routeType = RouteTypes.RAPIDA,
+            fav = false,
+            vehiclePlate = ""
+        )
+
+        val expectedCalories = mockedRoute.distance * 62.0
+        `when`(mockRouteRepository.calculateCaloriesConsumition(mockedRoute, TransportMethods.APIE))
+            .thenReturn(expectedCalories)
+
+        val calories = routeService.calculateCaloriesConsumition(mockedRoute, TransportMethods.APIE)
+
+        assertEquals(expectedCalories, calories, 0.1)
+        verify(mockRouteRepository).calculateCaloriesConsumition(mockedRoute, TransportMethods.APIE)
     }
 }

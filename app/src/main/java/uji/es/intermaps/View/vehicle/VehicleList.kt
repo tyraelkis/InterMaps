@@ -37,9 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.Vehicle
-import uji.es.intermaps.ViewModel.VehicleService
 import uji.es.intermaps.ViewModel.VehicleViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -47,17 +45,11 @@ import java.nio.charset.StandardCharsets
 @Composable
 fun VehicleList(auth: FirebaseAuth, navController: NavController, viewModel: VehicleViewModel) {
     val email = auth.currentUser?.email
-    val vehicleService = VehicleService(FirebaseRepository())
     var allVehicles by remember { mutableStateOf<List<Vehicle>>(emptyList()) }
 
     LaunchedEffect(email) {
         if (email != null) {
-            try {
-                val vehicles = vehicleService.viewVehicleList()
-                allVehicles = vehicles
-            } catch (e: Exception) {
-                allVehicles = emptyList()
-            }
+            allVehicles = viewModel.viewVehicleList()
         }
     }
 

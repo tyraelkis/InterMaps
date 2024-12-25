@@ -50,11 +50,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uji.es.intermaps.Exceptions.NotValidAliasException
-import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.R
-import uji.es.intermaps.ViewModel.FirebaseRepository
-import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +60,7 @@ fun InterestPlaceCreation(navController: NavController, viewModel: InterestPlace
     var showPopupCreateSucces by remember { mutableStateOf(false) }
     var showPopupCreateError by remember { mutableStateOf(false) }
     var alias by remember { mutableStateOf("") }
-    val interestPlaceService = InterestPlaceService(FirebaseRepository())
+    var errorMessage by remember { mutableStateOf("") }
 
 
     Column(
@@ -120,7 +116,7 @@ fun InterestPlaceCreation(navController: NavController, viewModel: InterestPlace
             MapboxMap(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f), // Ocupa la mitad del espacio
+                    .weight(1f),
                 mapViewportState = rememberMapViewportState {
                     setCameraOptions {
                         zoom(12.0)
@@ -197,26 +193,13 @@ fun InterestPlaceCreation(navController: NavController, viewModel: InterestPlace
         Button(
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        interestPlaceService.createInterestPlace(place.coordinate, place.toponym, alias)
-                        withContext(Dispatchers.Main) {
+                    viewModel.createInterestPlace(place.coordinate, place.toponym, alias)
+                    withContext(Dispatchers.Main) {
+                        errorMessage = viewModel.getErrorMessage()
+                        if (errorMessage.isEmpty())
                             showPopupCreateSucces = true
-                        }
-                    } catch (e: NotValidCoordinatesException) {
-                        withContext(Dispatchers.Main) {
+                        else
                             showPopupCreateError = true
-                            println("Error: ${e.message}")
-                        }
-                    } catch (e: NotValidAliasException) {
-                        withContext(Dispatchers.Main) {
-                            showPopupCreateError = true
-                            println("Error: ${e.message}")
-                        }
-                    } catch (e: Exception) {
-                        withContext(Dispatchers.Main) {
-                            showPopupCreateError = true
-                            println("Error general: ${e.message}")
-                        }
                     }
                 }
             },
@@ -320,7 +303,7 @@ fun InterestPlaceCreation(navController: NavController, viewModel: InterestPlace
                 ) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "No no se ha podido añadir el lugar de interés",
+                        text = "Error al crear el lugar\n${errorMessage}",
                         color = White,
                         fontSize = 26.sp,
                         textAlign = TextAlign.Center,

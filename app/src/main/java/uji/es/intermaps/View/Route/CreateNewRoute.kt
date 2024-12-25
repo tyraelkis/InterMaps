@@ -1,6 +1,8 @@
 package uji.es.intermaps.View.Route
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -54,10 +56,12 @@ import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.Vehicle
+import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.RouteService
 import uji.es.intermaps.ViewModel.RouteViewModel
 import uji.es.intermaps.ViewModel.VehicleService
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: RouteViewModel) {
     val user = auth.currentUser
@@ -77,16 +81,14 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
     val toponyms = allPlaces.map { it.toponym }
     val plates = allVehicles.map { it.plate }
     var routeType by remember { mutableStateOf(RouteTypes.RAPIDA) }
-    var trasnportMethod by remember { mutableStateOf(TransportMethods.VEHICULO) }
+    var transportMethod by remember { mutableStateOf(TransportMethods.VEHICULO) }
     var vehicle by remember { mutableStateOf("") }
 
     val isButtonEnabled by remember{
-        if(trasnportMethod == TransportMethods.VEHICULO){
-            derivedStateOf {
+        derivedStateOf {
+            if(transportMethod == TransportMethods.VEHICULO){
                 origin.isNotEmpty() && destination.isNotEmpty() && vehicle.isNotEmpty()
-            }
-        }else{
-            derivedStateOf {
+            }else{
                 origin.isNotEmpty() && destination.isNotEmpty()
             }
         }
@@ -377,7 +379,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = (trasnportMethod.toString()),
+                    text = (transportMethod.toString()),
                     color = Black,
                     modifier = Modifier.weight(1f)
                 )
@@ -401,13 +403,13 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                                 text = type.toString(),
                                 modifier = Modifier
                                     .clickable {
-                                        trasnportMethod = type
+                                        transportMethod = type
                                         expandedTransport = false
                                     }
                             )
                         },
                         onClick = {
-                            trasnportMethod = type
+                            transportMethod = type
                             expandedTransport = false
                         }
                     )
@@ -417,7 +419,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
             }
         }
         //Vehiculo elegido
-        if(trasnportMethod == TransportMethods.VEHICULO) {
+        if(transportMethod == TransportMethods.VEHICULO) {
             Spacer(modifier = Modifier.height(18.dp))
             Row(
                 modifier = Modifier
@@ -496,8 +498,9 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
         Spacer(modifier = Modifier.height(32.dp))
         Button(
             onClick = {
-                viewModel.updateRoute(origin, destination, trasnportMethod, routeType, vehicle)
+                viewModel.updateRoute(origin, destination, transportMethod, routeType, vehicle)
                 navController.navigate("viewRoute")
+
             },
             enabled = isButtonEnabled,
             modifier = Modifier

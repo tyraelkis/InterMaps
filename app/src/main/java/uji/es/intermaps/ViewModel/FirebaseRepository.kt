@@ -5,9 +5,6 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.APIParsers.RouteGeometry
@@ -21,7 +18,6 @@ import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
-import uji.es.intermaps.Model.RetrofitConfig
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.RouteTypes
@@ -32,7 +28,6 @@ import uji.es.intermaps.Model.VehicleTypes
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
-import kotlin.jvm.Throws
 
 class FirebaseRepository: Repository {
     private val db = DataBase.db
@@ -531,98 +526,133 @@ class FirebaseRepository: Repository {
         }
     }
 
-
-
-    override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TransportMethods,routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route {
-        val userEmail = auth.currentUser?.email
-            ?: throw IllegalStateException("No hay un usuario autenticado")
-        lateinit var resRoute: Route
-        val coordinates = convertToCoordinate(route.geometry)
+    override suspend fun viewVehicleData(plate: String): Vehicle {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
 
         try {
-            val documentSnapshot = db.collection("InterestPlace")
+            val documentSnapshot = db.collection("Vehicle")
                 .document(userEmail)
                 .get()
                 .await()
 
             if (documentSnapshot.exists()) {
-                val interestPlaces =
-                    documentSnapshot.get("interestPlaces") as? MutableList<Map<String, Any>>
-                        ?: mutableListOf()
-                interestPlaces.find { place ->
-                    val actualToponym = place["toponym"] as? String ?: ""
-                    origin.equals(actualToponym)
-                } ?: throw NotSuchPlaceException()
-                interestPlaces.find { place ->
-                    val actualToponym = place["toponym"] as? String ?: ""
-                    destination.equals(actualToponym)
-                } ?: throw NotSuchPlaceException()
-            }
+                val vehicleList = documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
 
+                val foundVehicle = vehicleList.find { vehicle ->
+                    val foundVehiclePlate = vehicle["plate"] as? String ?: ""
 
-            return suspendCoroutine { continuation ->
-                var tiempo =  route.properties.summary.duration;
-                if(tiempo >= 3600){
-                    tiempo = tiempo / 60 / 60
-                }else{
-                    tiempo = tiempo / 60
-                }
+                    plate == foundVehiclePlate
+                } ?: throw NotSuchElementException("No se ha encontrado el vehiculo")
 
-
-                val iniEndCoordinates: MutableList<Coordinate> = mutableListOf()
-
-                iniEndCoordinates.add(coordinates.get(0))
-                iniEndCoordinates.add(coordinates.get(coordinates.size - 1))
-                var distance = String.format("%.2f", route.properties.summary.distance / 1000).toDouble()
-                tiempo = String.format("%.2f", route.properties.summary.duration / 60).toDouble()
-                val newRoute = mapOf(
-                    "origin" to origin,
-                    "destination" to destination,
-                    "trasnportMethod" to trasnportMethods,
-                    "route" to iniEndCoordinates,
-                    "distance" to distance,
-                    "duration" to tiempo,
-                    "cost" to 0.0,
-                    "routeType" to routeType,
-                    "fav" to false,
-                    "vehiclePlate" to vehiclePlate
+                return VehicleFactory.createVehicle(
+                    foundVehicle["plate"] as String? ?: "",
+                    foundVehicle["type"] as String? ?: "",
+                    (foundVehicle["consumption"] as Number? ?: 0.0).toDouble(),
+                    foundVehicle["fav"] as Boolean? ?: false
                 )
-                resRoute = Route(
-                    origin = origin,
-                    destination = destination,
-                    route = coordinates,
-                    distance = route.properties.summary.distance / 1000,
-                    duration = tiempo,
-                    trasnportMethod = trasnportMethods,
-                    routeType = routeType,
-                    vehiclePlate = vehiclePlate
-                )
-                Log.d("coordenadas de la ruta",resRoute.route.toString())
-                val userDocument = db.collection("Route").document(userEmail)
-                //Intenta añadir a interestPlaces el nuevo lugar evitando duplicados con el FieldValue.arrayUnion
-                userDocument.update("routes", FieldValue.arrayUnion(newRoute))
-                    .addOnSuccessListener {
-                        continuation.resume(resRoute)
-                    }
-                    .addOnFailureListener { _ ->
-                        // Si falla porque el usuario aún no tiene lugares guardados crea el documento con el atributo interestPlaces y le añade el lugar
-                        userDocument.set(mapOf("routes" to listOf(newRoute)))
-                            .addOnSuccessListener {
-                                continuation.resume(resRoute)
-                            }
-                            .addOnFailureListener { e ->
-                                continuation.resumeWithException(e)
-                            }
-                    }
+
+            } else {
+                throw Exception("No existe el documento para el usuario: $userEmail")
             }
         } catch (e: Exception) {
-            Log.e("createRoute", "Error al crear la ruta: ${e.message}", e)
-            throw Exception("Error al crear la ruta: ${e.message}", e)
+            Log.e("GeneralError", "Ocurrió un error", e)
+            throw e
         }
-        return resRoute
     }
 
-    fun convertToCoordinate(lista: RouteGeometry):List<Coordinate>{
+    override suspend fun editVehicleData(plate: String, newType: String, newConsumption: Double): Boolean {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        var result = false
+        val documentSnapshot = db.collection("Vehicle")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val vehicleList =
+                documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
+
+            val foundVehicle = (vehicleList.find { vehicle ->
+                val foundVehiclePlate = vehicle["plate"] as? String ?: ""
+
+                plate == foundVehiclePlate
+            }?: throw NotSuchElementException("Vehiculo no encontrado")).toMutableMap()
+
+            val updatedVehicle = vehicleList.map { vehicle ->
+                if (vehicle == foundVehicle){
+                    vehicle.toMutableMap().apply {
+                        this["type"] = newType
+                        this["consumption"] = newConsumption
+                    }
+                } else {
+                    vehicle
+                }
+            }
+
+            db.collection("Vehicle")
+                .document(userEmail)
+                .update("vehicles", updatedVehicle)
+                .await()
+            result = true
+
+        } else {
+            result = false
+        }
+        return result
+    }
+
+    override suspend fun saveRouteToDatabase(route: Route) {
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        try {
+            val userDocument = db.collection("Route").document(userEmail)
+
+            val documentSnapshot = db.collection("InterestPlace")
+                .document(userEmail)
+                .get()
+                .await()
+
+            val interestPlaces = documentSnapshot.get("interestPlaces") as? List<Map<String, Any>>
+                ?: throw NotSuchPlaceException("El usuario no tiene lugares de interés registrados.")
+
+            interestPlaces.find { it["toponym"] == route.origin }
+                ?: throw NotSuchPlaceException("El origen no es un lugar de interés.")
+            interestPlaces.find { it["toponym"] == route.destination }
+                ?: throw NotSuchPlaceException("El destino no es un lugar de interés.")
+
+            val newRoute = mapOf(
+                "origin" to route.origin,
+                "destination" to route.destination,
+                "trasnportMethod" to route.trasnportMethod,
+                "route" to route.route.take(2),
+                "distance" to route.distance,
+                "duration" to route.duration,
+                "cost" to route.cost,
+                "routeType" to route.routeType,
+                "fav" to false,
+                "vehiclePlate" to route.vehiclePlate
+            )
+            val documentData = userDocument.get().await()
+            if (documentData.exists()) {
+                userDocument.update("routes", FieldValue.arrayUnion(newRoute)).await()
+            } else {
+                userDocument.set(mapOf("routes" to listOf(newRoute))).await()
+            }
+
+            Log.d("saveRouteToDatabase", "Ruta guardada exitosamente.")
+        } catch (e: NotSuchPlaceException) {
+            Log.e("saveRouteToDatabase", "Error en los lugares de interés: ${e.message}")
+            throw e
+        } catch (e: Exception) {
+            Log.e("saveRouteToDatabase", "Error desconocido: ${e.message}", e)
+            throw e
+        }
+    }
+
+
+    override fun convertToCoordinate(lista: RouteGeometry):List<Coordinate>{
         var listaCoordenadas: ArrayList<Coordinate> = ArrayList()
         for (coordenada in lista.coordinates){
             listaCoordenadas.add(Coordinate(latitude = coordenada[1], longitude = coordenada[0]))
@@ -656,23 +686,55 @@ class FirebaseRepository: Repository {
     override suspend fun getElectricPrice(): Double {
         try {
             val userDocument = db.collection("ElectricityPrices").document("precios").get().await()
-
             if (userDocument.exists()) {
                 val precioLuz = userDocument.getDouble("precioLuz")
-
                 if (precioLuz != null ) {
                     return precioLuz
-                } else {
-                    return 0.0
-                }
-            } else {
-                return -1.0
-            }
+                } else { return 0.0 }
+            } else { return -1.0 }
+
         } catch (e: Exception) {
             Log.e("ElectricityPrices", "Error al obtener los precios de la luz: ${e.message}")
             return 0.0
         }
     }
+
+    override suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double> {
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        return try {
+            val documentSnapshot = db.collection("Vehicle")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                val vehicles = documentSnapshot.get("vehicles") as? List<Map<String, Any>>
+                    ?: throw IllegalArgumentException("No se encontró el campo 'vehicles' en el documento")
+
+                val vehicle = vehicles.find { it["plate"] == route.vehiclePlate }
+                    ?: throw IllegalArgumentException("No se encontró un vehículo con la matrícula '${route.vehiclePlate}'")
+
+                val typeString = vehicle["type"] as? String
+                    ?: throw IllegalArgumentException("No se encontró el campo 'type' para el vehículo '${route.vehiclePlate}'")
+
+                val vehicleType = VehicleTypes.values().find { it.type == typeString }
+                    ?: throw IllegalArgumentException("El tipo de vehículo '$typeString' no es válido")
+
+                val consumption = vehicle["consumption"] as? Double
+                    ?: throw IllegalArgumentException("No se encontró el campo 'consumption' para el vehículo '${route.vehiclePlate}'")
+
+                Pair(vehicleType, consumption)
+            } else {
+                throw IllegalArgumentException("El documento del vehículo no existe")
+            }
+        } catch (e: Exception) {
+            Log.e("VehicleService", "Error al obtener el tipo y consumo del vehículo: ${e.message}")
+            throw e
+        }
+    }
+
 
 
 
