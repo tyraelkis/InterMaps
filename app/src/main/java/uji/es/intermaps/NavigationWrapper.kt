@@ -1,11 +1,12 @@
 package uji.es.intermaps
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
 import uji.es.intermaps.View.Route.CreateNewRoute
@@ -30,12 +31,13 @@ import uji.es.intermaps.ViewModel.VehicleViewModel
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, viewModelPlace: InterestPlaceViewModel, viewModelUser: UserViewModel, viewModelVehicle: VehicleViewModel, viewModelRoute: RouteViewModel) {
     
     NavHost(
         navController = navHostController,
-        startDestination = "logIn",
+        startDestination = "initial",
         ) {
         composable("initial") {
             InitialScreen(
@@ -44,12 +46,14 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         }
         composable("logIn") {
             LoginScreen(
-                navHostController
+                navHostController,
+                viewModelUser
             )
         }
         composable("signUp") {
             SignUpScreen(
-                navHostController
+                navHostController,
+                viewModelUser
             )
         }
         composable("home") {
@@ -87,7 +91,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         composable(
             route = "interestPlaceCreationByToponym"
         ) {
-            InterestPlaceCreationByToponym(viewModelPlace)
+            InterestPlaceCreationByToponym(navHostController, viewModelPlace)
         }
         composable(
             route = "interestPlaceSetAlias/{toponym}",

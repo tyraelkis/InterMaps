@@ -7,10 +7,15 @@ import uji.es.intermaps.Model.InterestPlace
 import androidx.compose.runtime.*
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import uji.es.intermaps.APIParsers.PossibleCoord
+import uji.es.intermaps.Exceptions.NotSuchPlaceException
+import uji.es.intermaps.Exceptions.NotValidAliasException
+import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
 import uji.es.intermaps.Interfaces.ORSAPI
 import uji.es.intermaps.Model.Coordinate
@@ -146,5 +151,90 @@ class InterestPlaceViewModel(
             interestPlaceService.deleteInterestPlace(coordinate)
 
         }catch (e: UnableToDeletePlaceException){}
+    }
+
+
+    //Lo de arriba es un lío asi que hago las cosas a partir de aqui :)
+    private var errorMessage = ""
+
+    suspend fun gestorDeBusqueda(busqueda: String): InterestPlace{
+        val coordinatePattern = Regex("""^\s*(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)\s*$""")
+        var coordenada = Coordinate()
+        var busquedaCoordenadas = false
+        val input = busqueda.trim()
+        if (coordinatePattern.matches(input)) {
+            val parts = input.split(",")
+            val lat = parts[0].trim().toDouble()
+            val lon = parts[1].trim().toDouble()
+            coordenada = Coordinate(lat, lon)
+            busquedaCoordenadas = true
+        }
+        if (busquedaCoordenadas)
+            return searchInterestPlaceByCoordiante(coordenada)
+        else
+            return searchInterestPlaceByToponym(input)
+    }
+
+    suspend fun searchInterestPlaceByCoordiante(coordinate: Coordinate): InterestPlace{
+        var iP = InterestPlace()
+        try {
+            iP = interestPlaceService.searchInterestPlaceByCoordiante(coordinate)
+            errorMessage = ""
+        } catch (e: NotValidCoordinatesException) {
+            errorMessage = e.message.toString()
+        } catch (e: Exception) {
+            errorMessage = e.message.toString()
+        }
+        return iP
+    }
+
+    suspend fun searchInterestPlaceByToponym(toponym: String): InterestPlace{
+        var iP = InterestPlace()
+        try {
+            iP = interestPlaceService.searchInterestPlaceByToponym(toponym)
+            errorMessage = ""
+        } catch (e: NotSuchPlaceException) {
+            errorMessage = e.message.toString()
+        } catch (e: Exception) {
+            errorMessage = e.message.toString()
+        }
+        return iP
+    }
+
+    suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String){
+        try {
+            interestPlaceService.createInterestPlace(coordinate, toponym, alias)
+            errorMessage = ""
+        } catch (e: NotValidCoordinatesException) {
+            errorMessage = e.message.toString()
+        } catch (e: NotValidAliasException) {
+            errorMessage = e.message.toString()
+        } catch (e: Exception) {
+            errorMessage = e.message.toString()
+        }
+    }
+
+    suspend fun createInterestPlaceFromToponym(toponym: String){
+        try {
+            interestPlaceService.createInterestPlaceFromToponym(toponym)
+            errorMessage = ""
+        } catch (e: NotSuchPlaceException) {
+            errorMessage = e.message.toString()
+        } catch (e: Exception) {
+            errorMessage = e.message.toString()
+        }
+    }
+
+    suspend fun setAlias(interestPlace: InterestPlace, newAlias: String): Boolean{
+        try {
+            interestPlaceService.setAlias(interestPlace, newAlias)
+            return true
+        }catch (e: Exception){
+            return false
+        }
+    }
+
+    fun getErrorMessage(): String{
+        return errorMessage
     }
 }

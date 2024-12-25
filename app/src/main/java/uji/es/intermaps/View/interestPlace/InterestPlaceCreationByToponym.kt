@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,30 +40,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import kotlinx.coroutines.launch
-import uji.es.intermaps.ViewModel.FirebaseRepository
-import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import com.mapbox.geojson.Point.fromLngLat
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import uji.es.intermaps.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
+fun InterestPlaceCreationByToponym(navController: NavController, viewModel: InterestPlaceViewModel) {
     var showPopupCreateSucces by remember { mutableStateOf(false) }
-    var showPopupCreateError by remember { mutableStateOf(false) }
     var toponym by remember { mutableStateOf("") }
     var selectToponym by remember { mutableStateOf("") }
     var sePuedeAñadir by remember { mutableStateOf(false) }
-    val interestPlaceService = InterestPlaceService(FirebaseRepository())
-    val  coroutineScope = rememberCoroutineScope()
 
 
     CreateInterestPlaceCorrectPopUp(viewModel)
@@ -83,10 +81,10 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
 
     Column(
         modifier = Modifier
-        .fillMaxSize()
-        .background(
-        White
-        ),
+            .fillMaxSize()
+            .background(
+                White
+            ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(50.dp))
@@ -175,12 +173,14 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
             if (sePuedeAñadir) {
                 Button(
                     onClick = {
-                        coroutineScope.launch {
-                            val result = interestPlaceService.createInterestPlaceFromToponym(selectToponym)
-                            if (result != null) {
-                                viewModel.showCreateInterestPlaceCorrectPopUp()
-                            }else{
-                                viewModel.showCreateInterestPlaceErrorPopUp()
+                        CoroutineScope(Dispatchers.IO).launch {
+                            viewModel.createInterestPlaceFromToponym(selectToponym)
+                            var errorMessage = viewModel.getErrorMessage()
+                            withContext(Dispatchers.Main) {
+                                if (errorMessage.isEmpty())
+                                    showPopupCreateSucces = true
+                                else
+                                    viewModel.showCreateInterestPlaceErrorPopUp()
                             }
                         }
                     },
@@ -234,21 +234,23 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                                         )
                                     )
                                 }
-                                clickedPoint = fromLngLat(coordinates[0], coordinates[1]) //Establece la ubicación del marcador
+                                clickedPoint = fromLngLat(
+                                    coordinates[0],
+                                    coordinates[1]
+                                ) //Establece la ubicación del marcador
                             }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
-
+    }
     if (showPopupCreateSucces) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(32.dp)
-                .background(Color(0x80FFFFFF))
-                .clickable { showPopupCreateSucces = false},
+                .background(Color(0x80FFFFFF)),
             contentAlignment = Alignment.Center
         ) {
             Box(
@@ -283,7 +285,7 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                     ) {
                         Button(
                             onClick = {
-                                showPopupCreateSucces = false
+                                navController.navigate("interestPlaceList")
                             },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(
@@ -295,75 +297,9 @@ fun InterestPlaceCreationByToponym(viewModel: InterestPlaceViewModel) {
                                 fontSize = 16.sp,
                             )
                         }
-
                     }
                 }
             }
         }
-    }
-/*
-    if (showPopupCreateError) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp)
-                .background(Color(0x80FFFFFF))
-                .clickable { showPopupCreateSucces = false},
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .height(250.dp)
-                    .width(395.dp)
-                    .background(Color(0XFF007E70), shape = RoundedCornerShape(10.dp))
-                    .clip(RoundedCornerShape(10.dp))
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "No no se ha podido añadir el lugar de interés",
-                        color = White,
-                        fontSize = 26.sp,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Spacer(modifier = Modifier.height(50.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Button(
-                            onClick = {
-                                showPopupCreateError = false
-                            },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Black
-                            )
-                        ) {
-                            Text(
-                                text = "Aceptar",
-                                fontSize = 16.sp,
-                            )
-                        }
-
-                    }
-                }
-            }
-        }
-    }
-
-
-
- */
     }
 }

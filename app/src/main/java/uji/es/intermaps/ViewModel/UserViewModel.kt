@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
@@ -33,6 +34,7 @@ class UserViewModel(
     val showPasswordDialog: State<Boolean> get() = _showPasswordPopUp
 
 
+    private var errorMessageNormal = ""
 
     var password by mutableStateOf("")
     var errorMessage by mutableStateOf("")
@@ -153,4 +155,33 @@ class UserViewModel(
     }
 
 
+    suspend fun createUser(email: String, password: String){
+        try {
+            userService.createUser(email, password)
+            errorMessageNormal = ""
+        } catch (e: NotValidUserData) {
+            errorMessageNormal = e.message.toString()
+        } catch (e: IllegalArgumentException) {
+            errorMessageNormal = e.message.toString()
+        } catch (e: AccountAlreadyRegistredException) {
+            errorMessageNormal = e.message.toString()
+        }
+    }
+
+    suspend fun login(email: String, password: String){
+        try {
+            userService.login(email, password)
+            errorMessageNormal = ""
+        } catch (e: NotValidUserData) {
+            errorMessageNormal = e.message.toString()
+        } catch (e: IllegalArgumentException) {
+            errorMessageNormal = e.message.toString()
+        } catch (e: UnregistredUserException) {
+            errorMessageNormal = e.message.toString()
+        }
+    }
+
+    fun getErrorMessageNormal(): String{
+        return errorMessageNormal
+    }
 }
