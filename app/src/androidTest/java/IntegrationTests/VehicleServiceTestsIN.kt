@@ -125,4 +125,19 @@ class VehicleServiceTestsIN {
             .`when`(mockRepository).setFavVehicle("8888COD")
         vehicleService.setFavVehicle("8888COD")
     }
+
+    @Test
+    fun deleteFavVehicle_E1Valid_vehicleDeleteAsFavourite(): Unit = runBlocking {
+        `when`(mockRepository.deleteFavVehicle(vehicle.plate)).thenReturn(true)
+        val result: Boolean = vehicleService.deleteFavVehicle(vehicle.plate)
+        assertEquals(true, result)
+        verify(mockRepository).deleteFavVehicle(vehicle.plate)
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun deleteFavVehicle_E2Invalid_errorOnDeletingFavVehicle(): Unit = runBlocking {
+        doAnswer{ throw NotSuchElementException("No existe ese vehículo") }
+            .`when`(mockRepository).deleteFavVehicle("8888COD")
+        vehicleService.deleteFavVehicle("8888COD")
+    }
 }
