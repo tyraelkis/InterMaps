@@ -31,6 +31,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPriceRepository {
+    val repository = FirebaseRepository()
+
     private val apiKey = "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23"
     val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
     override suspend fun searchInterestPlaceByCoordinates(coordinate: Coordinate): InterestPlace {
@@ -93,36 +95,66 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
 
         throw NotSuchPlaceException("Error en la llamada a la API para obtener las coordenadas")
     }
+    override suspend fun calculateRoute( origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes
+    ): RouteFeature {
 
-    override suspend fun calculateRoute(origin: String, destination: String, trasnportMethod: TransportMethods,routeType: RouteTypes) : RouteFeature {
-        lateinit var call : retrofit2.Response<RouteResponse>
-        var route = RouteFeature(geometry = RouteGeometry(emptyList()), properties = RouteProperties(
-            RouteSummary(distance = 0.0, duration = 0.0)
-        ))
         try {
-            if (trasnportMethod.equals(TransportMethods.VEHICULO)) {
-                call = openRouteService.calculateRouteVehicle(apiKey, origin, destination)
-            } else if (trasnportMethod.equals(TransportMethods.BICICLETA)) {
-                call = openRouteService.calculateRouteBycicle(apiKey, origin, destination)
-            } else {
-                call = openRouteService.calculateRouteWalk(apiKey, origin, destination)
+            val call: retrofit2.Response<RouteResponse> = when (transportMethod) {
+                TransportMethods.VEHICULO -> openRouteService.calculateRouteVehicle(apiKey, origin, destination)
+                TransportMethods.BICICLETA -> openRouteService.calculateRouteBycicle(apiKey, origin, destination)
+                TransportMethods.APIE -> openRouteService.calculateRouteWalk(apiKey, origin, destination)
             }
             if (call.isSuccessful) {
-                Log.d("createRoute", "Ruta creada exitosamente")
-                route = call.body()!!.features[0]
-
+                Log.d("calculateRoute", "Ruta creada exitosamente")
+                return call.body()?.features?.get(0)
+                    ?: throw IllegalStateException("Respuesta sin características válidas")
             } else {
-                Log.e("createRoute", "Error al crear la ruta: ${call.message()}")
+                Log.e("calculateRoute", "Error al crear la ruta: ${call.message()}")
+                throw Exception("Error al obtener la ruta: ${call.message()}")
             }
-        }catch (e:Exception){
-            Log.e("createRoute", "Error al crear la ruta: ${e.message}")
+        } catch (e: Exception) {
+            Log.e("calculateRoute", "Error al crear la ruta: ${e.message}", e)
+            throw Exception("Error al calcular la ruta: ${e.message}", e)
+        }
+    }
 
+    override suspend fun createRoute( origin: String, destination: String, transportMethod: TransportMethods,
+        routeType: RouteTypes, vehiclePlate: String, route: RouteFeature
+    ): Route {
+        val routeService = RouteService(repository)
+        val coordinates = routeService.convertToCoordinate(route.geometry)
+        if (coordinates.isEmpty()) {
+            throw IllegalArgumentException("No se generaron coordenadas válidas para la ruta")
+        }
+
+        val tiempo = route.properties.summary.duration
+        val distance = String.format("%.2f", route.properties.summary.distance / 1000).toDouble()
+        val horas = (tiempo / 3600).toInt()
+        val minutos = ((tiempo % 3600) / 60).toInt()
+        val duration = if (horas != 0) "$horas h $minutos min" else "$minutos min"
+
+        val route = Route(
+            origin = origin,
+            destination = destination,
+            route = coordinates,
+            distance = distance,
+            duration = duration,
+            trasnportMethod = transportMethod,
+            routeType = routeType,
+            vehiclePlate = vehiclePlate,
+            cost = 0.0
+        )
+
+        route.cost = if (transportMethod == TransportMethods.VEHICULO) {
+            val vehicleType = routeService.getVehicleTypeAndConsump(route).first
+            calculateConsumition(route, transportMethod, vehicleType)
+        } else {
+            calculateCaloriesConsumition(route, transportMethod)
         }
         return route
     }
 
     override suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
-        val repository = FirebaseRepository()
         val routeService = RouteService(repository)
         var coste = 0.0
         var costeRounded = 0.0
@@ -141,7 +173,8 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                 coste = (route.distance/100) * consumo * (routeService.getElctricCost()/1000)
                 costeRounded = BigDecimal(coste).setScale(3, RoundingMode.HALF_UP).toDouble()
             }
-            saveRouteCostToDatabase(route.origin, route.destination, costeRounded)
+            route.cost = costeRounded
+            //saveRouteCostToDatabase(route.origin, route.destination, costeRounded)
         }
         return costeRounded
     }
@@ -158,7 +191,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             coste = route.distance * caloriasMediaBici
         }
         val costeRounded = BigDecimal(coste).setScale(1, RoundingMode.HALF_UP).toDouble()
-        saveRouteCostToDatabase(route.origin, route.destination, costeRounded)
+        route.cost = costeRounded
         return costeRounded
     }
 
@@ -193,6 +226,45 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             return false
         }
 
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override suspend fun calculateElectricityCost(): Boolean {
+        val openRouteService = RetrofitConfig.createRetrofitPrecioLuz()
+
+        return try {
+            val dateformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
+
+            val jsonFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+
+            val now = LocalDateTime.now()
+            val currentHour = now.hour
+
+            val today = LocalDate.now()
+            val startDate = today.atStartOfDay().format(dateformatter)
+            val endDate = today.atTime(23, 59).format(dateformatter)
+
+            val response = openRouteService.getElectricityCost(startDate, endDate, "hour")
+
+            val pvpctData = response.included
+                    .filter { it.type == "PVPC" }
+                .flatMap { it.attributes.values }
+
+            val matchingEntry = pvpctData.firstOrNull { entry ->
+                val entryHour = LocalDateTime.parse(entry.datetime, jsonFormatter).hour
+                entryHour == currentHour
+            }
+
+            matchingEntry?.let {
+                saveElectricityCostToDatabase(it.value)
+            } ?: Log.w("ElectricityCost", "No se encontró un precio para la hora actual.")
+
+            return true
+        } catch (e: Exception) {
+            Log.e("FuelAPI", "Error al obtener las estaciones de servicio: ${e.message}")
+            return false
+        }
     }
 
     private fun saveRouteCostToDatabase(origin: String, destination: String, cost: Double) {
@@ -237,44 +309,6 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                 "precioLuz" to precio,
             )
         )
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    override suspend fun calculateElectricityCost(): Boolean {
-        val openRouteService = RetrofitConfig.createRetrofitPrecioLuz()
-
-        return try {
-            val dateformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
-
-            val jsonFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
-
-            val now = LocalDateTime.now()
-            val currentHour = now.hour
-
-            val today = LocalDate.now()
-            val startDate = today.atStartOfDay().format(dateformatter)
-            val endDate = today.atTime(23, 59).format(dateformatter)
-
-            val response = openRouteService.getElectricityCost(startDate, endDate, "hour")
-
-            val pvpctData = response.included
-                    .filter { it.type == "PVPC" }
-                .flatMap { it.attributes.values }
-
-            val matchingEntry = pvpctData.firstOrNull { entry ->
-                val entryHour = LocalDateTime.parse(entry.datetime, jsonFormatter).hour
-                entryHour == currentHour
-            }
-
-            matchingEntry?.let {
-                saveElectricityCostToDatabase(it.value)
-            } ?: Log.w("ElectricityCost", "No se encontró un precio para la hora actual.")
-
-            return true
-        } catch (e: Exception) {
-            Log.e("FuelAPI", "Error al obtener las estaciones de servicio: ${e.message}")
-            return false
-        }
     }
 
 }

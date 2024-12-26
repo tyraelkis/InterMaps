@@ -8,10 +8,7 @@
       <SelectionState runConfigName="InterestPlaceServiceTests">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="VehicleServiceTests">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="VehicleServiceTestsIN">
+      <SelectionState runConfigName="createRoute_E1Valid_routeIsCreated()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

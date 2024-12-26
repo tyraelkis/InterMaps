@@ -34,19 +34,20 @@ class RouteViewModel(private val routeService: RouteService): ViewModel() {
             try {
                 val route = routeService.createRoute(origin, destination, transportMethod, routeType, vehicle)
                 _route.value = route
-                val currentRoute = _route.value ?: throw IllegalStateException("No hay una ruta cargada")
-                var cost = 0.0
-                if (transportMethod == TransportMethods.VEHICULO) {
-                    val vehicleType = routeService.getVehicleTypeAndConsump(currentRoute).first
-                    cost = routeService.calculateConsumition( currentRoute, currentRoute.trasnportMethod, vehicleType)
-                } else{
-                    cost = routeService.calculateCaloriesConsumition(currentRoute, currentRoute.trasnportMethod)
-                }
-                route.cost = cost
             } catch (e: Exception) {
                 Log.e("RouteViewModel", "Error al actualizar la ruta: ${e.message}")
             } finally {
                 loading = false
+            }
+        }
+    }
+
+    fun saveRoute(route: Route) {
+        viewModelScope.launch {
+            try{
+                routeService.putRoute(route)
+            } catch (e: Exception) {
+                Log.e("RouteViewModel", "Error al guardar la ruta: ${e.message}")
             }
         }
     }
