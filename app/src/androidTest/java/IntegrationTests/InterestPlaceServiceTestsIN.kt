@@ -3,6 +3,7 @@ package IntegrationTests
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert
 import org.junit.Assert.assertTrue
 
 import org.junit.Before
@@ -189,4 +190,18 @@ class InterestPlaceServiceTestsIN {
         interestPlaceService.deleteInterestPlace(puntoDelete)
     }
 
+    @Test
+    fun setFavouriteInterestPlace_E1Valid_InterestPlaceSetAsFavourite(): Unit = runBlocking {
+        `when`(mockRepository.setFavInterestPlace(interestPlace.coordinate)).thenReturn(true)
+        val res = interestPlaceService.setFavInterestPlace(interestPlace.coordinate)
+        assertEquals(true, res)
+        verify(mockRepository).setFavInterestPlace(interestPlace.coordinate)
+    }
+
+    @Test(expected = NotSuchPlaceException::class)
+    fun setFavouriteInterestPlace_E3Invalid_errorOnSettingFavInterestPlace(): Unit = runBlocking {
+        doAnswer{ throw NotSuchPlaceException("No existe ese lugar") }
+            .`when`(mockRepository).setFavInterestPlace(Coordinate(38.0,-0.0))
+        interestPlaceService.setFavInterestPlace(Coordinate(38.0,-0.0))
+    }
 }
