@@ -12,6 +12,7 @@ import uji.es.intermaps.APIParsers.RouteResponse
 import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
+import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.ElectricityPriceRepository
 import uji.es.intermaps.Interfaces.FuelPriceRepository
 import uji.es.intermaps.Interfaces.ORSRepository
@@ -95,15 +96,47 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
 
         throw NotSuchPlaceException("Error en la llamada a la API para obtener las coordenadas")
     }
-    override suspend fun calculateRoute( origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes
-    ): RouteFeature {
 
+    override suspend fun calculateRoute(origin: String, destination: String, trasnportMethod: TransportMethods,routeType: RouteTypes) : RouteFeature {
+        lateinit var call : retrofit2.Response<RouteResponse>
+        var route = RouteFeature(geometry = RouteGeometry(emptyList()), properties = RouteProperties(
+            RouteSummary(distance = 0.0, duration = 0.0)
+        ))
         try {
-            val call: retrofit2.Response<RouteResponse> = when (transportMethod) {
-                TransportMethods.VEHICULO -> openRouteService.calculateRouteVehicle(apiKey, origin, destination)
-                TransportMethods.BICICLETA -> openRouteService.calculateRouteBycicle(apiKey, origin, destination)
-                TransportMethods.APIE -> openRouteService.calculateRouteWalk(apiKey, origin, destination)
+            val routeTypePreference = when (routeType) {
+                RouteTypes.RAPIDA -> "fastest"
+                RouteTypes.CORTA -> "shortest"
+                RouteTypes.ECONOMICA -> "recommended"
             }
+
+            val avoidPeajes = if (trasnportMethod == TransportMethods.VEHICULO && routeType == RouteTypes.ECONOMICA) {
+                "tollways" //
+            } else {
+                null
+            }
+
+            call = when (trasnportMethod) {
+                TransportMethods.VEHICULO -> openRouteService.calculateRouteVehicle(
+                    apiKey,
+                    origin,
+                    destination,
+                    routeTypePreference,
+                    avoidPeajes
+                )
+                TransportMethods.BICICLETA -> openRouteService.calculateRouteBycicle(
+                    apiKey,
+                    origin,
+                    destination,
+                    routeTypePreference
+                )
+                TransportMethods.APIE -> openRouteService.calculateRouteWalk(
+                    apiKey,
+                    origin,
+                    destination,
+                    routeTypePreference
+                )
+            }
+
             if (call.isSuccessful) {
                 Log.d("calculateRoute", "Ruta creada exitosamente")
                 return call.body()?.features?.get(0)
@@ -116,10 +149,11 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             Log.e("calculateRoute", "Error al crear la ruta: ${e.message}", e)
             throw Exception("Error al calcular la ruta: ${e.message}", e)
         }
+        return route
     }
 
     override suspend fun createRoute( origin: String, destination: String, transportMethod: TransportMethods,
-        routeType: RouteTypes, vehiclePlate: String, route: RouteFeature
+                                      routeType: RouteTypes, vehiclePlate: String, route: RouteFeature
     ): Route {
         val routeService = RouteService(repository)
         val coordinates = routeService.convertToCoordinate(route.geometry)
@@ -153,6 +187,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         }
         return route
     }
+
 
     override suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
         val routeService = RouteService(repository)
