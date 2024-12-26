@@ -10,7 +10,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.APIParsers.RouteFeature
-import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
@@ -655,15 +654,6 @@ class FirebaseRepository: Repository {
         }
     }
 
-    fun decodeAndMapToCoordenadas(polylineString: String): List<Coordinate> {
-        val lista: MutableList<Point> = PolylineUtils.decode(polylineString,5)
-
-        Log.i("Lista de coordenadas de la ruta", lista.toString())
-        return lista.map { coordenada ->
-            Coordinate(coordenada.latitude(), coordenada.longitude())
-        }
-    }
-
 
     override suspend fun getAverageFuelPrices(): List<Double> {
         try {
@@ -739,7 +729,7 @@ class FirebaseRepository: Repository {
         }
     }
 
-    suspend fun viewRouteList(): List<Route> {
+    override suspend fun viewRouteList(): List<Route> {
         TODO()
     }
 

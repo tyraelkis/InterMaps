@@ -6,7 +6,6 @@ import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.Exceptions.NoValidTypeException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
@@ -32,8 +31,8 @@ open class RouteService(private val repository: Repository){
         val destinationCoordinate = routeRepository.searchInterestPlaceByToponym(destination).coordinate
         val originString = "${originCoordinate.longitude},${originCoordinate.latitude}"
         val destinationString = "${destinationCoordinate.longitude},${destinationCoordinate.latitude}"
-        val routeCall = routeRepository.calculateRoute(originString, destinationString, transportMethod, routeType )
-        val route = routeRepository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate, routeCall)
+        val routeCall = createTypeRoute(originString, destinationString, transportMethod, routeType )
+        val route = routeRepository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate, routeCall.second)
         return route
     }
 
@@ -105,12 +104,6 @@ open class RouteService(private val repository: Repository){
         }
         val res = routeRepository.calculateRoute(origin, destination, transportMethod, routeType)
         return Pair(true,res)
-    }
-
-
-    fun convertToCoordinate(geometry: RouteGeometry): List<Coordinate> {
-        return repository.convertToCoordinate(geometry)
-
     }
 
     fun viewRouteList(): List<Route> {

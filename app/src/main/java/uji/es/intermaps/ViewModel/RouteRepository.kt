@@ -3,6 +3,7 @@ package uji.es.intermaps.ViewModel
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -161,13 +162,13 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                                       routeType: RouteTypes, vehiclePlate: String, route: RouteFeature
     ): Route {
         val routeService = RouteService(repository)
-        val coordinates = routeService.convertToCoordinate(route.geometry)
+        val coordinates = decodeAndMapToCoordenadas(route.geometry)
         if (coordinates.isEmpty()) {
             throw IllegalArgumentException("No se generaron coordenadas válidas para la ruta")
         }
 
-        val tiempo = route.properties.summary.duration
-        val distance = String.format("%.2f", route.properties.summary.distance / 1000).toDouble()
+        val tiempo = route.summary.duration
+        val distance = String.format("%.2f", route.summary.distance / 1000).toDouble()
         val horas = (tiempo / 3600).toInt()
         val minutos = ((tiempo % 3600) / 60).toInt()
         val duration = if (horas != 0) "$horas h $minutos min" else "$minutos min"
@@ -349,6 +350,19 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                 "precioLuz" to precio,
             )
         )
+    }
+    fun parseCoordinates(coordinateString: String): List<Double> {
+        val parts = coordinateString.split(",")
+        return listOf(parts[0].toDouble(), parts[1].toDouble())
+    }
+
+    fun decodeAndMapToCoordenadas(polylineString: String): List<Coordinate> {
+        val lista: MutableList<Point> = PolylineUtils.decode(polylineString,5)
+
+        Log.i("Lista de coordenadas de la ruta", lista.toString())
+        return lista.map { coordenada ->
+            Coordinate(coordenada.latitude(), coordenada.longitude())
+        }
     }
 
 }
