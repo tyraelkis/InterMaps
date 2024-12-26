@@ -7,6 +7,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import uji.es.intermaps.APIParsers.RouteGeometry
+import uji.es.intermaps.APIParsers.RouteFeature
+import uji.es.intermaps.Exceptions.NoValidTypeException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.Repository
@@ -97,6 +99,14 @@ open class RouteService(private val repository: Repository){
     suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double> {
         return repository.getVehicleTypeAndConsump(route)
     }
+    suspend fun createTypeRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes?):Pair<Boolean,RouteFeature> {
+        if (routeType == null){
+            throw NoValidTypeException()
+        }
+        val res = routeRepository.calculateRoute(origin, destination, transportMethod, routeType)
+        return Pair(true,res)
+    }
+
 
     fun convertToCoordinate(geometry: RouteGeometry): List<Coordinate> {
         return repository.convertToCoordinate(geometry)

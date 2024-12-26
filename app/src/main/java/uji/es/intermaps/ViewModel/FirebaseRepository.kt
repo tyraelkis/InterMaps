@@ -18,8 +18,6 @@ import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
-import uji.es.intermaps.Model.TransportMethods
-import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.Model.VehicleFactory
@@ -649,7 +647,6 @@ class FirebaseRepository: Repository {
             throw e
         }
     }
-
 
     override fun convertToCoordinate(lista: RouteGeometry):List<Coordinate>{
         var listaCoordenadas: ArrayList<Coordinate> = ArrayList()
