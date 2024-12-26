@@ -5,9 +5,11 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.type.LatLng
+import com.mapbox.geojson.Point
+import com.mapbox.geojson.utils.PolylineUtils
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.APIParsers.RouteFeature
-import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
@@ -606,8 +608,6 @@ class FirebaseRepository: Repository {
         val userEmail = auth.currentUser?.email
             ?: throw IllegalStateException("No hay un usuario autenticado")
         lateinit var resRoute: Route
-        val coordinates = convertToCoordinate(route.geometry)
-
         try {
             val documentSnapshot = db.collection("InterestPlace")
                 .document(userEmail)
@@ -630,7 +630,7 @@ class FirebaseRepository: Repository {
 
 
             return suspendCoroutine { continuation ->
-                var tiempo =  route.properties.summary.duration;
+                var tiempo =  route.summary.duration;
                 if(tiempo >= 3600){
                     tiempo = tiempo / 60 / 60
                 }else{
@@ -638,17 +638,16 @@ class FirebaseRepository: Repository {
                 }
 
 
-                val iniEndCoordinates: MutableList<Coordinate> = mutableListOf()
+                val coordinates = decodeAndMapToCoordenadas(route.geometry)
+                Log.d("coordenadas de la ruta",coordinates.toString())
 
-                iniEndCoordinates.add(coordinates.get(0))
-                iniEndCoordinates.add(coordinates.get(coordinates.size - 1))
-                var distance = String.format("%.2f", route.properties.summary.distance / 1000).toDouble()
-                tiempo = String.format("%.2f", route.properties.summary.duration / 60).toDouble()
+                var distance = String.format("%.2f", route.summary.distance / 1000).toDouble()
+                tiempo = String.format("%.2f", route.summary.duration / 60).toDouble()
                 val newRoute = mapOf(
                     "origin" to origin,
                     "destination" to destination,
                     "trasnportMethod" to trasnportMethods,
-                    "route" to iniEndCoordinates,
+                    "route" to listOf(coordinates[0], coordinates[coordinates.size - 1]),
                     "distance" to distance,
                     "duration" to tiempo,
                     "cost" to 0.0,
@@ -691,13 +690,16 @@ class FirebaseRepository: Repository {
         return resRoute
     }
 
-    fun convertToCoordinate(lista: RouteGeometry):List<Coordinate>{
-        var listaCoordenadas: ArrayList<Coordinate> = ArrayList()
-        for (coordenada in lista.coordinates){
-            listaCoordenadas.add(Coordinate(latitude = coordenada[1], longitude = coordenada[0]))
+    fun decodeAndMapToCoordenadas(polylineString: String): List<Coordinate> {
+        val lista: MutableList<Point> = PolylineUtils.decode(polylineString,5)
+
+        Log.i("Lista de coordenadas de la ruta", lista.toString())
+        return lista.map { coordenada ->
+            Coordinate(coordenada.latitude(), coordenada.longitude())
         }
-        return listaCoordenadas
     }
+
+
 
 
     override suspend fun getAverageFuelPrices(): List<Double> {

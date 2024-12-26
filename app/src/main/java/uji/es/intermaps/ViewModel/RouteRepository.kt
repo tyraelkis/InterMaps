@@ -3,11 +3,11 @@ package uji.es.intermaps.ViewModel
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.mapbox.geojson.utils.PolylineUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.APIParsers.RouteFeature
-import uji.es.intermaps.APIParsers.RouteGeometry
-import uji.es.intermaps.APIParsers.RouteProperties
+import uji.es.intermaps.APIParsers.RouteRequestBody
 import uji.es.intermaps.APIParsers.RouteResponse
 import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
@@ -94,11 +94,12 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         throw NotSuchPlaceException("Error en la llamada a la API para obtener las coordenadas")
     }
 
-    override suspend fun calculateRoute(origin: String, destination: String, trasnportMethod: TransportMethods,routeType: RouteTypes) : RouteFeature {
-        lateinit var call : retrofit2.Response<RouteResponse>
-        var route = RouteFeature(geometry = RouteGeometry(emptyList()), properties = RouteProperties(
-            RouteSummary(distance = 0.0, duration = 0.0)
-        ))
+    override suspend fun calculateRoute(origin: String, destination: String, transportMethod: TransportMethods,routeType: RouteTypes) : RouteFeature {
+        var route = RouteFeature(geometry ="",
+            summary = RouteSummary(distance = 0.0, duration = 0.0)
+        )
+        val originCoordinate = parseCoordinates(origin)
+        val destinationCoordinate = parseCoordinates(destination)
         try {
             val routeTypePreference = when (routeType) {
                 RouteTypes.RAPIDA -> "fastest"
@@ -106,19 +107,21 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                 RouteTypes.ECONOMICA -> "recommended"
             }
 
-            val avoidPeajes = if (trasnportMethod == TransportMethods.VEHICULO && routeType == RouteTypes.ECONOMICA) {
+            val avoidPeajes = if (transportMethod == TransportMethods.VEHICULO && routeType == RouteTypes.ECONOMICA) {
                 "tollways" //
             } else {
                 null
             }
 
-            call = when (trasnportMethod) {
+            val call = when (transportMethod) {
                 TransportMethods.VEHICULO -> openRouteService.calculateRouteVehicle(
                     apiKey,
-                    origin,
-                    destination,
-                    routeTypePreference,
-                    avoidPeajes
+                    requestBody =  RouteRequestBody(
+                        coordinates = listOf(originCoordinate, destinationCoordinate),
+                        extra_info = listOfNotNull(avoidPeajes),
+                        preference = routeTypePreference
+                    )
+
                 )
                 TransportMethods.BICICLETA -> openRouteService.calculateRouteBycicle(
                     apiKey,
@@ -134,9 +137,10 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                 )
             }
 
+
             if (call.isSuccessful) {
                 Log.d("createRoute", "Ruta creada exitosamente")
-                route = call.body()!!.features[0]
+                route = call.body()!!.routes[0]
 
             } else {
                 Log.e("createRoute", "Error al crear la ruta: ${call.message()}")
@@ -277,6 +281,12 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             Log.e("FuelAPI", "Error al obtener las estaciones de servicio: ${e.message}")
             return false
         }
+    }
+    fun parseCoordinates(coordinateString: String): List<Double> {
+
+        val parts = coordinateString.split(",")
+
+        return listOf(parts[0].toDouble(), parts[1].toDouble())
     }
 
 }

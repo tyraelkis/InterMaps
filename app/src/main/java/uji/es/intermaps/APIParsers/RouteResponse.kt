@@ -3,28 +3,18 @@ package uji.es.intermaps.APIParsers
 import com.google.gson.annotations.SerializedName
 
 data class RouteResponse(
-    @SerializedName("features")
-    val features: List<RouteFeature>
+    @SerializedName("routes")
+    val routes: List<RouteFeature>
 )
 
 data class RouteFeature(
     @SerializedName("geometry")
-    val geometry: RouteGeometry,
+    val geometry: String,
 
-    @SerializedName("properties")
-    val properties: RouteProperties
-)
-
-
-data class RouteGeometry(
-    @SerializedName("coordinates")
-    val coordinates: List<List<Double>> // Lista de coordenadas del recorrido
-)
-
-data class RouteProperties(
     @SerializedName("summary")
     val summary: RouteSummary
 )
+
 data class RouteSummary(
     @SerializedName("distance")
     val distance: Double,
