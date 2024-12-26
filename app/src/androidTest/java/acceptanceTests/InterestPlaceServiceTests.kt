@@ -156,4 +156,15 @@ class InterestPlaceServiceTests {
         fun setFavouriteInterestPlace_E3Invalid_errorOnSettingFavInterestPlace(): Unit = runBlocking {
             interestPlaceService.setFavInterestPlace(Coordinate(38.0,-0.0))
         }
+
+    @Test
+    fun deleteFavInterestPlace_E1Valid_InterestPlaceDeletedAsFavourite(): Unit = runBlocking {
+        val res = interestPlaceService.deleteFavInterestPlace(interestPlace.coordinate)
+        assertEquals(true,res)
+    }
+
+    @Test (expected = NotSuchPlaceException::class)
+    fun deleteFavInterestPlace_E3Invalid_errorOnDeletingFavInterestPlace(): Unit = runBlocking {
+        interestPlaceService.deleteFavInterestPlace(Coordinate(38.0,-0.0))
+    }
 }

@@ -743,6 +743,10 @@ class FirebaseRepository: Repository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun deleteFavInterestPlace(coordinate: Coordinate): Boolean {
+        TODO("Not yet implemented")
+    }
+
 
 }
 
