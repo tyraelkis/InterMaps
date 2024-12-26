@@ -43,4 +43,5 @@ interface Repository {
     suspend fun setFavInterestPlace(coordinate: Coordinate): Boolean
     suspend fun setFavVehicle(plate: String): Boolean
     suspend fun deleteFavInterestPlace(coordinate: Coordinate): Boolean
+    suspend fun deleteFavVehicle(plate: String): Boolean
 }

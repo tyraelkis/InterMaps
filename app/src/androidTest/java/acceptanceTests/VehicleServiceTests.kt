@@ -116,4 +116,10 @@ class VehicleServiceTests {
         vehicleService.setFavVehicle("8888COD")
     }
 
+    @Test
+    fun deleteFavVehicle_E1Valid_vehicleDeleteAsFavourite(): Unit = runBlocking {
+        val result: Boolean = vehicleService.deleteFavVehicle(vehicle.plate)
+        assertEquals(true, result)
+    }
+
 }
