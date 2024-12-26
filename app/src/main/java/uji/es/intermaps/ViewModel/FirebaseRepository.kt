@@ -779,7 +779,44 @@ class FirebaseRepository: Repository {
     }
 
     override suspend fun setFavVehicle(plate: String): Boolean {
-        TODO("Not yet implemented")
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        var result = false
+        val documentSnapshot = db.collection("Vehicle")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val vehicleList =
+                documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
+
+            val foundVehicle = (vehicleList.find { vehicle ->
+                val foundVehiclePlate = vehicle["plate"] as? String ?: ""
+
+                plate == foundVehiclePlate
+            }?: throw NotSuchElementException("Vehiculo no encontrado")).toMutableMap()
+
+            val updatedVehicle = vehicleList.map { vehicle ->
+                if (vehicle == foundVehicle){
+                    vehicle.toMutableMap().apply {
+                        this["fav"] = true
+                    }
+                } else {
+                    vehicle
+                }
+            }
+
+            db.collection("Vehicle")
+                .document(userEmail)
+                .update("vehicles", updatedVehicle)
+                .await()
+            result = true
+
+        } else {
+            result = false
+        }
+        return result
     }
 
     override suspend fun deleteFavInterestPlace(coordinate: Coordinate): Boolean {
