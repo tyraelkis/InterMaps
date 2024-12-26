@@ -100,6 +100,8 @@ open class InterestPlaceService(private val repository: Repository) {
         return returnPlace
     }
 
-
+    suspend fun setFavInterestPlace(coordinate: Coordinate) : Boolean {
+        TODO("Not yet implemented")
+    }
 
 }

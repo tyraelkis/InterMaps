@@ -735,7 +735,9 @@ class FirebaseRepository: Repository {
         }
     }
 
-
+    override suspend fun setFavInterestPlace(coordinate: Coordinate): Boolean {
+        TODO("Not yet implemented")
+    }
 
 
 }

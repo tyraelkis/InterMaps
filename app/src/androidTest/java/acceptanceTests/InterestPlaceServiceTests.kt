@@ -146,5 +146,17 @@ class InterestPlaceServiceTests {
         interestPlaceService.createInterestPlaceFromToponym("Moztrambique")
     }
 
+    @Test
+    fun setFavouriteInterestPlace_E1Valid_InterestPlaceSetAsFavourite(): Unit = runBlocking {
+        val res = interestPlaceService.setFavInterestPlace(interestPlace.coordinate)
+        assertEquals(true,res)
+    }
+
+    @Test(expected = NotSuchPlaceException::class)
+        fun setFavouriteInterestPlace_E2Invalid_InterestPlaceSetAsFavourite(): Unit = runBlocking {
+            interestPlaceService.setFavInterestPlace(Coordinate(38.0,-0.0))
+        }
+    }
+
 
 }
