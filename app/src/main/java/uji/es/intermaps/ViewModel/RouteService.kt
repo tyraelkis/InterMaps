@@ -103,6 +103,10 @@ open class RouteService(private val repository: Repository){
 
     }
 
+    fun viewRouteList(): List<Route> {
+        TODO()
+    }
+
 
 
 }

@@ -5,6 +5,7 @@ import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,6 +48,7 @@ class RouteTests {
     private val userService = UserService(FirebaseRepository())
     private val userTest: User = User("emaildeprueba@gmail.com", "123456BB")
     lateinit private var routeService: RouteService
+    private val route = Route("","", emptyList(), 0.0, 0.0.toString(),0.0,  RouteTypes.RAPIDA, false, TransportMethods.VEHICULO, "")
 
     @Before
     fun setup():Unit = runBlocking() {
@@ -204,5 +206,21 @@ class RouteTests {
 
         assertEquals(expectedCalories, calories, 0.1)
         verify(mockRouteRepository).calculateCaloriesConsumition(mockedRoute, TransportMethods.APIE)
+    }
+
+    @Test
+    fun viewRouteList_E1Valido_routeListViewed(): Unit = runBlocking{
+        `when`(mockRepository.viewRouteList()).thenReturn(listOf(route))
+        val res = routeService.viewRouteList()
+        assertTrue(res.isNotEmpty())
+        verify(mockRepository).viewRouteList()
+    }
+
+    @Test
+    fun viewRouteList_E2Valido_emptyRouteListViewed(): Unit = runBlocking{
+        `when`(mockRepository.viewRouteList()).thenReturn(emptyList())
+        val res = routeService.viewRouteList()
+        assertTrue(res.isEmpty())
+        verify(mockRepository).viewRouteList()
     }
 }

@@ -4,6 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,6 +35,8 @@ class RouteServiceTest {
     private var routeService: RouteService = RouteService(repository)
     private var routeRepository: RouteRepository = RouteRepository()
     var routeTest: Route? = null
+    private var emailEmpty: String = "emaildepruebaempty@gmail.com" //Usuario sin lista de lugares
+
 
     @Before
     fun setup(): Unit = runBlocking {
@@ -112,7 +115,20 @@ class RouteServiceTest {
         routeService.putRoute(routeTest)
     }
 
+    @Test
+    fun viewRouteList_E1Valido_RouteListViewed(): Unit = runBlocking{
+        val res = routeService.viewRouteList()
+        assertTrue(res.isNotEmpty())
+    }
 
+    @Test
+    fun viewRouteList_E2Valido_emptyRouteListViewed(): Unit = runBlocking{
+        userService.signOut()
+        userService.login(emailEmpty, "123456BB")
+        val res = routeService.viewRouteList()
+        userService.login(email, "123456BB")
+        assertTrue(res.isEmpty())
+    }
 
 
 }
