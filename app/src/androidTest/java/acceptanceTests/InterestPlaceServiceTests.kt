@@ -156,7 +156,4 @@ class InterestPlaceServiceTests {
         fun setFavouriteInterestPlace_E2Invalid_InterestPlaceSetAsFavourite(): Unit = runBlocking {
             interestPlaceService.setFavInterestPlace(Coordinate(38.0,-0.0))
         }
-    }
-
-
 }
