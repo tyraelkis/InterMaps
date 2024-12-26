@@ -112,7 +112,7 @@ class VehicleServiceTests {
     }
 
     @Test (expected = NotSuchElementException::class)
-    fun setFavVehicle_E2Invalid_errorOnSettingFavVehicle(): Unit = runBlocking {
+    fun setFavVehicle_E3Invalid_errorOnSettingFavVehicle(): Unit = runBlocking {
         vehicleService.setFavVehicle("8888COD")
     }
 

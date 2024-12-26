@@ -68,7 +68,7 @@ class RouteServiceTest {
     }
 
     @Test
-    fun calculateConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
+    fun calculateConsumition_E1Valid_consumitionCalculated(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,
             RouteTypes.RAPIDA, "9999GON")
         val vehicleType = routeService.getVehicleTypeAndConsump(routeTest).first
@@ -78,14 +78,14 @@ class RouteServiceTest {
     }
 
     @Test(expected = NotValidTransportException::class)
-    fun calculateConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
+    fun calculateConsumition_E2Invalid_consumitionNotCalculated(): Unit = runBlocking {
         val routeTest = routeService.createRoute("Galicia", "Castellón", TransportMethods.APIE,RouteTypes.RAPIDA, "1111AAA")
         routeService.calculateConsumition(routeTest, TransportMethods.APIE, VehicleTypes.ELECTRICO)
 
     }
 
     @Test
-    fun calculateCaloriesConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
+    fun calculateCaloriesConsumition_E1Valid_consumitionCalculated(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Burriana", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "")
         val calculatedConsumition = routeService.calculateCaloriesConsumition(routeTest, TransportMethods.APIE)
         val result = 13731.8
@@ -93,21 +93,21 @@ class RouteServiceTest {
     }
 
     @Test (expected = NotValidTransportException::class)
-    fun calculateCaloriesConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
+    fun calculateCaloriesConsumition_E2Invalid_consumitionNotCalculated(): Unit = runBlocking {
         val routeTest = routeService.createRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "")
         routeService.calculateCaloriesConsumition(routeTest, TransportMethods.VEHICULO)
 
     }
 
     @Test
-    fun saveRoute_E4Valid_routeSaved(): Unit = runBlocking {
+    fun saveRoute_E1Valid_routeSaved(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Castello de la Plana, VC, Spain", "Borriana, VC, Spain", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
         val res = routeService.putRoute(routeTest)
         assertEquals(true, res)
     }
 
     @Test (expected = NotValidPlaceException::class)
-    fun saveRoute_E4Invalid_noRouteSaved(): Unit = runBlocking {
+    fun saveRoute_E2Invalid_noRouteSaved(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Valencia", "Valencia", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
         routeService.putRoute(routeTest)
     }
