@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.ViewModel.RouteViewModel
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,10 +39,8 @@ import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
-import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
-import uji.es.intermaps.Model.Route
 import uji.es.intermaps.R
 
 @Composable
@@ -51,7 +48,7 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
 
     val origin = viewModel.route.value?.origin
     val destination = viewModel.route.value?.destination
-    val transportMethod = viewModel.route.value?.trasnportMethod
+    val transportMethod = viewModel.route.value?.transportMethod
     val routeType = viewModel.route.value?.routeType
     val routePoints = viewModel.route.value?.route
     val distance = viewModel.route.value?.distance

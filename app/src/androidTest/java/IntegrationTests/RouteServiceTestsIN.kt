@@ -2,24 +2,20 @@ package IntegrationTests
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.APIParsers.RouteProperties
 import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
-import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
@@ -66,7 +62,7 @@ class RouteTests {
         var mockedRoute = Route(
             origin = "Burriana",
             destination = "Castellón de la Plana",
-            trasnportMethod = TransportMethods.VEHICULO,
+            transportMethod = TransportMethods.VEHICULO,
             route = emptyList(),
             distance = 0.0,
             duration = 0.0.toString(),
@@ -137,7 +133,7 @@ class RouteTests {
         val mockedRoute = Route(
             origin = "Burriana",
             destination = "Castellón de la Plana",
-            trasnportMethod = TransportMethods.VEHICULO,
+            transportMethod = TransportMethods.VEHICULO,
             route = emptyList(),
             distance = 25.0,
             duration = "30 min",
@@ -158,7 +154,7 @@ class RouteTests {
         val mockedRoute = Route(
             origin = "Burriana",
             destination = "Castellón de la Plana",
-            trasnportMethod = TransportMethods.VEHICULO,
+            transportMethod = TransportMethods.VEHICULO,
             route = emptyList(),
             distance = 25.0,
             duration = "30 min",
@@ -186,7 +182,7 @@ class RouteTests {
         val mockedRoute = Route(
             origin = "Burriana",
             destination = "Castellón de la Plana",
-            trasnportMethod = TransportMethods.APIE,
+            transportMethod = TransportMethods.APIE,
             route = emptyList(),
             distance = 10.0, // 10 km de distancia como ejemplo
             duration = "2 h",
@@ -204,8 +200,6 @@ class RouteTests {
 
         assertEquals(expectedCalories, calories, 0.1)
         verify(mockRouteRepository).calculateCaloriesConsumition(mockedRoute, TransportMethods.APIE)
-        // Comprobamos que la ruta fue creada correctamente
-        assertEquals(mockedRoute.cost, consumition)
 
     }
 

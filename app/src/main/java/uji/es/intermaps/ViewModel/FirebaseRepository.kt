@@ -6,12 +6,10 @@ import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
-import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
@@ -20,8 +18,6 @@ import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
-import uji.es.intermaps.Model.TransportMethods
-import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.Model.VehicleFactory
@@ -626,7 +622,7 @@ class FirebaseRepository: Repository {
             val newRoute = mapOf(
                 "origin" to route.origin,
                 "destination" to route.destination,
-                "trasnportMethod" to route.trasnportMethod,
+                "trasnportMethod" to route.transportMethod,
                 "route" to route.route.take(2),
                 "distance" to route.distance,
                 "duration" to route.duration,

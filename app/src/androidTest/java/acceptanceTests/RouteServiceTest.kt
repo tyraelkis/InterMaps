@@ -58,9 +58,9 @@ class RouteServiceTest {
     fun createRoute_E1Valid_routeIsCreated(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
         val vehicleType = routeService.getVehicleTypeAndConsump(routeTest).first
-        routeService.calculateConsumition(routeTest, routeTest.trasnportMethod, vehicleType)
+        routeService.calculateConsumition(routeTest, routeTest.transportMethod, vehicleType)
         val res = db.doesRouteExist(routeTest)
-        routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod)
+        routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.transportMethod)
         assertEquals(true, res)
     }
 

@@ -12,7 +12,6 @@ import uji.es.intermaps.APIParsers.RouteResponse
 import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
-import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.ElectricityPriceRepository
 import uji.es.intermaps.Interfaces.FuelPriceRepository
 import uji.es.intermaps.Interfaces.ORSRepository
@@ -97,7 +96,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         throw NotSuchPlaceException("Error en la llamada a la API para obtener las coordenadas")
     }
 
-    override suspend fun calculateRoute(origin: String, destination: String, trasnportMethod: TransportMethods,routeType: RouteTypes) : RouteFeature {
+    override suspend fun calculateRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes) : RouteFeature {
         lateinit var call : retrofit2.Response<RouteResponse>
         var route = RouteFeature(geometry = RouteGeometry(emptyList()), properties = RouteProperties(
             RouteSummary(distance = 0.0, duration = 0.0)
@@ -109,13 +108,13 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                 RouteTypes.ECONOMICA -> "recommended"
             }
 
-            val avoidPeajes = if (trasnportMethod == TransportMethods.VEHICULO && routeType == RouteTypes.ECONOMICA) {
+            val avoidPeajes = if (transportMethod == TransportMethods.VEHICULO && routeType == RouteTypes.ECONOMICA) {
                 "tollways" //
             } else {
                 null
             }
 
-            call = when (trasnportMethod) {
+            call = when (transportMethod) {
                 TransportMethods.VEHICULO -> openRouteService.calculateRouteVehicle(
                     apiKey,
                     origin,
@@ -173,7 +172,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             route = coordinates,
             distance = distance,
             duration = duration,
-            trasnportMethod = transportMethod,
+            transportMethod = transportMethod,
             routeType = routeType,
             vehiclePlate = vehiclePlate,
             cost = 0.0
