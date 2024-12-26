@@ -9,5 +9,5 @@ data class Route(
     var cost: Double = 0.0,
     val routeType: RouteTypes = RouteTypes.RAPIDA,
     val fav: Boolean = false,
-    val trasnportMethod: TransportMethods,
+    val transportMethod: TransportMethods,
     val vehiclePlate: String = "")

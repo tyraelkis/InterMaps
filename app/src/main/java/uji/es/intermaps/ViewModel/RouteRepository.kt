@@ -6,10 +6,7 @@ import androidx.annotation.RequiresApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.APIParsers.RouteFeature
-import uji.es.intermaps.APIParsers.RouteGeometry
-import uji.es.intermaps.APIParsers.RouteProperties
 import uji.es.intermaps.APIParsers.RouteResponse
-import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Interfaces.ElectricityPriceRepository
@@ -139,7 +136,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             route = coordinates,
             distance = distance,
             duration = duration,
-            trasnportMethod = transportMethod,
+            transportMethod = transportMethod,
             routeType = routeType,
             vehiclePlate = vehiclePlate,
             cost = 0.0

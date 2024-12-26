@@ -6,7 +6,6 @@ import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
-import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchElementException
@@ -625,7 +624,7 @@ class FirebaseRepository: Repository {
             val newRoute = mapOf(
                 "origin" to route.origin,
                 "destination" to route.destination,
-                "trasnportMethod" to route.trasnportMethod,
+                "trasnportMethod" to route.transportMethod,
                 "route" to route.route.take(2),
                 "distance" to route.distance,
                 "duration" to route.duration,
@@ -735,8 +734,39 @@ class FirebaseRepository: Repository {
         }
     }
 
-    suspend fun viewRouteList(): List<Route> {
-        TODO()
+    override suspend fun viewRouteList(): List<Route> {
+        val userEmail =  auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        return try {
+            val documentSnapshot = db.collection("Route")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                // Extraemos el array interestPlaces del documento
+                val routes = documentSnapshot.get("routes") as? List<Map<String, Any>> ?: emptyList()
+
+                // Convertimos cada elemento del array a InterestPlace
+                routes.map { route ->
+                    Route(
+                        origin = route["origin"] as String? ?: "",
+                        destination = route["destination"] as String? ?: "",
+                        transportMethod = route["transportMethod"] as TransportMethods,
+                        route = route["route"] as List<Coordinate>,
+                        distance = route["distance"] as Double,
+                        duration = route["duration"] as String,
+                        cost = route["cost"] as Double,
+                        routeType = route["routeType"] as RouteTypes,
+                        fav = route["fav"] as Boolean? ?: false,
+                        vehiclePlate = route["vehiclePlate"] as String
+                    )
+                }
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            emptyList()  // En caso de error, retornamos una lista vacía
+        }
     }
 
 

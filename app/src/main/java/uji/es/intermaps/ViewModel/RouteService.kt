@@ -103,8 +103,8 @@ open class RouteService(private val repository: Repository){
 
     }
 
-    fun viewRouteList(): List<Route> {
-        TODO()
+    suspend fun viewRouteList(): List<Route> {
+        return repository.viewRouteList()
     }
 
 
