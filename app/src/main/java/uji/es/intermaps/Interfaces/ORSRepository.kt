@@ -1,6 +1,5 @@
 package uji.es.intermaps.Interfaces
 
-import androidx.annotation.BoolRes
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
@@ -13,8 +12,9 @@ interface ORSRepository {
     suspend fun searchInterestPlaceByCoordinates(coordinate: Coordinate):InterestPlace
     suspend fun searchInterestPlaceByToponym(toponym: String): InterestPlace
     suspend fun calculateRoute(origin: String, destination: String, trasnportMethod: TransportMethods,routeType: RouteTypes) : RouteFeature
-    suspend fun calculateFuelConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double
-    suspend fun calculateElectricConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double
+    suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double
     suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods): Double
-
+    suspend fun createRoute( origin: String, destination: String,
+                             transportMethods: TransportMethods,
+                             routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route
 }

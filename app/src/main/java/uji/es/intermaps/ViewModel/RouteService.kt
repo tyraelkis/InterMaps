@@ -2,9 +2,11 @@ package uji.es.intermaps.ViewModel
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.Exceptions.NoValidTypeException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
@@ -18,7 +20,8 @@ import uji.es.intermaps.Model.VehicleTypes
 
 open class RouteService(private val repository: Repository){
     public var routeRepository = RouteRepository()
-    suspend fun createRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String = ""):Route {
+
+    suspend fun createRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String):Route {
         if (origin.isEmpty() or destination.isEmpty()){
             throw NotValidPlaceException()
         }
@@ -29,8 +32,8 @@ open class RouteService(private val repository: Repository){
         val destinationCoordinate = routeRepository.searchInterestPlaceByToponym(destination).coordinate
         val originString = "${originCoordinate.longitude},${originCoordinate.latitude}"
         val destinationString = "${destinationCoordinate.longitude},${destinationCoordinate.latitude}"
-        val routeCall = createTypeRoute(originString, destinationString, transportMethod, routeType )
-        val route = repository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate,routeCall.second)
+        val routeCall = routeRepository.calculateRoute(originString, destinationString, transportMethod, routeType )
+        val route = routeRepository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate, routeCall)
         return route
     }
 
@@ -39,39 +42,36 @@ open class RouteService(private val repository: Repository){
         TODO()
     }
 
-    suspend fun calculateFuelConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Boolean {
-        var res :Boolean
-        val routeRepository = RouteRepository()
-        if (transportMethod != TransportMethods.VEHICULO || vehicleType == VehicleTypes.ELECTRICO ){
+    suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
+        var res = 0.0
+        if (transportMethod != TransportMethods.VEHICULO ){
             throw NotValidTransportException()
         } else {
-            routeRepository.calculateFuelConsumition(route, transportMethod, vehicleType,)
-            res = true
+            res = routeRepository.calculateConsumition(route, transportMethod, vehicleType,)
         }
        return res
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun calculateElectricConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Boolean {
-        var res: Boolean
+    suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods ): Double {
+        var res = 0.0
         if (transportMethod == TransportMethods.VEHICULO ){
             throw NotValidTransportException()
         } else {
-            routeRepository.calculateCaloriesConsumition(route, transportMethod)
-            res = true
+            res = routeRepository.calculateCaloriesConsumition(route, transportMethod)
         }
         return res
     }
 
-    suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods ): Boolean {
-        var res: Boolean
-        if (transportMethod == TransportMethods.VEHICULO ){
-            throw NotValidTransportException()
-        } else {
-            routeRepository.calculateCaloriesConsumition(route, transportMethod)
-            res = true
+    suspend fun putRoute(route: Route): Boolean {
+        if (route.origin.isEmpty() or route.destination.isEmpty()){
+            throw NotValidPlaceException()
         }
-        return res
+        if (route.origin == route.destination){
+            throw NotValidPlaceException()
+        }
+        repository.saveRouteToDatabase(route)
+        return true
+
     }
 
 
@@ -96,6 +96,9 @@ open class RouteService(private val repository: Repository){
         return repository.getElectricPrice()
     }
 
+    suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double> {
+        return repository.getVehicleTypeAndConsump(route)
+    }
     suspend fun createTypeRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes?):Pair<Boolean,RouteFeature> {
         if (routeType == null){
             throw NoValidTypeException()
@@ -105,6 +108,14 @@ open class RouteService(private val repository: Repository){
     }
 
 
+    fun convertToCoordinate(geometry: RouteGeometry): List<Coordinate> {
+        return repository.convertToCoordinate(geometry)
+
+    }
+
+    fun viewRouteList(): List<Route> {
+        TODO()
+    }
 
 
 

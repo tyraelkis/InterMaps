@@ -47,6 +47,7 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import uji.es.intermaps.Model.VehicleTypes
 import uji.es.intermaps.ViewModel.VehicleViewModel
 
@@ -224,7 +225,7 @@ fun VehicleEditDelete(navController: NavController, viewModel: VehicleViewModel,
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
                     viewModel.editVehicleData(vehicle.plate, vehicle.type, vehicle.consumption)
-                    CoroutineScope(Dispatchers.Main).launch {
+                    withContext(Dispatchers.Main) {
                         errorMessage = viewModel.getErrorMessage()
                         if (errorMessage.isEmpty())
                             showPopupEditSucces = viewModel.getShowPopupEditSucces()

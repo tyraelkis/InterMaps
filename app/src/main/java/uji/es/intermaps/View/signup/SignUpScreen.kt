@@ -43,17 +43,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
-import uji.es.intermaps.Exceptions.NotValidUserData
-import uji.es.intermaps.ViewModel.FirebaseRepository
-import uji.es.intermaps.Interfaces.Repository
-import uji.es.intermaps.ViewModel.UserService
+import uji.es.intermaps.ViewModel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(navController: NavController) {
-    val repository: Repository = FirebaseRepository()
-    val userService = UserService(repository)
+fun SignUpScreen(navController: NavController, viewModel: UserViewModel) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -98,14 +92,14 @@ fun SignUpScreen(navController: NavController) {
             placeholder = { Text(
                 text = "Ingrese su correo electrónico",
                 modifier = Modifier
-                    .background(Color.Transparent), // Cambiar el fondo del placeholder
-                color = LightGray // Color del texto del placeholder
+                    .background(Color.Transparent),
+                color = LightGray
             ) },
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = White, // Fondo del TextField
-                cursorColor = Black, // Color del cursor
-                focusedIndicatorColor = Color.Transparent, // Eliminar el indicador de enfoque
-                unfocusedIndicatorColor = Color.Transparent // Eliminar el indicador cuando no está enfocado
+                containerColor = White,
+                cursorColor = Black,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
             )
         )
         Text(
@@ -143,14 +137,14 @@ fun SignUpScreen(navController: NavController) {
             placeholder = { Text(
                 text = "Ingrese su contraseña",
                 modifier = Modifier
-                    .background(Color.Transparent), // Cambiar el fondo del placeholder
-                color = LightGray // Color del texto del placeholder
+                    .background(Color.Transparent),
+                color = LightGray
             ) },
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = White, // Fondo del TextField
-                cursorColor = Black, // Color del cursor
-                focusedIndicatorColor = Color.Transparent, // Eliminar el indicador de enfoque
-                unfocusedIndicatorColor = Color.Transparent // Eliminar el indicador cuando no está enfocado
+                containerColor = White,
+                cursorColor = Black,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
             )
         )
         Text(
@@ -181,23 +175,11 @@ fun SignUpScreen(navController: NavController) {
                 OutlinedButton(
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        userService.createUser(email, password)
-                        withContext(Dispatchers.Main) {
+                    viewModel.createUser(email, password)
+                    withContext(Dispatchers.Main) {
+                        errorMessage = viewModel.getErrorMessageNormal()
+                        if (errorMessage.isEmpty())
                             navController.navigate("mainMenu")
-                        }
-                    } catch (e: NotValidUserData) {
-                        withContext(Dispatchers.Main) {
-                            errorMessage = e.message.toString()
-                        }
-                    } catch (e: IllegalArgumentException) {
-                        withContext(Dispatchers.Main) {
-                            errorMessage = e.message.toString()
-                        }
-                    } catch (e: AccountAlreadyRegistredException) {
-                        withContext(Dispatchers.Main) {
-                            errorMessage = e.message.toString()
-                        }
                     }
                 }
             },

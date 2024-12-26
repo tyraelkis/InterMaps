@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.ViewModel.RouteViewModel
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,7 +39,6 @@ import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
-import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import uji.es.intermaps.R
@@ -50,11 +48,12 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
 
     val origin = viewModel.route.value?.origin
     val destination = viewModel.route.value?.destination
-    val transportMethod = viewModel.route.value?.trasnportMethod
+    val transportMethod = viewModel.route.value?.transportMethod
     val routeType = viewModel.route.value?.routeType
     val routePoints = viewModel.route.value?.route
     val distance = viewModel.route.value?.distance
     val duration = viewModel.route.value?.duration
+    val cost = viewModel.route.value?.cost
     val vehiclePlate = viewModel.route.value?.vehiclePlate
     val loading = viewModel.loading
     val startPoint:Coordinate? = routePoints?.get(0)
@@ -140,7 +139,7 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
 
                 // Información de la ruta
                 Text(
-                    text = "${origin} -->${destination}",
+                    text = "${origin} → ${destination}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
                     modifier = Modifier.padding(start = 16.dp)
@@ -156,15 +155,15 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                     LocationCard("${destination}", "Imagen 2")
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 // Datos adicionales
-                Text(
+                /*Text(
                     text = "Datos adicionales",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     modifier = Modifier.padding(start = 16.dp)
-                )
+                )*/
 
                 Column(modifier = Modifier.padding(16.dp)) {
                     RouteDetailItem(label = "Método de transporte", value = "${transportMethod}")
@@ -173,13 +172,14 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                     }
                     RouteDetailItem(label = "Tipo de ruta", value = "${routeType}")
                     RouteDetailItem(label = "Distancia", value = "${distance} km")
-                    if (duration!! < 60){
-                        RouteDetailItem(label = "Duración", value = "${duration} min")
-                    }else{
-                        RouteDetailItem(label = "Duración", value = "${duration} horas")
-                    }
+                    RouteDetailItem(label = "Duración", value = "${duration}")
 
-                    //RouteDetailItem(label = "Coste", value = "2€")
+                    if (transportMethod == TransportMethods.VEHICULO){
+                        RouteDetailItem(label = "Coste", value = "${cost} €")
+                    }
+                    else{
+                        RouteDetailItem(label = "Coste", value = "${cost} kcal")
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -187,7 +187,9 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                 // Botón Guardar ruta
                 Button(
                     onClick = {
-                        //la idea es que lleve a la lista de rutas, cuando este creada
+                        viewModel.route.value?.let { currentRoute ->
+                            viewModel.saveRoute(currentRoute) // Llama al método del ViewModel
+                        }
                         navController.navigate("home")
                     },
                     modifier = Modifier
@@ -197,7 +199,7 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = "Ver rutas",
+                        text = "Guardar ruta",
                         color = Color.White,
                         fontSize = 18.sp
                     )

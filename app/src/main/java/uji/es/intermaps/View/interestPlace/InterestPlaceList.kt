@@ -2,7 +2,6 @@
 
 package uji.es.intermaps.View.interestPlace
 
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -95,7 +94,7 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                 color = Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center // Centrar el texto dentro del Row
+                textAlign = TextAlign.Center
             )
         }
 
@@ -167,7 +166,6 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                 .clickable {
                                     viewModel.updateInterestPlace(place)
                                     val encodedToponym = URLEncoder.encode(place.toponym, StandardCharsets.UTF_8.toString())
-                                    Log.d("encodedToponym", encodedToponym)
                                     navController.navigate("interestPlaceSetAlias/$encodedToponym")
                                 },
 
@@ -245,7 +243,6 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                 .clickable {
                                     viewModel.updateInterestPlace(notFavPlace)
                                     val encodedToponym = URLEncoder.encode(notFavPlace.toponym, StandardCharsets.UTF_8.toString())
-                                    Log.d("encodedToponym", encodedToponym)
                                     navController.navigate("interestPlaceSetAlias/$encodedToponym")
                                 },
                             tint = Black
@@ -294,5 +291,7 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                 fontSize = 20.sp,
             )
         }
+
+        Spacer(modifier = Modifier.height(30.dp))
     }
 }

@@ -17,6 +17,7 @@ import uji.es.intermaps.Interfaces.ElectricityPriceRepository
 import uji.es.intermaps.Interfaces.FuelPriceRepository
 import uji.es.intermaps.Interfaces.ORSRepository
 import uji.es.intermaps.Model.Coordinate
+import uji.es.intermaps.Model.DataBase.auth
 import uji.es.intermaps.Model.DataBase.db
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.RetrofitConfig
@@ -31,6 +32,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPriceRepository {
+    val repository = FirebaseRepository()
+
     private val apiKey = "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23"
     val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
     override suspend fun searchInterestPlaceByCoordinates(coordinate: Coordinate): InterestPlace {
@@ -154,30 +157,66 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         return route
     }
 
-    override suspend fun calculateFuelConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
-        val repository = FirebaseRepository()
+    override suspend fun createRoute( origin: String, destination: String, transportMethod: TransportMethods,
+                                      routeType: RouteTypes, vehiclePlate: String, route: RouteFeature
+    ): Route {
         val routeService = RouteService(repository)
-        var coste = 0.0
-        val consumoMedioGasolina95_l_por_100km = 7.0
-        val consumoMedioGasoleoA_l_por_100km = 5.0
-        if (transportMethod == TransportMethods.VEHICULO && vehicleType == VehicleTypes.GASOLINA ){
-            coste = (route.distance/100) * consumoMedioGasolina95_l_por_100km * routeService.getFuelCostAverage().get(0)
+        val coordinates = routeService.convertToCoordinate(route.geometry)
+        if (coordinates.isEmpty()) {
+            throw IllegalArgumentException("No se generaron coordenadas válidas para la ruta")
         }
-        if (transportMethod == TransportMethods.VEHICULO && vehicleType == VehicleTypes.DIESEL){
-            coste = (route.distance/100) * consumoMedioGasoleoA_l_por_100km * routeService.getFuelCostAverage().get(1)
+
+        val tiempo = route.properties.summary.duration
+        val distance = String.format("%.2f", route.properties.summary.distance / 1000).toDouble()
+        val horas = (tiempo / 3600).toInt()
+        val minutos = ((tiempo % 3600) / 60).toInt()
+        val duration = if (horas != 0) "$horas h $minutos min" else "$minutos min"
+
+        val route = Route(
+            origin = origin,
+            destination = destination,
+            route = coordinates,
+            distance = distance,
+            duration = duration,
+            transportMethod = transportMethod,
+            routeType = routeType,
+            vehiclePlate = vehiclePlate,
+            cost = 0.0
+        )
+
+        route.cost = if (transportMethod == TransportMethods.VEHICULO) {
+            val vehicleType = routeService.getVehicleTypeAndConsump(route).first
+            calculateConsumition(route, transportMethod, vehicleType)
+        } else {
+            calculateCaloriesConsumition(route, transportMethod)
         }
-        return coste
+        return route
     }
 
-    override suspend fun calculateElectricConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
-        val repository = FirebaseRepository()
+
+    override suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
         val routeService = RouteService(repository)
         var coste = 0.0
-        val consumoMediokWh_por_100km = 7.0
-        if (transportMethod == TransportMethods.VEHICULO && vehicleType == VehicleTypes.ELECTRICO ){
-            coste = (route.distance/100) * consumoMediokWh_por_100km * (routeService.getElctricCost()/1000)
+        var costeRounded = 0.0
+        val consumo = routeService.getVehicleTypeAndConsump(route).second
+        if (transportMethod == TransportMethods.VEHICULO){
+            if (vehicleType == VehicleTypes.GASOLINA ){
+                coste = (route.distance/100) * consumo * routeService.getFuelCostAverage().get(0)
+                costeRounded = BigDecimal(coste).setScale(3, RoundingMode.HALF_UP).toDouble()
+
+            }
+            else if (vehicleType == VehicleTypes.DIESEL){
+                coste = (route.distance/100) * consumo * routeService.getFuelCostAverage().get(1)
+                costeRounded = BigDecimal(coste).setScale(3, RoundingMode.HALF_UP).toDouble()
+            }
+            else if (vehicleType == VehicleTypes.ELECTRICO ){
+                coste = (route.distance/100) * consumo * (routeService.getElctricCost()/1000)
+                costeRounded = BigDecimal(coste).setScale(3, RoundingMode.HALF_UP).toDouble()
+            }
+            route.cost = costeRounded
+            //saveRouteCostToDatabase(route.origin, route.destination, costeRounded)
         }
-        return coste
+        return costeRounded
     }
 
 
@@ -186,12 +225,14 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         val caloriasMediaBici = 45
         val caloriasMediaCaminar = 62
         if (transportMethod == TransportMethods.APIE){
-            coste = (route.distance/100) * caloriasMediaCaminar
+            coste = route.distance * caloriasMediaCaminar
         }
         if (transportMethod == TransportMethods.BICICLETA){
-            coste = (route.distance/100) * caloriasMediaBici
+            coste = route.distance * caloriasMediaBici
         }
-        return coste
+        val costeRounded = BigDecimal(coste).setScale(1, RoundingMode.HALF_UP).toDouble()
+        route.cost = costeRounded
+        return costeRounded
     }
 
     override suspend fun calculateFuelCostAverage(): Boolean {
@@ -227,25 +268,6 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
 
     }
 
-    private fun saveFuelCostAverageToDatabase(averages: List<Double>) {
-        val fuelPricesDocument = db.collection("FuelPrices").document("mediaPrecios")
-        fuelPricesDocument.set(
-            mapOf(
-                "gasolina95" to averages[0],
-                "gasoleoA" to averages[1],
-                "timestamp" to System.currentTimeMillis()
-            )
-        )
-    }
-
-    private fun saveElectricityCostToDatabase(precio: Double){
-        val electricityPricesDocument = db.collection("ElectricityPrices").document("precios")
-        electricityPricesDocument.set(
-            mapOf(
-                "precioLuz" to precio,
-            )
-        )
-    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun calculateElectricityCost(): Boolean {
@@ -284,11 +306,49 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             return false
         }
     }
-    fun parseCoordinates(coordinateString: String): List<Double> {
 
-        val parts = coordinateString.split(",")
+    private fun saveRouteCostToDatabase(origin: String, destination: String, cost: Double) {
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
 
-        return listOf(parts[0].toDouble(), parts[1].toDouble())
+        val routesDocument = db.collection("Route").document(userEmail)
+        routesDocument.get().addOnSuccessListener { documentSnapshot ->
+            if (documentSnapshot.exists()) {
+                val routes = documentSnapshot.get("routes") as? MutableList<Map<String, Any>>
+                    ?: throw IllegalArgumentException("No se encontró el campo 'routes' en el documento")
+                val routeId = routes.indexOfFirst {
+                    it["origin"] == origin && it["destination"] == destination
+                }
+
+                if (routeId in routes.indices) {
+                    val updatedRoute = routes[routeId].toMutableMap()
+                    updatedRoute["cost"] = cost
+                    routes[routeId] = updatedRoute
+
+                    routesDocument.update("routes", routes)
+                }
+            }
+        }
+    }
+
+    private fun saveFuelCostAverageToDatabase(averages: List<Double>) {
+        val fuelPricesDocument = db.collection("FuelPrices").document("mediaPrecios")
+        fuelPricesDocument.set(
+            mapOf(
+                "gasolina95" to averages[0],
+                "gasoleoA" to averages[1],
+                "timestamp" to System.currentTimeMillis()
+            )
+        )
+    }
+
+    private fun saveElectricityCostToDatabase(precio: Double){
+        val electricityPricesDocument = db.collection("ElectricityPrices").document("precios")
+        electricityPricesDocument.set(
+            mapOf(
+                "precioLuz" to precio,
+            )
+        )
     }
 
 }

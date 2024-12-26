@@ -114,9 +114,9 @@ object DataBase {
                 val transportMethods = actualRoute["trasnportMethod"] ?: return@any false
                 if (transportMethods == "VEHICULO") {
                     val vehiclePlate = actualRoute["vehiclePlate"] ?: return@any false
-                    routeOrigin == route.origin && routeDestination == route.destination && routeType == route.routeType.toString() && transportMethods == route.trasnportMethod.toString() && vehiclePlate == route.vehiclePlate
+                    routeOrigin == route.origin && routeDestination == route.destination && routeType == route.routeType.toString() && transportMethods == route.transportMethod.toString() && vehiclePlate == route.vehiclePlate
                 }else{
-                    routeOrigin == route.origin && routeDestination == route.destination && routeType == route.routeType.toString() && transportMethods == route.trasnportMethod.toString()
+                    routeOrigin == route.origin && routeDestination == route.destination && routeType == route.routeType.toString() && transportMethods == route.transportMethod.toString()
                 }
 
             }
