@@ -6,6 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import uji.es.intermaps.APIParsers.RouteFeature
+import uji.es.intermaps.Exceptions.NoValidTypeException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.Repository
@@ -28,8 +29,8 @@ open class RouteService(private val repository: Repository){
         val destinationCoordinate = routeRepository.searchInterestPlaceByToponym(destination).coordinate
         val originString = "${originCoordinate.longitude},${originCoordinate.latitude}"
         val destinationString = "${destinationCoordinate.longitude},${destinationCoordinate.latitude}"
-        val routeCall = routeRepository.calculateRoute(originString, destinationString, transportMethod, routeType )
-        val route = repository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate,routeCall)
+        val routeCall = createTypeRoute(originString, destinationString, transportMethod, routeType )
+        val route = repository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate,routeCall.second)
         return route
     }
 
@@ -96,7 +97,11 @@ open class RouteService(private val repository: Repository){
     }
 
     suspend fun createTypeRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes?):Pair<Boolean,RouteFeature> {
-        TODO()
+        if (routeType == null){
+            throw NoValidTypeException()
+        }
+        val res = routeRepository.calculateRoute(origin, destination, transportMethod, routeType)
+        return Pair(true,res)
     }
 
 

@@ -12,6 +12,7 @@ import uji.es.intermaps.APIParsers.RouteResponse
 import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
+import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.ElectricityPriceRepository
 import uji.es.intermaps.Interfaces.FuelPriceRepository
 import uji.es.intermaps.Interfaces.ORSRepository
@@ -99,13 +100,40 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             RouteSummary(distance = 0.0, duration = 0.0)
         ))
         try {
-            if (trasnportMethod.equals(TransportMethods.VEHICULO)) {
-                call = openRouteService.calculateRouteVehicle(apiKey, origin, destination)
-            } else if (trasnportMethod.equals(TransportMethods.BICICLETA)) {
-                call = openRouteService.calculateRouteBycicle(apiKey, origin, destination)
-            } else {
-                call = openRouteService.calculateRouteWalk(apiKey, origin, destination)
+            val routeTypePreference = when (routeType) {
+                RouteTypes.RAPIDA -> "fastest"
+                RouteTypes.CORTA -> "shortest"
+                RouteTypes.ECONOMICA -> "recommended"
             }
+
+            val avoidPeajes = if (trasnportMethod == TransportMethods.VEHICULO && routeType == RouteTypes.ECONOMICA) {
+                "tollways" //
+            } else {
+                null
+            }
+
+            call = when (trasnportMethod) {
+                TransportMethods.VEHICULO -> openRouteService.calculateRouteVehicle(
+                    apiKey,
+                    origin,
+                    destination,
+                    routeTypePreference,
+                    avoidPeajes
+                )
+                TransportMethods.BICICLETA -> openRouteService.calculateRouteBycicle(
+                    apiKey,
+                    origin,
+                    destination,
+                    routeTypePreference
+                )
+                TransportMethods.APIE -> openRouteService.calculateRouteWalk(
+                    apiKey,
+                    origin,
+                    destination,
+                    routeTypePreference
+                )
+            }
+
             if (call.isSuccessful) {
                 Log.d("createRoute", "Ruta creada exitosamente")
                 route = call.body()!!.features[0]

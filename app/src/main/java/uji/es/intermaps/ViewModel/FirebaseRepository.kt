@@ -660,7 +660,7 @@ class FirebaseRepository: Repository {
                     origin = origin,
                     destination = destination,
                     route = coordinates,
-                    distance = route.properties.summary.distance / 1000,
+                    distance = distance,
                     duration = tiempo,
                     trasnportMethod = trasnportMethods,
                     routeType = routeType,
