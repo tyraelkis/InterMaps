@@ -604,7 +604,7 @@ class FirebaseRepository: Repository {
         return result
     }
 
-    override suspend fun createRoute(origin: String, destination:String,trasnportMethods: TransportMethods,routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route {
+    override suspend fun createRoute(origin: String, destination:String,trasnportMethod: TransportMethods,routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route {
         val userEmail = auth.currentUser?.email
             ?: throw IllegalStateException("No hay un usuario autenticado")
         lateinit var resRoute: Route
@@ -646,7 +646,7 @@ class FirebaseRepository: Repository {
                 val newRoute = mapOf(
                     "origin" to origin,
                     "destination" to destination,
-                    "trasnportMethod" to trasnportMethods,
+                    "trasnportMethod" to trasnportMethod,
                     "route" to listOf(coordinates[0], coordinates[coordinates.size - 1]),
                     "distance" to distance,
                     "duration" to tiempo,
@@ -661,7 +661,7 @@ class FirebaseRepository: Repository {
                     route = coordinates,
                     distance = distance,
                     duration = tiempo,
-                    trasnportMethod = trasnportMethods,
+                    trasnportMethod = trasnportMethod,
                     routeType = routeType,
                     vehiclePlate = vehiclePlate
                 )

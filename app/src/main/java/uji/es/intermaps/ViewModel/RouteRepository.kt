@@ -125,15 +125,17 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                 )
                 TransportMethods.BICICLETA -> openRouteService.calculateRouteBycicle(
                     apiKey,
-                    origin,
-                    destination,
-                    routeTypePreference
+                    requestBody =  RouteRequestBody(
+                        coordinates = listOf(originCoordinate, destinationCoordinate),
+                        preference = routeTypePreference
+                    )
                 )
                 TransportMethods.APIE -> openRouteService.calculateRouteWalk(
                     apiKey,
-                    origin,
-                    destination,
-                    routeTypePreference
+                    requestBody =  RouteRequestBody(
+                        coordinates = listOf(originCoordinate, destinationCoordinate),
+                        preference = routeTypePreference
+                    )
                 )
             }
 
