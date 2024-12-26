@@ -105,5 +105,15 @@ class VehicleServiceTests {
         vehicleService.editVehicleData("8888COD", VehicleTypes.DIESEL.type, 11.0)
     }
 
+    @Test
+    fun setFavVehicle_E1Valid_vehicleIsFav(): Unit = runBlocking {
+        val result: Boolean = vehicleService.setFavVehicle(vehicle.plate)
+        assertEquals(true, result)
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun setFavVehicle_E2Invalid_errorOnSettingFavVehicle(): Unit = runBlocking {
+        vehicleService.setFavVehicle("8888COD")
+    }
 
 }

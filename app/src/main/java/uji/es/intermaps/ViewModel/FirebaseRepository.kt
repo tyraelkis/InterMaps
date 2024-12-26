@@ -739,6 +739,10 @@ class FirebaseRepository: Repository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun setFavVehicle(plate: String): Boolean {
+        TODO("Not yet implemented")
+    }
+
 
 }
 

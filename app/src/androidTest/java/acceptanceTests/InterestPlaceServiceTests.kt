@@ -153,7 +153,7 @@ class InterestPlaceServiceTests {
     }
 
     @Test(expected = NotSuchPlaceException::class)
-        fun setFavouriteInterestPlace_E2Invalid_InterestPlaceSetAsFavourite(): Unit = runBlocking {
+        fun setFavouriteInterestPlace_E2Invalid_errorOnSettingFavInterestPlace(): Unit = runBlocking {
             interestPlaceService.setFavInterestPlace(Coordinate(38.0,-0.0))
         }
 }

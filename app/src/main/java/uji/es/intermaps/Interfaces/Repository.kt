@@ -41,4 +41,5 @@ interface Repository {
     suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double>
     fun convertToCoordinate(lista: RouteGeometry): List<Coordinate>
     suspend fun setFavInterestPlace(coordinate: Coordinate): Boolean
+    suspend fun setFavVehicle(plate: String): Boolean
 }
