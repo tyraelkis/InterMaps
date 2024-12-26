@@ -204,4 +204,19 @@ class InterestPlaceServiceTestsIN {
             .`when`(mockRepository).setFavInterestPlace(Coordinate(38.0,-0.0))
         interestPlaceService.setFavInterestPlace(Coordinate(38.0,-0.0))
     }
+
+    @Test
+    fun deleteFavInterestPlace_E1Valid_InterestPlaceDeletedAsFavourite(): Unit = runBlocking {
+        `when`(mockRepository.deleteFavInterestPlace(interestPlace.coordinate)).thenReturn(true)
+        val res = interestPlaceService.deleteFavInterestPlace(interestPlace.coordinate)
+        assertEquals(true, res)
+        verify(mockRepository).deleteFavInterestPlace(interestPlace.coordinate)
+    }
+
+    @Test (expected = NotSuchPlaceException::class)
+    fun deleteFavInterestPlace_E3Invalid_errorOnDeletingFavInterestPlace(): Unit = runBlocking {
+        doAnswer{ throw NotSuchPlaceException("No existe ese lugar") }
+            .`when`(mockRepository).deleteFavInterestPlace(Coordinate(38.0,-0.0))
+        interestPlaceService.deleteFavInterestPlace(Coordinate(38.0,-0.0))
+    }
 }
