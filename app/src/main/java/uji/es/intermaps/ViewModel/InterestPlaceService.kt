@@ -105,7 +105,7 @@ open class InterestPlaceService(private val repository: Repository) {
     }
 
     suspend fun deleteFavInterestPlace(coordinate: Coordinate) : Boolean {
-        TODO("Not yet implemented")
+        return repository.deleteFavInterestPlace(coordinate)
     }
 
 }

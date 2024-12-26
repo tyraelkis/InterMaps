@@ -40,8 +40,8 @@ interface Repository {
     suspend fun editVehicleData(plate: String, newType: String, newConsumption: Double): Boolean
     suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double>
     fun convertToCoordinate(lista: RouteGeometry): List<Coordinate>
-    suspend fun setFavInterestPlace(coordinate: Coordinate): Boolean
+    suspend fun setFavInterestPlace(placeCoordinate: Coordinate): Boolean
     suspend fun setFavVehicle(plate: String): Boolean
-    suspend fun deleteFavInterestPlace(coordinate: Coordinate): Boolean
+    suspend fun deleteFavInterestPlace(placeCoordinate: Coordinate): Boolean
     suspend fun deleteFavVehicle(plate: String): Boolean
 }
