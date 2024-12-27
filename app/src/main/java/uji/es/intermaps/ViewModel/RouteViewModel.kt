@@ -18,10 +18,17 @@ import uji.es.intermaps.Model.TransportMethods
 class RouteViewModel(private val routeService: RouteService): ViewModel() {
     val repository = FirebaseRepository()
 
-    private val _route = MutableLiveData<Route>()
-    val route: LiveData<Route> = _route
+    private val _route = MutableLiveData<Route?>()
+    val route: MutableLiveData<Route?> = _route
+
+
+    private val _routes = MutableLiveData<List<Route>>()
+    val routes: LiveData<List<Route>> = _routes
 
     var loading by mutableStateOf(false)
+        private set
+
+    var routeInDataBase by mutableStateOf(false)
         private set
 
 
@@ -51,6 +58,49 @@ class RouteViewModel(private val routeService: RouteService): ViewModel() {
             }
         }
     }
+
+    fun getRoute(origin: String, destination: String, transportMethod: TransportMethods, plate: String) {
+        loading = true
+        viewModelScope.launch {
+            try {
+                val route = routeService.getRoute(origin, destination, transportMethod, plate)
+                if (route != null) {
+                    _route.value = route
+                } else {
+                    Log.e("RouteViewModel", "Route not found or is null")
+                }
+            } catch (e: Exception) {
+                Log.e("RouteViewModel", "Error al obtener la ruta: ${e.message}")
+            } finally {
+                routeInDataBase = _route.value != null
+                loading = false
+            }
+        }
+    }
+
+    fun deleteRoute(route: Route) {
+        viewModelScope.launch {
+            try {
+                routeService.deleteRoute(route)
+            } catch (e: Exception) {
+                Log.e("RouteViewModel", "Error al eliminar la ruta: ${e.message}")
+            }
+            _routes.value = _routes.value?.filter { it != route }
+            updateRouteList()
+        }
+    }
+
+    fun updateRouteList() {
+        viewModelScope.launch {
+            try {
+                val routeList = routeService.viewRouteList()
+                _routes.value = routeList
+            } catch (e: Exception) {
+                _routes.value = emptyList()
+            }
+        }
+    }
+
 
 
 }

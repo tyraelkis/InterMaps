@@ -17,4 +17,6 @@ interface ORSRepository {
     suspend fun createRoute( origin: String, destination: String,
                              transportMethods: TransportMethods,
                              routeType: RouteTypes, vehiclePlate: String, route: RouteFeature): Route
+    suspend fun getRoute(origin: String, destination: String, transportMethod: TransportMethods,
+                         vehiclePlate: String): Route?
 }

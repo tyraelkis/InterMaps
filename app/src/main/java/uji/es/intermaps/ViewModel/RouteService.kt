@@ -37,8 +37,14 @@ open class RouteService(private val repository: Repository){
     }
 
 
-    fun deleteRoute(origin: String,destination: String, trasnportMethod: TransportMethods): Boolean {
-        TODO()
+    suspend fun deleteRoute(route: Route): Boolean {
+        if (route.origin.isEmpty() or route.destination.isEmpty()){
+            throw NotValidPlaceException()
+        }
+        if (route.origin == route.destination){
+            throw NotValidPlaceException()
+        }
+        return repository.deleteRoute(route)
     }
 
     suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
@@ -106,8 +112,13 @@ open class RouteService(private val repository: Repository){
         return Pair(true,res)
     }
 
-    fun viewRouteList(): List<Route> {
-        TODO()
+
+    suspend fun viewRouteList(): List<Route> {
+        return repository.viewRouteList()
+    }
+
+    suspend fun getRoute (origin: String, destination: String, transportMethod: TransportMethods, vehiclePlate: String): Route? {
+        return routeRepository.getRoute(origin, destination, transportMethod, vehiclePlate)
     }
 
 

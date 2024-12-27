@@ -60,6 +60,8 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.RouteService
 import uji.es.intermaps.ViewModel.RouteViewModel
 import uji.es.intermaps.ViewModel.VehicleService
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -499,7 +501,13 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
         Button(
             onClick = {
                 viewModel.updateRoute(origin, destination, transportMethod, routeType, vehicle)
-                navController.navigate("viewRoute")
+                navController.navigate(
+                    "viewRoute/" +
+                            URLEncoder.encode(origin, StandardCharsets.UTF_8.toString()) + "/" +
+                            URLEncoder.encode(destination, StandardCharsets.UTF_8.toString()) + "/" +
+                            URLEncoder.encode(transportMethod.name, StandardCharsets.UTF_8.toString()) + "/" +
+                            URLEncoder.encode(vehicle, StandardCharsets.UTF_8.toString())
+                )
 
             },
             enabled = isButtonEnabled,

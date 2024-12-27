@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.APIParsers.RouteRequestBody
@@ -142,7 +143,6 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                     )
                 )
             }
-
 
             if (call.isSuccessful) {
                 Log.d("createRoute", "Ruta creada exitosamente")
@@ -362,6 +362,50 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         Log.i("Lista de coordenadas de la ruta", lista.toString())
         return lista.map { coordenada ->
             Coordinate(coordenada.latitude(), coordenada.longitude())
+        }
+    }
+
+     override suspend fun getRoute(
+        origin: String,
+        destination: String,
+        transportMethod: TransportMethods,
+        vehiclePlate: String
+    ): Route? {
+        val routeService = RouteService(repository)
+
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        return try {
+            val documentSnapshot = db.collection("Route")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                val routes = documentSnapshot.get("routes") as? List<Map<String, Any>> ?: emptyList()
+
+                routes.firstOrNull { route ->
+                    route["origin"] == origin &&
+                            route["destination"] == destination &&
+                            TransportMethods.valueOf(route["transportMethod"] as? String ?: "") == transportMethod &&
+                            route["vehiclePlate"] == vehiclePlate
+                }?.let { route ->
+                    val completeRoute = routeService.createRoute(
+                        origin = origin,
+                        destination = destination,
+                        transportMethod = transportMethod,
+                        routeType = RouteTypes.valueOf(route["routeType"] as? String ?: "DEFAULT"),
+                        vehiclePlate = route["vehiclePlate"] as? String ?: "defaultPlate",
+                    )
+
+                    return@let completeRoute
+                }
+            } else {
+                Log.e("viewRoute", "El documento del usuario no existe en la colección 'Route'")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("viewRoute", "Error al obtener ruta desde Firebase: ${e.message}")
+            null
         }
     }
 
