@@ -20,20 +20,32 @@ import uji.es.intermaps.Model.VehicleTypes
 open class RouteService(private val repository: Repository){
     public var routeRepository = RouteRepository()
 
-    suspend fun createRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String):Route {
+    suspend fun createRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String):Pair<Boolean,Route> {
         if (origin.isEmpty() or destination.isEmpty()){
             throw NotValidPlaceException()
         }
         if (origin == destination){
             throw NotValidPlaceException()
         }
-        val originCoordinate = routeRepository.searchInterestPlaceByToponym(origin).coordinate
-        val destinationCoordinate = routeRepository.searchInterestPlaceByToponym(destination).coordinate
+        var originCoordinate = Coordinate(0.0, 0.0)
+        var destinationCoordinate = Coordinate(0.0, 0.0)
+        try{
+            originCoordinate = repository.getInterestPlaceByToponym(origin).coordinate
+        }catch (e: Exception){
+            throw NotValidPlaceException()
+
+        }
+
+        try{
+            destinationCoordinate = repository.getInterestPlaceByToponym(destination).coordinate
+        }catch (e: Exception) {
+            throw NotValidPlaceException()
+        }
         val originString = "${originCoordinate.longitude},${originCoordinate.latitude}"
         val destinationString = "${destinationCoordinate.longitude},${destinationCoordinate.latitude}"
         val routeCall = createTypeRoute(originString, destinationString, transportMethod, routeType )
         val route = routeRepository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate, routeCall.second)
-        return route
+        return Pair(true,route)
     }
 
 

@@ -628,7 +628,7 @@ class FirebaseRepository: Repository {
             val newRoute = mapOf(
                 "origin" to route.origin,
                 "destination" to route.destination,
-                "trasnportMethod" to route.transportMethod,
+                "transportMethod" to route.transportMethod,
                 "route" to route.route.take(2),
                 "distance" to route.distance,
                 "duration" to route.duration,
@@ -653,15 +653,6 @@ class FirebaseRepository: Repository {
             throw e
         }
     }
-
-    override fun convertToCoordinate(lista: RouteGeometry):List<Coordinate>{
-        var listaCoordenadas: ArrayList<Coordinate> = ArrayList()
-        for (coordenada in lista.coordinates){
-            listaCoordenadas.add(Coordinate(latitude = coordenada[1], longitude = coordenada[0]))
-        }
-        return listaCoordenadas
-    }
-
 
     override suspend fun getAverageFuelPrices(): List<Double> {
         try {
@@ -801,7 +792,7 @@ class FirebaseRepository: Repository {
             }
 
             if (index == -1) {
-                throw NotSuchElementException("Vehículo no encontrado")
+                throw NotSuchElementException("Ruta no encontrada")
             } //La excepción no tiene que ser cazada en este metodo sino en el servicio
 
             routes.removeAt(index)

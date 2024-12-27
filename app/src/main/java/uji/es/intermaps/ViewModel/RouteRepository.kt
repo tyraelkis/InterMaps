@@ -395,7 +395,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                         transportMethod = transportMethod,
                         routeType = RouteTypes.valueOf(route["routeType"] as? String ?: "DEFAULT"),
                         vehiclePlate = route["vehiclePlate"] as? String ?: "defaultPlate",
-                    )
+                    ).second
 
                     return@let completeRoute
                 }

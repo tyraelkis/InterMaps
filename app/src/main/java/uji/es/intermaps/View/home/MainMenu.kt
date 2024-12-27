@@ -406,7 +406,7 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
                             .clickable { showMenu = false
-                                        navController.navigate("routeList") }, //TODO Ir a rutas
+                                        navController.navigate("routeList") },
                         contentScale = ContentScale.Crop
                     )
 
