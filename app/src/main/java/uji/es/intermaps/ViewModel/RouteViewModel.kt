@@ -39,7 +39,7 @@ class RouteViewModel(private val routeService: RouteService): ViewModel() {
         loading = true
         viewModelScope.launch {
             try {
-                val route = routeService.createRoute(origin, destination, transportMethod, routeType, vehicle)
+                val route = routeService.createRoute(origin, destination, transportMethod, routeType, vehicle).second
                 _route.value = route
             } catch (e: Exception) {
                 Log.e("RouteViewModel", "Error al actualizar la ruta: ${e.message}")
@@ -100,7 +100,5 @@ class RouteViewModel(private val routeService: RouteService): ViewModel() {
             }
         }
     }
-
-
 
 }

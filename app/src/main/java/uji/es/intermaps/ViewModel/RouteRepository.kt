@@ -3,16 +3,18 @@ package uji.es.intermaps.ViewModel
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.mapbox.geojson.Point
+import com.mapbox.geojson.utils.PolylineUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.APIParsers.RouteFeature
-import uji.es.intermaps.APIParsers.RouteGeometry
-import uji.es.intermaps.APIParsers.RouteProperties
+import uji.es.intermaps.APIParsers.RouteRequestBody
 import uji.es.intermaps.APIParsers.RouteResponse
 import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
+import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.ElectricityPriceRepository
 import uji.es.intermaps.Interfaces.FuelPriceRepository
 import uji.es.intermaps.Interfaces.ORSRepository
@@ -97,12 +99,12 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         throw NotSuchPlaceException("Error en la llamada a la API para obtener las coordenadas")
     }
 
-    override suspend fun calculateRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes) : RouteFeature {
-        lateinit var call : retrofit2.Response<RouteResponse>
-        var route = RouteFeature(geometry = RouteGeometry(emptyList()), properties = RouteProperties(
-            RouteSummary(distance = 0.0, duration = 0.0)
+    override suspend fun calculateRoute(origin: String, destination: String, transportMethod: TransportMethods,routeType: RouteTypes) : RouteFeature {
+        var route = RouteFeature(geometry ="",
+            summary = RouteSummary(distance = 0.0, duration = 0.0)
         )
-        )
+        val originCoordinate = parseCoordinates(origin)
+        val destinationCoordinate = parseCoordinates(destination)
         try {
             val routeTypePreference = when (routeType) {
                 RouteTypes.RAPIDA -> "fastest"
@@ -116,39 +118,42 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                 null
             }
 
-            call = when (transportMethod) {
+            val call = when (transportMethod) {
                 TransportMethods.VEHICULO -> openRouteService.calculateRouteVehicle(
                     apiKey,
-                    origin,
-                    destination,
-                    routeTypePreference,
-                    avoidPeajes
+                    requestBody =  RouteRequestBody(
+                        coordinates = listOf(originCoordinate, destinationCoordinate),
+                        extra_info = listOfNotNull(avoidPeajes),
+                        preference = routeTypePreference
+                    )
+
                 )
                 TransportMethods.BICICLETA -> openRouteService.calculateRouteBycicle(
                     apiKey,
-                    origin,
-                    destination,
-                    routeTypePreference
+                    requestBody =  RouteRequestBody(
+                        coordinates = listOf(originCoordinate, destinationCoordinate),
+                        preference = routeTypePreference
+                    )
                 )
                 TransportMethods.APIE -> openRouteService.calculateRouteWalk(
                     apiKey,
-                    origin,
-                    destination,
-                    routeTypePreference
+                    requestBody =  RouteRequestBody(
+                        coordinates = listOf(originCoordinate, destinationCoordinate),
+                        preference = routeTypePreference
+                    )
                 )
             }
 
             if (call.isSuccessful) {
-                Log.d("calculateRoute", "Ruta creada exitosamente")
-                return call.body()?.features?.get(0)
-                    ?: throw IllegalStateException("Respuesta sin características válidas")
+                Log.d("createRoute", "Ruta creada exitosamente")
+                route = call.body()!!.routes[0]
+
             } else {
-                Log.e("calculateRoute", "Error al crear la ruta: ${call.message()}")
-                throw Exception("Error al obtener la ruta: ${call.message()}")
+                Log.e("createRoute", "Error al crear la ruta: ${call.message()}")
             }
-        } catch (e: Exception) {
-            Log.e("calculateRoute", "Error al crear la ruta: ${e.message}", e)
-            throw Exception("Error al calcular la ruta: ${e.message}", e)
+        }catch (e:Exception){
+            Log.e("createRoute", "Error al crear la ruta: ${e.message}")
+
         }
         return route
     }
@@ -157,13 +162,13 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                                       routeType: RouteTypes, vehiclePlate: String, route: RouteFeature
     ): Route {
         val routeService = RouteService(repository)
-        val coordinates = routeService.convertToCoordinate(route.geometry)
+        val coordinates = decodeAndMapToCoordenadas(route.geometry)
         if (coordinates.isEmpty()) {
             throw IllegalArgumentException("No se generaron coordenadas válidas para la ruta")
         }
 
-        val tiempo = route.properties.summary.duration
-        val distance = String.format("%.2f", route.properties.summary.distance / 1000).toDouble()
+        val tiempo = route.summary.duration
+        val distance = String.format("%.2f", route.summary.distance / 1000).toDouble()
         val horas = (tiempo / 3600).toInt()
         val minutos = ((tiempo % 3600) / 60).toInt()
         val duration = if (horas != 0) "$horas h $minutos min" else "$minutos min"
@@ -303,6 +308,29 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         }
     }
 
+    private fun saveRouteCostToDatabase(origin: String, destination: String, cost: Double) {
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        val routesDocument = db.collection("Route").document(userEmail)
+        routesDocument.get().addOnSuccessListener { documentSnapshot ->
+            if (documentSnapshot.exists()) {
+                val routes = documentSnapshot.get("routes") as? MutableList<Map<String, Any>>
+                    ?: throw IllegalArgumentException("No se encontró el campo 'routes' en el documento")
+                val routeId = routes.indexOfFirst {
+                    it["origin"] == origin && it["destination"] == destination
+                }
+
+                if (routeId in routes.indices) {
+                    val updatedRoute = routes[routeId].toMutableMap()
+                    updatedRoute["cost"] = cost
+                    routes[routeId] = updatedRoute
+
+                    routesDocument.update("routes", routes)
+                }
+            }
+        }
+    }
 
     private fun saveFuelCostAverageToDatabase(averages: List<Double>) {
         val fuelPricesDocument = db.collection("FuelPrices").document("mediaPrecios")
@@ -322,6 +350,19 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                 "precioLuz" to precio,
             )
         )
+    }
+    fun parseCoordinates(coordinateString: String): List<Double> {
+        val parts = coordinateString.split(",")
+        return listOf(parts[0].toDouble(), parts[1].toDouble())
+    }
+
+    fun decodeAndMapToCoordenadas(polylineString: String): List<Coordinate> {
+        val lista: MutableList<Point> = PolylineUtils.decode(polylineString,5)
+
+        Log.i("Lista de coordenadas de la ruta", lista.toString())
+        return lista.map { coordenada ->
+            Coordinate(coordenada.latitude(), coordenada.longitude())
+        }
     }
 
      override suspend fun getRoute(
@@ -354,7 +395,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                         transportMethod = transportMethod,
                         routeType = RouteTypes.valueOf(route["routeType"] as? String ?: "DEFAULT"),
                         vehiclePlate = route["vehiclePlate"] as? String ?: "defaultPlate",
-                    )
+                    ).second
 
                     return@let completeRoute
                 }

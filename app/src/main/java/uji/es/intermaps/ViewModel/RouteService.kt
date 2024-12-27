@@ -6,7 +6,6 @@ import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.Exceptions.NoValidTypeException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
@@ -21,20 +20,32 @@ import uji.es.intermaps.Model.VehicleTypes
 open class RouteService(private val repository: Repository){
     public var routeRepository = RouteRepository()
 
-    suspend fun createRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String):Route {
+    suspend fun createRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String):Pair<Boolean,Route> {
         if (origin.isEmpty() or destination.isEmpty()){
             throw NotValidPlaceException()
         }
         if (origin == destination){
             throw NotValidPlaceException()
         }
-        val originCoordinate = routeRepository.searchInterestPlaceByToponym(origin).coordinate
-        val destinationCoordinate = routeRepository.searchInterestPlaceByToponym(destination).coordinate
+        var originCoordinate = Coordinate(0.0, 0.0)
+        var destinationCoordinate = Coordinate(0.0, 0.0)
+        try{
+            originCoordinate = repository.getInterestPlaceByToponym(origin).coordinate
+        }catch (e: Exception){
+            throw NotValidPlaceException()
+
+        }
+
+        try{
+            destinationCoordinate = repository.getInterestPlaceByToponym(destination).coordinate
+        }catch (e: Exception) {
+            throw NotValidPlaceException()
+        }
         val originString = "${originCoordinate.longitude},${originCoordinate.latitude}"
         val destinationString = "${destinationCoordinate.longitude},${destinationCoordinate.latitude}"
-        val routeCall = routeRepository.calculateRoute(originString, destinationString, transportMethod, routeType )
-        val route = routeRepository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate, routeCall)
-        return route
+        val routeCall = createTypeRoute(originString, destinationString, transportMethod, routeType )
+        val route = routeRepository.createRoute(origin, destination, transportMethod,routeType, vehiclePlate, routeCall.second)
+        return Pair(true,route)
     }
 
 
@@ -113,11 +124,6 @@ open class RouteService(private val repository: Repository){
         return Pair(true,res)
     }
 
-
-    fun convertToCoordinate(geometry: RouteGeometry): List<Coordinate> {
-        return repository.convertToCoordinate(geometry)
-
-    }
 
     suspend fun viewRouteList(): List<Route> {
         return repository.viewRouteList()

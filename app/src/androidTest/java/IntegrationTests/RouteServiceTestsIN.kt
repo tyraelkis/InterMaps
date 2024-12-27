@@ -11,13 +11,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.doNothing
+import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import uji.es.intermaps.APIParsers.RouteFeature
-import uji.es.intermaps.APIParsers.RouteGeometry
-import uji.es.intermaps.APIParsers.RouteProperties
 import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
@@ -44,7 +43,6 @@ class RouteTests {
 
     var mockRouteRepository: RouteRepository = mock(RouteRepository::class.java)
 
-    var mockInterestPlaceService: InterestPlaceService = mock(InterestPlaceService::class.java)
 
     private val userService = UserService(FirebaseRepository())
     private val userTest: User = User("emaildeprueba@gmail.com", "123456BB")
@@ -76,59 +74,55 @@ class RouteTests {
             cost = 0.0,
             routeType = RouteTypes.RAPIDA,
             fav = false,
-            vehiclePlate = "",
+            vehiclePlate = "9999GON",
         )
 
         val mockedCall = RouteFeature(
-            geometry = RouteGeometry(
-                coordinates = emptyList()
-            ),
-            properties = RouteProperties(
+            geometry = "",
+            summary =
                 RouteSummary(
                     distance = 0.0,
                     duration = 0.0
-                )
             ),
         )
 
-        `when`(mockRouteRepository.searchInterestPlaceByToponym("Burriana"))
-            .thenReturn(
-                InterestPlace(
-                    Coordinate(39.888399, -0.085748),
-                    toponym = "Burriana",""
-                )
+        doReturn(
+            InterestPlace(
+                Coordinate(39.888399, -0.085748),
+                toponym = "Burriana",""
             )
-        `when`(mockRouteRepository.searchInterestPlaceByToponym("Castellón de la Plana"))
-            .thenReturn(
-                InterestPlace(
-                    Coordinate(39.987142, -0.037787),
-                    toponym = "Castellón de la Plana",""
-                )
+        ).`when`(mockRepository).getInterestPlaceByToponym("Burriana")
+
+        doReturn(
+            InterestPlace(
+                Coordinate(39.987142, -0.037787),
+                toponym = "Castellón de la Plana",""
             )
-        `when`(mockRouteRepository.calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", transportMethod = TransportMethods.VEHICULO,RouteTypes.RAPIDA))
-            .thenReturn(mockedCall)
+        ).`when`(mockRepository).getInterestPlaceByToponym("Castellón de la Plana")
+
+        doReturn(mockedCall).`when`(mockRouteRepository).calculateRoute("-0.085748,39.888399", "-0.037787,39.987142",TransportMethods.VEHICULO,RouteTypes.RAPIDA)
 
 
-        `when`(mockRouteRepository.createRoute(
+        doReturn(mockedRoute).`when`(mockRouteRepository).createRoute(
             origin = "Burriana",
             destination = "Castellón de la Plana",
             transportMethod = TransportMethods.VEHICULO,
             routeType = RouteTypes.RAPIDA,
-            vehiclePlate = "",
+            vehiclePlate = "9999GON",
             route = mockedCall
-        )).thenReturn(mockedRoute)
+        )
 
-        val routeTest = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
+        val routeTest = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON").second
         // Comprobamos que la ruta fue creada correctamente
         assertEquals(mockedRoute, routeTest)
-        verify(mockRouteRepository).searchInterestPlaceByToponym("Burriana")
-        verify(mockRouteRepository).searchInterestPlaceByToponym("Castellón de la Plana")
+        verify(mockRepository).getInterestPlaceByToponym("Burriana")
+        verify(mockRepository).getInterestPlaceByToponym("Castellón de la Plana")
         verify(mockRouteRepository).calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", transportMethod = TransportMethods.VEHICULO,RouteTypes.RAPIDA)
         verify(mockRouteRepository).createRoute(origin = "Burriana",
             destination = "Castellón de la Plana",
             transportMethod = TransportMethods.VEHICULO,
             routeType = RouteTypes.RAPIDA,
-            vehiclePlate = "",
+            vehiclePlate = "9999GON",
             route = mockedCall
         )
 
@@ -213,14 +207,10 @@ class RouteTests {
     @Test
     fun createRouteWithType_E1Valid_routeIsCalculated(): Unit = runBlocking {
         val mockedCall = RouteFeature(
-            geometry = RouteGeometry(
-                coordinates = emptyList()
-            ),
-            properties = RouteProperties(
-                RouteSummary(
-                    distance = 1200.0,
-                    duration = 1100.0
-                )
+            geometry = "",
+            summary =  RouteSummary(
+                distance = 1200.0,
+                duration = 1100.0
             ),
         )
         `when`(mockRouteRepository.calculateRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.CORTA))

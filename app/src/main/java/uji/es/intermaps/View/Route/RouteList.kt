@@ -2,6 +2,7 @@
 
 package uji.es.intermaps.View.Route
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -55,28 +56,19 @@ import java.nio.charset.StandardCharsets
 fun RouteList(auth: FirebaseAuth, navController: NavController, viewModel: RouteViewModel) {
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
-    val routeService = RouteService(repository)
-    var allRoutes by remember { mutableStateOf<List<Route>>(emptyList()) }
-
+    val allRoutes by viewModel.routes.observeAsState(emptyList())
     val emailPrefix = user?.email?.substringBefore("@") ?: "Usuario"
 
 
-
-    LaunchedEffect(user?.email) {
-
-        if (user?.email != null) {
-            try {
-                val route = routeService.viewRouteList()
-                allRoutes = route
-            } catch (e: Exception) {
-                allRoutes = emptyList()
-            }
-
-        }
-    }
+    viewModel.updateRouteList()
+    Log.i("Lista de rutas", allRoutes.toString() )
 
     val favList = allRoutes.filter { it.fav }
+    Log.i("Lista de rutas", allRoutes.toString() )
+
     val noFavList = allRoutes.filter { !it.fav }
+    Log.i("Lista de rutas", allRoutes.toString() )
+
 
     Column(
         modifier = Modifier

@@ -189,7 +189,8 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                             viewModel.route.value?.let { currentRoute ->
                                 viewModel.deleteRoute(route)
                             }
-                            navController.navigate("mainMenu")
+                            viewModel.updateRouteList()
+                            navController.navigate("routeList")
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -210,7 +211,8 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                         viewModel.route.value?.let { currentRoute ->
                             viewModel.saveRoute(currentRoute)
                         }
-                        navController.navigate("mainMenu")
+                        viewModel.updateRouteList()
+                        navController.navigate("routeList")
                     },
                     modifier = Modifier
                         .fillMaxWidth()
