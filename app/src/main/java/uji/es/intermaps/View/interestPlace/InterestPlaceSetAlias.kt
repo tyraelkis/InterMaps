@@ -1,10 +1,8 @@
 package uji.es.intermaps.View.interestPlace
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,11 +24,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,9 +45,6 @@ import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import kotlinx.coroutines.launch
-import uji.es.intermaps.ViewModel.FirebaseRepository
-import uji.es.intermaps.ViewModel.InterestPlaceService
-import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
@@ -62,12 +53,7 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlaceViewModel, toponym: String){
     val place = viewModel.interestPlace
     val loading = viewModel.loading
-    var showPopupAliasCorrecto by remember { mutableStateOf(false) }
-    var showPopupAliasIncorrecto by remember { mutableStateOf(false) }
-    //var newAlias by remember { mutableStateOf("") }
-    val repository: Repository = FirebaseRepository()
-    val interestPlaceService = InterestPlaceService(repository)
-    val  coroutineScope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
     val long = place.coordinate.longitude
     val lat = place.coordinate.latitude
 
@@ -133,7 +119,7 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                     mapViewportState = rememberMapViewportState {
                         setCameraOptions {
                             zoom(11.0)
-                            center(fromLngLat(long,lat))
+                            center(fromLngLat(long, lat))
                             pitch(0.0)
                             bearing(0.0)
                         }
@@ -141,7 +127,12 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                 ) {
                     ViewAnnotation(
                         options = viewAnnotationOptions {
-                            geometry(fromLngLat(place.coordinate.longitude, place.coordinate.latitude))
+                            geometry(
+                                fromLngLat(
+                                    place.coordinate.longitude,
+                                    place.coordinate.latitude
+                                )
+                            )
                             allowOverlap(true)
                         }
                     ) {
@@ -156,7 +147,7 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Row (
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp),
@@ -181,7 +172,7 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                 // Texto en el fondo
                 TextField(
                     value = viewModel.newAlias,
-                    onValueChange = { viewModel.newAlias= it },
+                    onValueChange = { viewModel.newAlias = it },
                     modifier = Modifier
                         .height(52.dp)
                         .fillMaxWidth()
@@ -203,20 +194,12 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                 onClick = {
                     coroutineScope.launch {
                         val newAlias = viewModel.newAlias
-                        try {
-                            if (interestPlaceService.setAlias(
-                                    interestPlace = place,
-                                    newAlias = newAlias
-                                )
-                            ) {
-                                viewModel.showUpdateInterestPlacePopUp()
-                            }
-                        }catch (e: Exception){
+                        if (viewModel.setAlias(place, newAlias))
+                            viewModel.showUpdateInterestPlacePopUp()
+                        else
                             viewModel.showUpdateInterestPlaceErrorPopUp()
-                        }
-
                     }
-                } ,
+                },
                 modifier = Modifier
                     .height(40.dp)
                     .fillMaxWidth()
@@ -233,7 +216,7 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                 onClick = {
                     viewModel.coordinate = place.coordinate
                     viewModel.showDeleteInterestPlacePopUp()
-                } ,
+                },
                 modifier = Modifier
                     .height(40.dp)
                     .fillMaxWidth()
@@ -247,127 +230,4 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
             Spacer(modifier = Modifier.height(30.dp))
         }
     }
-
-    /*if (showPopupAliasCorrecto) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp)
-                .background(Color(0x80FFFFFF))
-                .clickable { showPopupAliasCorrecto = false},
-            contentAlignment = Alignment.Center
-        ) {
-            // Popup con el contenido de edición de correo
-            Box(
-                modifier = Modifier
-                    .height(250.dp)
-                    .width(395.dp)
-                    .background(Color(0XFF007E70), shape = RoundedCornerShape(10.dp))
-                    .clip(RoundedCornerShape(10.dp))
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "El cambio de alias se ha realizado correctamente",
-                        color = White,
-                        fontSize = 26.sp,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Spacer(modifier = Modifier.height(50.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Button(
-                            onClick = {
-                                showPopupAliasCorrecto = false
-                            },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Black
-                            )
-                        ) {
-                            Text(
-                                text = "Aceptar",
-                                fontSize = 16.sp,
-                            )
-                        }
-
-                    }
-                }
-            }
-        }
-    }*/
-
-    if (showPopupAliasIncorrecto) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp)
-                .background(Color(0x80FFFFFF))
-                .clickable { showPopupAliasCorrecto = false},
-            contentAlignment = Alignment.Center
-        ) {
-            // Popup con el contenido de edición de correo
-            Box(
-                modifier = Modifier
-                    .height(250.dp)
-                    .width(395.dp)
-                    .background(Color(0XFF007E70), shape = RoundedCornerShape(10.dp))
-                    .clip(RoundedCornerShape(10.dp))
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "El cambio de alias no se ha podido realizar",
-                        color = White,
-                        fontSize = 26.sp,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Spacer(modifier = Modifier.height(50.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Button(
-                            onClick = {
-                                showPopupAliasIncorrecto = false
-                            },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Black
-                            )
-                        ) {
-                            Text(
-                                text = "Aceptar",
-                                fontSize = 16.sp,
-                            )
-                        }
-
-                    }
-                }
-            }
-        }
-    }
-
 }

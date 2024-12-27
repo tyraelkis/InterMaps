@@ -1,6 +1,6 @@
 @file:Suppress("PreviewAnnotationInFunctionWithParameters")
 
-package uji.es.intermaps.View.interestPlace
+package uji.es.intermaps.View.Route
 
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,38 +41,46 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import uji.es.intermaps.ViewModel.FirebaseRepository
-import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.Route
+import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
+import uji.es.intermaps.ViewModel.RouteService
+import uji.es.intermaps.ViewModel.RouteViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 @Composable
-fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewModel: InterestPlaceViewModel) {
+fun RouteList(auth: FirebaseAuth, navController: NavController, viewModel: RouteViewModel) {
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
-    val interestPlaceService = InterestPlaceService(repository)
-    var allPlaces by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
+    val routeService = RouteService(repository)
+    var allRoutes by remember { mutableStateOf<List<Route>>(emptyList()) }
+
     val emailPrefix = user?.email?.substringBefore("@") ?: "Usuario"
 
+
+
     LaunchedEffect(user?.email) {
+
         if (user?.email != null) {
             try {
-                val places = interestPlaceService.viewInterestPlaceList()
-                allPlaces = places
+                val route = routeService.viewRouteList()
+                allRoutes = route
             } catch (e: Exception) {
-                allPlaces = emptyList()
+                allRoutes = emptyList()
             }
+
         }
     }
 
-    val favList = allPlaces.filter { it.fav }
-    val noFavList = allPlaces.filter { !it.fav }
+    val favList = allRoutes.filter { it.fav }
+    val noFavList = allRoutes.filter { !it.fav }
 
     Column(
         modifier = Modifier
-                .fillMaxSize()
+            .fillMaxSize()
             .background(
                 Color.White
             ),
@@ -87,9 +96,9 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
         ) {
             Text(
                 text = buildAnnotatedString {
-                        append("Lista de lugares de\n")
-                        append("\n")
-                        append(emailPrefix)
+                    append("Lista de rutas de\n")
+                    append("\n")
+                    append(emailPrefix)
                 },
                 color = Black,
                 fontSize = 26.sp,
@@ -109,7 +118,7 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
 
         ) {
             Text(
-                text = "Tus lugares favoritos",
+                text = "Tus rutas favoritas",
                 color = Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
@@ -124,7 +133,7 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
         ) {
 
             if (favList.isNotEmpty()) {
-                favList.forEach { place ->
+                favList.forEach { route ->
 
                     Row(
                         modifier = Modifier
@@ -139,34 +148,30 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                 .size(30.dp),
                             tint = Color(color = 0XFF007E70)
                         )
-                        if(place.alias.isEmpty()) {
-                            Text(
-                                text = place.toponym,
-                                fontSize = 20.sp,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 15.dp)
-                            )
-                        }
-                        else {
-                            Text(
-                                text = place.alias,
-                                fontSize = 20.sp,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 15.dp)
-                            )
-                        }
+                        Text(
+                            text = route.origin + " --> "+ route.destination,
+                            fontSize = 20.sp,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = 15.dp)
+                        )
+
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit",
+                            contentDescription = "Ver",
 
                             modifier = Modifier
                                 .size(30.dp)
                                 .clickable {
-                                    viewModel.updateInterestPlace(place)
-                                    val encodedToponym = URLEncoder.encode(place.toponym, StandardCharsets.UTF_8.toString())
-                                    navController.navigate("interestPlaceSetAlias/$encodedToponym")
+                                    viewModel.getRoute(route.origin, route.destination, route.transportMethod, route.vehiclePlate)
+                                    navController.navigate(
+                                        "viewRoute/" +
+                                                URLEncoder.encode(route.origin, StandardCharsets.UTF_8.toString()) + "/" +
+                                                URLEncoder.encode(route.destination, StandardCharsets.UTF_8.toString()) + "/" +
+                                                URLEncoder.encode(route.transportMethod.name, StandardCharsets.UTF_8.toString()) + "/" +
+                                                URLEncoder.encode(route.vehiclePlate, StandardCharsets.UTF_8.toString())
+                                    )
+
                                 },
 
                             tint = Color(color = 0XFF007E70)
@@ -189,7 +194,7 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
 
         ) {
             Text(
-                text = "Lugares de interés",
+                text = "Rutas ",
                 color = Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
@@ -203,7 +208,7 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                 .align(Alignment.Start)
         ) {
             if (noFavList.isNotEmpty()) {
-                noFavList.forEach { notFavPlace ->
+                noFavList.forEach { notFavRoute ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -217,33 +222,32 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                                 .size(30.dp),
                             tint = Black
                         )
-                        if(notFavPlace.alias.isEmpty()) {
-                            Text(
-                                text = notFavPlace.toponym,
-                                fontSize = 20.sp,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 8.dp)
-                            )
-                        } else {
-                            Text(
-                                text = notFavPlace.alias,
-                                fontSize = 20.sp,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 8.dp)
-                            )
-                        }
+
+                        Text(
+                            text = notFavRoute.origin + " --> "+ notFavRoute.destination,
+                            fontSize = 20.sp,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(horizontal = 8.dp)
+                        )
+
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit",
+                            contentDescription = "Ver",
 
                             modifier = Modifier
                                 .size(30.dp)
                                 .clickable {
-                                    viewModel.updateInterestPlace(notFavPlace)
-                                    val encodedToponym = URLEncoder.encode(notFavPlace.toponym, StandardCharsets.UTF_8.toString())
-                                    navController.navigate("interestPlaceSetAlias/$encodedToponym")
+
+                                    viewModel.getRoute(notFavRoute.origin, notFavRoute.destination, notFavRoute.transportMethod, notFavRoute.vehiclePlate)
+                                    navController.navigate(
+                                        "viewRoute/" +
+                                                URLEncoder.encode(notFavRoute.origin, StandardCharsets.UTF_8.toString()) + "/" +
+                                                URLEncoder.encode(notFavRoute.destination, StandardCharsets.UTF_8.toString()) + "/" +
+                                                URLEncoder.encode(notFavRoute.transportMethod.name, StandardCharsets.UTF_8.toString()) + "/" +
+                                                URLEncoder.encode(notFavRoute.vehiclePlate, StandardCharsets.UTF_8.toString())
+                                    ) //val encodedToponym = URLEncoder.encode(notFavPlace.toponym, StandardCharsets.UTF_8.toString())
+                                    //navController.navigate("interestPlaceSetAlias/$encodedToponym")
                                 },
                             tint = Black
                         )
@@ -251,28 +255,8 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                 }
             }
         }
-        Spacer(modifier = Modifier.weight(1f))
 
         Spacer(modifier = Modifier.height(15.dp))
-
-        Button(
-            onClick = {
-                navController.navigate("interestPlaceCreationByToponym")
-            },
-            modifier = Modifier
-                .width(350.dp)
-                .height(45.dp),
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Black
-            )
-        ) {
-            Text(
-                text = "Añadir lugar por topónimo",
-                fontSize = 20.sp,
-            )
-        }
-        Spacer(modifier = Modifier.height(30.dp))
 
         Button(
             onClick = {

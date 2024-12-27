@@ -1,14 +1,16 @@
 package uji.es.intermaps
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
 import uji.es.intermaps.View.Route.CreateNewRoute
+import uji.es.intermaps.View.Route.RouteList
 import uji.es.intermaps.View.Route.ViewRoute
 import uji.es.intermaps.View.home.HomeScreen
 import uji.es.intermaps.View.home.InitialScreen
@@ -30,12 +32,13 @@ import uji.es.intermaps.ViewModel.VehicleViewModel
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, viewModelPlace: InterestPlaceViewModel, viewModelUser: UserViewModel, viewModelVehicle: VehicleViewModel, viewModelRoute: RouteViewModel) {
     
     NavHost(
         navController = navHostController,
-        startDestination = "logIn",
+        startDestination = "initial",
         ) {
         composable("initial") {
             InitialScreen(
@@ -44,12 +47,14 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         }
         composable("logIn") {
             LoginScreen(
-                navHostController
+                navHostController,
+                viewModelUser
             )
         }
         composable("signUp") {
             SignUpScreen(
-                navHostController
+                navHostController,
+                viewModelUser
             )
         }
         composable("home") {
@@ -87,7 +92,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         composable(
             route = "interestPlaceCreationByToponym"
         ) {
-            InterestPlaceCreationByToponym(viewModelPlace)
+            InterestPlaceCreationByToponym(navHostController, viewModelPlace)
         }
         composable(
             route = "interestPlaceSetAlias/{toponym}",
@@ -139,10 +144,33 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             }
         }
 
+        composable("routeList") {
+            RouteList(auth, navHostController, viewModelRoute)
+        }
+
         composable(
-            route="viewRoute"
-        ) {
-            ViewRoute(navHostController, viewModelRoute)
+            route = "viewRoute/{origin}/{destination}/{transportMethod}/{vehiclePlate}",
+            arguments = listOf(
+                navArgument("origin") { type = NavType.StringType },
+                navArgument("destination") { type = NavType.StringType },
+                navArgument("transportMethod") { type = NavType.StringType },
+                navArgument("vehiclePlate") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val origin = backStackEntry.arguments?.getString("origin")?.let {
+                URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+            }
+            val destination = backStackEntry.arguments?.getString("destination")?.let {
+                URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+            }
+            val transportMethod = backStackEntry.arguments?.getString("transportMethod")?.let {
+                URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+            }
+            val vehiclePlate = backStackEntry.arguments?.getString("vehiclePlate")
+
+            if (origin != null && destination != null && transportMethod != null && vehiclePlate != null) {
+                ViewRoute(navHostController, viewModelRoute)
+            }
         }
     }
 }

@@ -4,9 +4,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import uji.es.intermaps.Exceptions.NoValidTypeException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.Repository
@@ -34,18 +36,24 @@ class RouteServiceTest {
     private var routeService: RouteService = RouteService(repository)
     private var routeRepository: RouteRepository = RouteRepository()
     var routeTest: Route? = null
+    private var emailEmpty: String = "emaildepruebaempty@gmail.com" //Usuario sin lista de lugares
+
 
     @Before
     fun setup(): Unit = runBlocking {
         userService.login(userTest.email, userTest.pswd)
         interestPlaceService.createInterestPlaceFromToponym("Valencia")
         interestPlaceService.createInterestPlaceFromToponym("Vila-real")
-
+        interestPlaceService.createInterestPlaceFromToponym("Burriana")
+        interestPlaceService.createInterestPlaceFromToponym("Castellón")
     }
+
     @After
     fun tearDown(): Unit = runBlocking {
         interestPlaceService.deleteInterestPlace(interestPlaceService.getInterestPlaceByToponym("Valencia").coordinate)
         interestPlaceService.deleteInterestPlace(interestPlaceService.getInterestPlaceByToponym("Vila-real").coordinate)
+        interestPlaceService.deleteInterestPlace(interestPlaceService.getInterestPlaceByToponym("Burriana").coordinate)
+        interestPlaceService.deleteInterestPlace(interestPlaceService.getInterestPlaceByToponym("Castellón").coordinate)
         userService.signOut()
     }
 
@@ -103,7 +111,6 @@ class RouteServiceTest {
     fun saveRoute_E4Valid_routeSaved(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Castello de la Plana, VC, Spain", "Borriana, VC, Spain", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
         val res = routeService.putRoute(routeTest)
-        routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod, routeTest.vehiclePlate)
         assertEquals(true, res)
     }
 
@@ -126,7 +133,31 @@ class RouteServiceTest {
         val routeTest: Route = routeService.createRoute("Castellón", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
         routeService.deleteRoute("Castellón", "Castellón", TransportMethods.VEHICULO, routeTest.vehiclePlate)
     }
+    @Test
+    fun viewRouteList_E1Valido_RouteListViewed(): Unit = runBlocking{
+        val res = routeService.viewRouteList()
+        assertTrue(res.isNotEmpty())
+    }
+
+    @Test
+    fun viewRouteList_E2Valido_emptyRouteListViewed(): Unit = runBlocking{
+        userService.signOut()
+        userService.login(emailEmpty, "123456BB")
+        val res = routeService.viewRouteList()
+        userService.login(email, "123456BB")
+        assertTrue(res.isEmpty())
+    }
 
 
+    @Test
+    fun createRouteWithType_E1Valid_routeIsCalculated(): Unit = runBlocking {
+        val routeTest = routeService.createTypeRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.CORTA)
+        assertEquals(true, routeTest.first)
+    }
+
+    @Test(expected = NoValidTypeException::class)
+    fun createRouteWithType_E2Invalid_routeNotCalculated(): Unit = runBlocking {
+        val routeTest = routeService.createTypeRoute("Burriana", "Castellón", TransportMethods.VEHICULO,null)
+    }
 
 }

@@ -1,6 +1,5 @@
 package uji.es.intermaps.View.home
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,13 +51,10 @@ import com.mapbox.maps.viewannotation.geometry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import uji.es.intermaps.Exceptions.NotSuchPlaceException
-import uji.es.intermaps.Exceptions.NotValidCoordinatesException
+import kotlinx.coroutines.withContext
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.R
-import uji.es.intermaps.ViewModel.FirebaseRepository
-import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @Composable
@@ -69,7 +65,6 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
     var showMenu by remember { mutableStateOf(false) }
     var showPlaceData by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
-    val interestPlaceService = InterestPlaceService(FirebaseRepository())
     var email = auth.currentUser?.email
 
     if (email == null)
@@ -153,59 +148,26 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                         modifier = Modifier.size(50.dp)
                             .clickable {
                                 if (busqueda.isNotEmpty()) {
-                                    //TODO mover la comprovación de coordenadas a un servicio
-                                    var coordinate = Coordinate()
-                                    var busquedaCoordenadas = false
-                                    val coordinatePattern = Regex("""^\s*(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)\s*$""")
-                                    val input = busqueda.trim()
-                                    if (coordinatePattern.matches(input)) {
-                                        val parts = input.split(",")
-                                        val lat = parts[0].trim().toDouble()
-                                        val lon = parts[1].trim().toDouble()
-                                        coordinate = Coordinate(lat, lon)
-                                        busquedaCoordenadas = true
-                                        errorMessage = ""
-                                    } else {
-                                        Log.e("FORMATO_NO_VALIDO", "El input no tiene formato de coordenadas")
-                                    }
                                     CoroutineScope(Dispatchers.IO).launch {
-                                        if (busquedaCoordenadas) {
-                                            try {
-                                                interestPlace = interestPlaceService.searchInterestPlaceByCoordiante(coordinate)
-                                                errorMessage=""
-                                                busqueda = ""
+                                        interestPlace = viewModel.gestorDeBusqueda(busqueda)
+
+                                        withContext(Dispatchers.Main) {
+                                            busqueda = ""
+                                            errorMessage = viewModel.getErrorMessage()
+                                            if (errorMessage.isEmpty()) {
                                                 mapViewportState.setCameraOptions {
-                                                    center(Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude))
+                                                    center(
+                                                        Point.fromLngLat(
+                                                            interestPlace.coordinate.longitude,
+                                                            interestPlace.coordinate.latitude
+                                                        )
+                                                    )
                                                     zoom(12.0)
                                                 }
-                                                clickedPoint = Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude)
-                                            } catch (e: NotValidCoordinatesException) {
-                                                Log.e("ERROR_BUSQUEDA_COORDS", "Error al buscar por coordenadas")
-                                                errorMessage = e.message.toString()
-                                                busqueda = ""
-                                            } catch (e: Exception) {
-                                                Log.e("ERROR_BUSQUEDA_COORDS", "Error al buscar por coordenadas")
-                                                errorMessage = e.message.toString()
-                                                busqueda = ""
-                                            }
-                                        } else {
-                                            try {
-                                                interestPlace = interestPlaceService.searchInterestPlaceByToponym(input)
-                                                errorMessage=""
-                                                busqueda = ""
-                                                mapViewportState.setCameraOptions {
-                                                    center(Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude))
-                                                    zoom(12.0)
-                                                }
-                                                clickedPoint = Point.fromLngLat(interestPlace.coordinate.longitude, interestPlace.coordinate.latitude)
-                                            } catch (e: NotSuchPlaceException) {
-                                                Log.e("ERROR_BUSQUEDA_TOP", "Error al buscar por topónimo")
-                                                errorMessage = e.message.toString()
-                                                busqueda = ""
-                                            } catch (e: Exception) {
-                                                Log.e("ERROR_BUSQUEDA_TOP", "Error al buscar por topónimo")
-                                                errorMessage = e.message.toString()
-                                                busqueda = ""
+                                                clickedPoint = Point.fromLngLat(
+                                                    interestPlace.coordinate.longitude,
+                                                    interestPlace.coordinate.latitude
+                                                )
                                             }
                                         }
                                     }
@@ -224,7 +186,10 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                     ),
                     contentDescription = "",
                     modifier = Modifier.size(20.dp)
-                        .clickable { showMenu = true },
+                        .clickable {
+                            showMenu = true
+                            showPlaceData = false
+                        },
                     contentScale = ContentScale.Crop
                 )
                 Spacer(modifier = Modifier.width(10.dp))
@@ -236,26 +201,9 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                 onMapClickListener = { point ->
                     clickedPoint = point
                     CoroutineScope(Dispatchers.IO).launch {
-                        try {
-                            interestPlace =
-                                interestPlaceService.searchInterestPlaceByCoordiante(
-                                    Coordinate(point.latitude(), point.longitude())
-                                )
-                            errorMessage = ""
-                        } catch (e: NotValidCoordinatesException) {
-                            Log.e(
-                                "ERROR_COORDS_CLICK",
-                                "Error al sacar las coordenadas del mapa"
-                            )
-                            errorMessage = e.message.toString()
-                        } catch (e: Exception) {
-                            Log.e(
-                                "ERROR_COORDS_CLICK",
-                                "Error al sacar las coordenadas del mapa"
-                            )
-                            errorMessage = e.message.toString()
-                        }
+                        interestPlace = viewModel.searchInterestPlaceByCoordiante(Coordinate(point.latitude(), point.longitude()))
                     }
+                    errorMessage = viewModel.getErrorMessage()
                     showPlaceData = true
                     true
                 }
@@ -457,13 +405,15 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { showMenu = false }, //TODO Ir a rutas
+                            .clickable { showMenu = false
+                                        navController.navigate("routeList") }, //TODO Ir a rutas
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            showMenu = false //TODO Ir a rutas
+                            showMenu = false
+                            navController.navigate("routeList")
                         },
                         modifier = Modifier
                             .height(40.dp)

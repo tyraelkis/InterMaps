@@ -39,6 +39,7 @@ interface Repository {
     suspend fun viewVehicleData(plate: String): Vehicle
     suspend fun editVehicleData(plate: String, newType: String, newConsumption: Double): Boolean
     suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double>
+    suspend fun viewRouteList(): List<Route>
     fun convertToCoordinate(lista: RouteGeometry): List<Coordinate>
-    suspend fun deleteRoute (origin: String,destination: String, trasnportMethod: TransportMethods, vehiclePlate: String): Boolean
+    suspend fun deleteRoute (route: Route): Boolean
 }

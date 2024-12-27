@@ -7,6 +7,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import uji.es.intermaps.APIParsers.RouteGeometry
+import uji.es.intermaps.APIParsers.RouteFeature
+import uji.es.intermaps.Exceptions.NoValidTypeException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.Repository
@@ -36,14 +38,14 @@ open class RouteService(private val repository: Repository){
     }
 
 
-    suspend fun deleteRoute(origin: String, destination: String, trasnportMethod: TransportMethods, vehiclePlate: String): Boolean {
-        if (origin.isEmpty() or destination.isEmpty()){
+    suspend fun deleteRoute(route: Route): Boolean {
+        if (route.origin.isEmpty() or route.destination.isEmpty()){
             throw NotValidPlaceException()
         }
-        if (origin == destination){
+        if (route.origin == route.destination){
             throw NotValidPlaceException()
         }
-        return repository.deleteRoute(origin, destination, trasnportMethod, vehiclePlate)
+        return repository.deleteRoute(route)
     }
 
     suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
@@ -103,10 +105,26 @@ open class RouteService(private val repository: Repository){
     suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double> {
         return repository.getVehicleTypeAndConsump(route)
     }
+    suspend fun createTypeRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes?):Pair<Boolean,RouteFeature> {
+        if (routeType == null){
+            throw NoValidTypeException()
+        }
+        val res = routeRepository.calculateRoute(origin, destination, transportMethod, routeType)
+        return Pair(true,res)
+    }
+
 
     fun convertToCoordinate(geometry: RouteGeometry): List<Coordinate> {
         return repository.convertToCoordinate(geometry)
 
+    }
+
+    suspend fun viewRouteList(): List<Route> {
+        return repository.viewRouteList()
+    }
+
+    suspend fun getRoute (origin: String, destination: String, transportMethod: TransportMethods, vehiclePlate: String): Route? {
+        return routeRepository.getRoute(origin, destination, transportMethod, vehiclePlate)
     }
 
 

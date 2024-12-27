@@ -5,6 +5,7 @@ import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,6 +49,7 @@ class RouteTests {
     private val userService = UserService(FirebaseRepository())
     private val userTest: User = User("emaildeprueba@gmail.com", "123456BB")
     lateinit private var routeService: RouteService
+    private val route = Route("","", emptyList(), 0.0, 0.0.toString(),0.0,  RouteTypes.RAPIDA, false, TransportMethods.VEHICULO, "")
 
     @Before
     fun setup():Unit = runBlocking() {
@@ -67,7 +69,7 @@ class RouteTests {
         var mockedRoute = Route(
             origin = "Burriana",
             destination = "Castellón de la Plana",
-            trasnportMethod = TransportMethods.VEHICULO,
+            transportMethod = TransportMethods.VEHICULO,
             route = emptyList(),
             distance = 0.0,
             duration = 0.0.toString(),
@@ -138,7 +140,7 @@ class RouteTests {
         val mockedRoute = Route(
             origin = "Burriana",
             destination = "Castellón de la Plana",
-            trasnportMethod = TransportMethods.VEHICULO,
+            transportMethod = TransportMethods.VEHICULO,
             route = emptyList(),
             distance = 25.0,
             duration = "30 min",
@@ -159,7 +161,7 @@ class RouteTests {
         val mockedRoute = Route(
             origin = "Burriana",
             destination = "Castellón de la Plana",
-            trasnportMethod = TransportMethods.VEHICULO,
+            transportMethod = TransportMethods.VEHICULO,
             route = emptyList(),
             distance = 25.0,
             duration = "30 min",
@@ -187,7 +189,7 @@ class RouteTests {
         val mockedRoute = Route(
             origin = "Burriana",
             destination = "Castellón de la Plana",
-            trasnportMethod = TransportMethods.APIE,
+            transportMethod = TransportMethods.APIE,
             route = emptyList(),
             distance = 10.0, // 10 km de distancia como ejemplo
             duration = "2 h",
@@ -205,6 +207,46 @@ class RouteTests {
 
         assertEquals(expectedCalories, calories, 0.1)
         verify(mockRouteRepository).calculateCaloriesConsumition(mockedRoute, TransportMethods.APIE)
+
+    }
+
+    @Test
+    fun createRouteWithType_E1Valid_routeIsCalculated(): Unit = runBlocking {
+        val mockedCall = RouteFeature(
+            geometry = RouteGeometry(
+                coordinates = emptyList()
+            ),
+            properties = RouteProperties(
+                RouteSummary(
+                    distance = 1200.0,
+                    duration = 1100.0
+                )
+            ),
+        )
+        `when`(mockRouteRepository.calculateRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.CORTA))
+            .thenReturn(mockedCall)
+
+        val routeTest = routeService.createTypeRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.CORTA)
+
+        assertEquals(Pair(true, mockedCall), routeTest)
+
+        verify(mockRouteRepository).calculateRoute("Burriana", "Castellón", TransportMethods.VEHICULO,RouteTypes.CORTA)
+    }
+
+    @Test
+    fun viewRouteList_E1Valido_routeListViewed(): Unit = runBlocking{
+        `when`(mockRepository.viewRouteList()).thenReturn(listOf(route))
+        val res = routeService.viewRouteList()
+        assertTrue(res.isNotEmpty())
+        verify(mockRepository).viewRouteList()
+    }
+
+    @Test
+    fun viewRouteList_E2Valido_emptyRouteListViewed(): Unit = runBlocking{
+        `when`(mockRepository.viewRouteList()).thenReturn(emptyList())
+        val res = routeService.viewRouteList()
+        assertTrue(res.isEmpty())
+        verify(mockRepository).viewRouteList()
     }
 
     @Test
