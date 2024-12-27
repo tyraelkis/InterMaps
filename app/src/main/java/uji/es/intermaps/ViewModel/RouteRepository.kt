@@ -4,9 +4,13 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.APIParsers.RouteFeature
+import uji.es.intermaps.APIParsers.RouteGeometry
+import uji.es.intermaps.APIParsers.RouteProperties
 import uji.es.intermaps.APIParsers.RouteResponse
+import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Interfaces.ElectricityPriceRepository
@@ -97,7 +101,8 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         lateinit var call : retrofit2.Response<RouteResponse>
         var route = RouteFeature(geometry = RouteGeometry(emptyList()), properties = RouteProperties(
             RouteSummary(distance = 0.0, duration = 0.0)
-        ))
+        )
+        )
         try {
             val routeTypePreference = when (routeType) {
                 RouteTypes.RAPIDA -> "fastest"
@@ -298,29 +303,6 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         }
     }
 
-    private fun saveRouteCostToDatabase(origin: String, destination: String, cost: Double) {
-        val userEmail = auth.currentUser?.email
-            ?: throw IllegalStateException("No hay un usuario autenticado")
-
-        val routesDocument = db.collection("Route").document(userEmail)
-        routesDocument.get().addOnSuccessListener { documentSnapshot ->
-            if (documentSnapshot.exists()) {
-                val routes = documentSnapshot.get("routes") as? MutableList<Map<String, Any>>
-                    ?: throw IllegalArgumentException("No se encontró el campo 'routes' en el documento")
-                val routeId = routes.indexOfFirst {
-                    it["origin"] == origin && it["destination"] == destination
-                }
-
-                if (routeId in routes.indices) {
-                    val updatedRoute = routes[routeId].toMutableMap()
-                    updatedRoute["cost"] = cost
-                    routes[routeId] = updatedRoute
-
-                    routesDocument.update("routes", routes)
-                }
-            }
-        }
-    }
 
     private fun saveFuelCostAverageToDatabase(averages: List<Double>) {
         val fuelPricesDocument = db.collection("FuelPrices").document("mediaPrecios")
@@ -340,6 +322,50 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                 "precioLuz" to precio,
             )
         )
+    }
+
+     override suspend fun getRoute(
+        origin: String,
+        destination: String,
+        transportMethod: TransportMethods,
+        vehiclePlate: String
+    ): Route? {
+        val routeService = RouteService(repository)
+
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        return try {
+            val documentSnapshot = db.collection("Route")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                val routes = documentSnapshot.get("routes") as? List<Map<String, Any>> ?: emptyList()
+
+                routes.firstOrNull { route ->
+                    route["origin"] == origin &&
+                            route["destination"] == destination &&
+                            TransportMethods.valueOf(route["transportMethod"] as? String ?: "") == transportMethod &&
+                            route["vehiclePlate"] == vehiclePlate
+                }?.let { route ->
+                    val completeRoute = routeService.createRoute(
+                        origin = origin,
+                        destination = destination,
+                        transportMethod = transportMethod,
+                        routeType = RouteTypes.valueOf(route["routeType"] as? String ?: "DEFAULT"),
+                        vehiclePlate = route["vehiclePlate"] as? String ?: "defaultPlate",
+                    )
+
+                    return@let completeRoute
+                }
+            } else {
+                Log.e("viewRoute", "El documento del usuario no existe en la colección 'Route'")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("viewRoute", "Error al obtener ruta desde Firebase: ${e.message}")
+            null
+        }
     }
 
 }

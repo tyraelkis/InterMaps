@@ -18,6 +18,8 @@ import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
+import uji.es.intermaps.Model.RouteTypes
+import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.Model.VehicleFactory
@@ -622,7 +624,7 @@ class FirebaseRepository: Repository {
             val newRoute = mapOf(
                 "origin" to route.origin,
                 "destination" to route.destination,
-                "trasnportMethod" to route.transportMethod,
+                "transportMethod" to route.transportMethod,
                 "route" to route.route.take(2),
                 "distance" to route.distance,
                 "duration" to route.duration,
@@ -732,7 +734,7 @@ class FirebaseRepository: Repository {
     }
 
     override suspend fun viewRouteList(): List<Route> {
-        val userEmail =  auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
         return try {
             val documentSnapshot = db.collection("Route")
                 .document(userEmail)
@@ -740,29 +742,74 @@ class FirebaseRepository: Repository {
                 .await()
 
             if (documentSnapshot.exists()) {
-                // Extraemos el array interestPlaces del documento
+                // Extraemos el array "routes" del documento
                 val routes = documentSnapshot.get("routes") as? List<Map<String, Any>> ?: emptyList()
 
-                // Convertimos cada elemento del array a InterestPlace
-                routes.map { route ->
+                // Convertimos cada elemento del array a Route
+                routes.mapNotNull { route ->
                     Route(
-                        origin = route["origin"] as String? ?: "",
-                        destination = route["destination"] as String? ?: "",
-                        transportMethod = route["transportMethod"] as TransportMethods,
-                        route = route["route"] as List<Coordinate>,
-                        distance = route["distance"] as Double,
+                        origin = route["origin"] as String,
+                        destination = route["destination"] as String,
+                        transportMethod = TransportMethods.valueOf(route["transportMethod"] as String),
+                        route = (route["route"] as List<Map<String, Any>>).mapNotNull { coordinate ->
+                            val latitude = coordinate["latitude"] as Double
+                            val longitude = coordinate["longitude"] as Double
+                            Coordinate(latitude, longitude)
+                        },
+                        distance = route["distance"] as Double ,
                         duration = route["duration"] as String,
-                        cost = route["cost"] as Double,
-                        routeType = route["routeType"] as RouteTypes,
-                        fav = route["fav"] as Boolean? ?: false,
+                        cost = route["cost"] as Double ,
+                        routeType = RouteTypes.valueOf(route["routeType"] as String),
+                        fav = route["fav"] as Boolean,
                         vehiclePlate = route["vehiclePlate"] as String
                     )
                 }
             } else {
+                Log.e("viewRouteList", "El documento del usuario no existe en la colección 'Route'")
                 emptyList()
             }
         } catch (e: Exception) {
-            emptyList()  // En caso de error, retornamos una lista vacía
+            Log.e("viewRouteList", "Error al obtener rutas desde Firebase: ${e.message}")
+            emptyList()
+        }
+    }
+
+    override suspend fun deleteRoute(route: Route): Boolean {
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        val documentSnapshot = db.collection("Route")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val routes = documentSnapshot.get("routes") as? MutableList<Map<String, Any>>
+                ?: mutableListOf()
+
+            val index = routes.indexOfFirst { vehicle ->
+                val routeOrigin = vehicle["origin"] as? String ?: return@indexOfFirst false
+                val routeDestination = vehicle["destination"] as? String ?: return@indexOfFirst false
+                val routeTransportMethod = vehicle["transportMethod"] as? String ?: return@indexOfFirst false
+                val routeVehiclePlate = vehicle["vehiclePlate"] as? String ?: return@indexOfFirst false
+                (routeOrigin == route.origin && routeDestination == route.destination &&
+                        routeTransportMethod == route.transportMethod.toString() && routeVehiclePlate == route.vehiclePlate)
+            }
+
+            if (index == -1) {
+                throw NotSuchElementException("Vehículo no encontrado")
+            } //La excepción no tiene que ser cazada en este metodo sino en el servicio
+
+            routes.removeAt(index)
+
+            db.collection("Route")
+                .document(userEmail)
+                .update("routes", routes)
+                .await()
+
+            return true
+        } else {
+            return false
         }
     }
 

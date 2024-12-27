@@ -41,4 +41,5 @@ interface Repository {
     suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double>
     suspend fun viewRouteList(): List<Route>
     fun convertToCoordinate(lista: RouteGeometry): List<Coordinate>
+    suspend fun deleteRoute (route: Route): Boolean
 }

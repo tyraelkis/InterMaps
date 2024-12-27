@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
 import uji.es.intermaps.View.Route.CreateNewRoute
+import uji.es.intermaps.View.Route.RouteList
 import uji.es.intermaps.View.Route.ViewRoute
 import uji.es.intermaps.View.home.HomeScreen
 import uji.es.intermaps.View.home.InitialScreen
@@ -143,10 +144,33 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
             }
         }
 
+        composable("routeList") {
+            RouteList(auth, navHostController, viewModelRoute)
+        }
+
         composable(
-            route="viewRoute"
-        ) {
-            ViewRoute(navHostController, viewModelRoute)
+            route = "viewRoute/{origin}/{destination}/{transportMethod}/{vehiclePlate}",
+            arguments = listOf(
+                navArgument("origin") { type = NavType.StringType },
+                navArgument("destination") { type = NavType.StringType },
+                navArgument("transportMethod") { type = NavType.StringType },
+                navArgument("vehiclePlate") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val origin = backStackEntry.arguments?.getString("origin")?.let {
+                URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+            }
+            val destination = backStackEntry.arguments?.getString("destination")?.let {
+                URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+            }
+            val transportMethod = backStackEntry.arguments?.getString("transportMethod")?.let {
+                URLDecoder.decode(it, StandardCharsets.UTF_8.toString())
+            }
+            val vehiclePlate = backStackEntry.arguments?.getString("vehiclePlate")
+
+            if (origin != null && destination != null && transportMethod != null && vehiclePlate != null) {
+                ViewRoute(navHostController, viewModelRoute)
+            }
         }
     }
 }
