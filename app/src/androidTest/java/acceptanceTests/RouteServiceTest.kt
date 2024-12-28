@@ -47,6 +47,7 @@ class RouteServiceTest {
         interestPlaceService.createInterestPlaceFromToponym("Vila-real")
         interestPlaceService.createInterestPlaceFromToponym("Burriana")
         interestPlaceService.createInterestPlaceFromToponym("Castellón de la Plana")
+        //vehicleService.deleteVehicle("9999GON")
         vehicleService.createVehicle("9999GON", "gasolina",9.0)
     }
 
@@ -100,6 +101,7 @@ class RouteServiceTest {
     @Test (expected = NotValidTransportException::class)
     fun calculateCaloriesConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
         val routeTest = routeService.createRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "").second
+        routeService.putRoute(routeTest)
         routeService.calculateCaloriesConsumition(routeTest, TransportMethods.VEHICULO)
 
     }
@@ -120,7 +122,7 @@ class RouteServiceTest {
 
     @Test
     fun deleteRoute_E4Valid_routeDeleted(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Castello de la Plana, VC, Spain", "Borriana, VC, Spain", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON").second
+        val routeTest: Route = routeService.createRoute("Castellón de la Plana", "Burriana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON").second
         routeService.putRoute(routeTest)
         val res = routeService.deleteRoute(routeTest)
         assertEquals(true, res)
@@ -146,8 +148,9 @@ class RouteServiceTest {
         userService.signOut()
         userService.login(emailEmpty, "123456BB")
         val res = routeService.viewRouteList()
-        userService.login(email, "123456BB")
-        assertTrue(res.isEmpty())
+        //userService.login(email, "123456BB")
+
+        assertEquals(res.size, 0)
     }
 
 
