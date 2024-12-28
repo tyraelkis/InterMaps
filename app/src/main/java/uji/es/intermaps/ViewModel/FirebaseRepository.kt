@@ -5,12 +5,15 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.type.LatLng
+import com.mapbox.geojson.Point
+import com.mapbox.geojson.utils.PolylineUtils
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.APIParsers.RouteFeature
-import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
+import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
@@ -625,7 +628,7 @@ class FirebaseRepository: Repository {
             val newRoute = mapOf(
                 "origin" to route.origin,
                 "destination" to route.destination,
-                "trasnportMethod" to route.trasnportMethod,
+                "transportMethod" to route.transportMethod,
                 "route" to route.route.take(2),
                 "distance" to route.distance,
                 "duration" to route.duration,
@@ -650,16 +653,6 @@ class FirebaseRepository: Repository {
             throw e
         }
     }
-
-
-    override fun convertToCoordinate(lista: RouteGeometry):List<Coordinate>{
-        var listaCoordenadas: ArrayList<Coordinate> = ArrayList()
-        for (coordenada in lista.coordinates){
-            listaCoordenadas.add(Coordinate(latitude = coordenada[1], longitude = coordenada[0]))
-        }
-        return listaCoordenadas
-    }
-
 
     override suspend fun getAverageFuelPrices(): List<Double> {
         try {
@@ -735,6 +728,85 @@ class FirebaseRepository: Repository {
         }
     }
 
+    override suspend fun viewRouteList(): List<Route> {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        return try {
+            val documentSnapshot = db.collection("Route")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (documentSnapshot.exists()) {
+                // Extraemos el array "routes" del documento
+                val routes = documentSnapshot.get("routes") as? List<Map<String, Any>> ?: emptyList()
+
+                // Convertimos cada elemento del array a Route
+                routes.mapNotNull { route ->
+                    Route(
+                        origin = route["origin"] as String,
+                        destination = route["destination"] as String,
+                        transportMethod = TransportMethods.valueOf(route["transportMethod"] as String),
+                        route = (route["route"] as List<Map<String, Any>>).mapNotNull { coordinate ->
+                            val latitude = coordinate["latitude"] as Double
+                            val longitude = coordinate["longitude"] as Double
+                            Coordinate(latitude, longitude)
+                        },
+                        distance = route["distance"] as Double ,
+                        duration = route["duration"] as String,
+                        cost = route["cost"] as Double ,
+                        routeType = RouteTypes.valueOf(route["routeType"] as String),
+                        fav = route["fav"] as Boolean,
+                        vehiclePlate = route["vehiclePlate"] as String
+                    )
+                }
+            } else {
+                Log.e("viewRouteList", "El documento del usuario no existe en la colección 'Route'")
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e("viewRouteList", "Error al obtener rutas desde Firebase: ${e.message}")
+            emptyList()
+        }
+    }
+
+    override suspend fun deleteRoute(route: Route): Boolean {
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        val documentSnapshot = db.collection("Route")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val routes = documentSnapshot.get("routes") as? MutableList<Map<String, Any>>
+                ?: mutableListOf()
+
+            val index = routes.indexOfFirst { vehicle ->
+                val routeOrigin = vehicle["origin"] as? String ?: return@indexOfFirst false
+                val routeDestination = vehicle["destination"] as? String ?: return@indexOfFirst false
+                val routeTransportMethod = vehicle["transportMethod"] as? String ?: return@indexOfFirst false
+                val routeVehiclePlate = vehicle["vehiclePlate"] as? String ?: return@indexOfFirst false
+                (routeOrigin == route.origin && routeDestination == route.destination &&
+                        routeTransportMethod == route.transportMethod.toString() && routeVehiclePlate == route.vehiclePlate)
+            }
+
+            if (index == -1) {
+                throw NotSuchElementException("Ruta no encontrada")
+            } //La excepción no tiene que ser cazada en este metodo sino en el servicio
+
+            routes.removeAt(index)
+
+            db.collection("Route")
+                .document(userEmail)
+                .update("routes", routes)
+                .await()
+
+            return true
+        } else {
+            return false
+        }
+    }
     override suspend fun setFavInterestPlace(placeCoordinate: Coordinate): Boolean {
         val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
         var result = false

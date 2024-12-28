@@ -2,7 +2,6 @@ package uji.es.intermaps.Interfaces
 
 import androidx.navigation.ActivityNavigator
 import uji.es.intermaps.APIParsers.RouteFeature
-import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
@@ -39,7 +38,8 @@ interface Repository {
     suspend fun viewVehicleData(plate: String): Vehicle
     suspend fun editVehicleData(plate: String, newType: String, newConsumption: Double): Boolean
     suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double>
-    fun convertToCoordinate(lista: RouteGeometry): List<Coordinate>
+    suspend fun viewRouteList(): List<Route>
+    suspend fun deleteRoute (route: Route): Boolean
     suspend fun setFavInterestPlace(placeCoordinate: Coordinate): Boolean
     suspend fun setFavVehicle(plate: String): Boolean
     suspend fun deleteFavInterestPlace(placeCoordinate: Coordinate): Boolean

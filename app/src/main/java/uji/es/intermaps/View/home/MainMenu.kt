@@ -405,13 +405,15 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { showMenu = false }, //TODO Ir a rutas
+                            .clickable { showMenu = false
+                                        navController.navigate("routeList") },
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            showMenu = false //TODO Ir a rutas
+                            showMenu = false
+                            navController.navigate("routeList")
                         },
                         modifier = Modifier
                             .height(40.dp)

@@ -1,11 +1,11 @@
 package uji.es.intermaps.View.Route
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.ViewModel.RouteViewModel
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +25,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,31 +42,33 @@ import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
-import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
-import uji.es.intermaps.Model.Route
 import uji.es.intermaps.R
 
 @Composable
 fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
-
-    val origin = viewModel.route.value?.origin
-    val destination = viewModel.route.value?.destination
-    val transportMethod = viewModel.route.value?.trasnportMethod
-    val routeType = viewModel.route.value?.routeType
-    val routePoints = viewModel.route.value?.route
-    val distance = viewModel.route.value?.distance
-    val duration = viewModel.route.value?.duration
-    val cost = viewModel.route.value?.cost
-    val vehiclePlate = viewModel.route.value?.vehiclePlate
+    val route = viewModel.route.value
+    val origin = route?.origin
+    val destination = route?.destination
+    val transportMethod = route?.transportMethod
+    val routeType = route?.routeType
+    val routePoints = route?.route
+    val distance = route?.distance
+    val duration = route?.duration
+    val cost = route?.cost
+    val vehiclePlate = route?.vehiclePlate
     val loading = viewModel.loading
-    val startPoint:Coordinate? = routePoints?.get(0)
-    val endPoint:Coordinate? = routePoints?.get(routePoints.size - 1)
-    val startLong = startPoint?.longitude
-    val startLat = startPoint?.latitude
-    val endLong = endPoint?.longitude
-    val endLat = endPoint?.latitude
+    val routeInDataBase = viewModel.routeInDataBase
+    val startPoint:Coordinate? = routePoints?.getOrNull(0)
+    val endPoint:Coordinate? = routePoints?.getOrNull(routePoints.size - 1)
+    val startLong = startPoint?.longitude ?: 0.0
+    val startLat = startPoint?.latitude ?: 0.0
+    val endLong = endPoint?.longitude ?: 0.0
+    val endLat = endPoint?.latitude ?: 0.0
+    val routes by viewModel.routes.observeAsState(emptyList())
+
+
 
     if (loading) {
         Column(
@@ -160,14 +164,6 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Datos adicionales
-                /*Text(
-                    text = "Datos adicionales",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(start = 16.dp)
-                )*/
-
                 Column(modifier = Modifier.padding(16.dp)) {
                     RouteDetailItem(label = "Método de transporte", value = "${transportMethod}")
                     if (transportMethod == TransportMethods.VEHICULO) {
@@ -187,13 +183,36 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                if (routeInDataBase) {
+                    Button(
+                        onClick = {
+                            viewModel.route.value?.let { currentRoute ->
+                                viewModel.deleteRoute(route)
+                            }
+                            viewModel.updateRouteList()
+                            navController.navigate("routeList")
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "Eliminar ruta",
+                            color = Color.White,
+                            fontSize = 18.sp
+                        )
+                    }
+                } else{
                 // Botón Guardar ruta
                 Button(
                     onClick = {
                         viewModel.route.value?.let { currentRoute ->
-                            viewModel.saveRoute(currentRoute) // Llama al método del ViewModel
+                            viewModel.saveRoute(currentRoute)
                         }
-                        navController.navigate("home")
+                        viewModel.updateRouteList()
+                        navController.navigate("routeList")
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -207,6 +226,7 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                         fontSize = 18.sp
                     )
                 }
+                    }
             }
         }
     }
