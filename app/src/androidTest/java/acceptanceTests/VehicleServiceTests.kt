@@ -105,5 +105,27 @@ class VehicleServiceTests {
         vehicleService.editVehicleData("8888COD", VehicleTypes.DIESEL.type, 11.0)
     }
 
+    @Test
+    fun setFavVehicle_E1Valid_vehicleIsFav(): Unit = runBlocking {
+        val result: Boolean = vehicleService.setFavVehicle(vehicle.plate)
+        assertEquals(true, result)
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun setFavVehicle_E3Invalid_errorOnSettingFavVehicle(): Unit = runBlocking {
+        vehicleService.setFavVehicle("8888COD")
+    }
+
+    @Test
+    fun deleteFavVehicle_E1Valid_vehicleDeleteAsFavourite(): Unit = runBlocking {
+        val result: Boolean = vehicleService.deleteFavVehicle(vehicle.plate)
+        assertEquals(true, result)
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun deleteFavVehicle_E2Invalid_errorOnDeletingFavVehicle(): Unit = runBlocking {
+        vehicleService.deleteFavVehicle("8888COD")
+    }
+
 
 }

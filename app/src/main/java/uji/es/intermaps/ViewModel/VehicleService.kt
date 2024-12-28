@@ -62,4 +62,12 @@ class VehicleService(private val repository: Repository) {
         }
         return true
     }
+
+    suspend fun setFavVehicle(plate: String): Boolean {
+        return repository.setFavVehicle(plate)
+    }
+
+    suspend fun deleteFavVehicle(plate: String): Boolean {
+        return repository.deleteFavVehicle(plate)
+    }
 }

@@ -100,6 +100,12 @@ open class InterestPlaceService(private val repository: Repository) {
         return returnPlace
     }
 
+    suspend fun setFavInterestPlace(coordinate: Coordinate) : Boolean {
+        return repository.setFavInterestPlace(coordinate)
+    }
 
+    suspend fun deleteFavInterestPlace(coordinate: Coordinate) : Boolean {
+        return repository.deleteFavInterestPlace(coordinate)
+    }
 
 }

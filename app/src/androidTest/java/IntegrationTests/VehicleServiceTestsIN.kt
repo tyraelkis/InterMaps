@@ -110,4 +110,34 @@ class VehicleServiceTestsIN {
             .`when`(mockRepository).editVehicleData(anyString(), anyString(), anyDouble())
         vehicleService.editVehicleData("8888COD", VehicleTypes.DIESEL.type, 11.0)
     }
+
+    @Test
+    fun setFavVehicle_E1Valid_vehicleIsFav(): Unit = runBlocking {
+        `when`(mockRepository.setFavVehicle(vehicle.plate)).thenReturn(true)
+        val result: Boolean = vehicleService.setFavVehicle(vehicle.plate)
+        assertEquals(true, result)
+        verify(mockRepository).setFavVehicle(vehicle.plate)
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun setFavVehicle_E3Invalid_errorOnSettingFavVehicle(): Unit = runBlocking {
+        doAnswer{ throw NotSuchElementException("No existe ese vehículo") }
+            .`when`(mockRepository).setFavVehicle("8888COD")
+        vehicleService.setFavVehicle("8888COD")
+    }
+
+    @Test
+    fun deleteFavVehicle_E1Valid_vehicleDeleteAsFavourite(): Unit = runBlocking {
+        `when`(mockRepository.deleteFavVehicle(vehicle.plate)).thenReturn(true)
+        val result: Boolean = vehicleService.deleteFavVehicle(vehicle.plate)
+        assertEquals(true, result)
+        verify(mockRepository).deleteFavVehicle(vehicle.plate)
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun deleteFavVehicle_E2Invalid_errorOnDeletingFavVehicle(): Unit = runBlocking {
+        doAnswer{ throw NotSuchElementException("No existe ese vehículo") }
+            .`when`(mockRepository).deleteFavVehicle("8888COD")
+        vehicleService.deleteFavVehicle("8888COD")
+    }
 }

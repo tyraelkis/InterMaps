@@ -809,8 +809,173 @@ class FirebaseRepository: Repository {
             return false
         }
     }
+    override suspend fun setFavInterestPlace(placeCoordinate: Coordinate): Boolean {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        var result = false
+        val documentSnapshot = db.collection("InterestPlace")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val interestPlaces =
+                documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
+
+            val foundPlace = (interestPlaces.find { place ->
+                val coordinate = place["coordinate"] as? Map<String, Double>
+                val latitude = coordinate?.get("latitude") ?: 0.0
+                val longitude = coordinate?.get("longitude") ?: 0.0
 
 
+                latitude == placeCoordinate.latitude && longitude == placeCoordinate.longitude
+            }?: throw NotSuchPlaceException("Lugar de interés no encontrado")).toMutableMap()
+
+
+            val updatedInterestPlaces = interestPlaces.map { place ->
+                if (place == foundPlace){
+                    place.toMutableMap().apply {
+                        this["fav"] = true
+                    }
+                } else {
+                    place
+                }
+            }
+
+            db.collection("InterestPlace")
+                .document(userEmail)
+                .update("interestPlaces", updatedInterestPlaces)
+                .await()
+            result = true
+        } else {
+            result = false
+        }
+        return result
+    }
+
+    override suspend fun setFavVehicle(plate: String): Boolean {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        var result = false
+        val documentSnapshot = db.collection("Vehicle")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val vehicleList =
+                documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
+
+            val foundVehicle = (vehicleList.find { vehicle ->
+                val foundVehiclePlate = vehicle["plate"] as? String ?: ""
+
+                plate == foundVehiclePlate
+            }?: throw NotSuchElementException("Vehiculo no encontrado")).toMutableMap()
+
+            val updatedVehicle = vehicleList.map { vehicle ->
+                if (vehicle == foundVehicle){
+                    vehicle.toMutableMap().apply {
+                        this["fav"] = true
+                    }
+                } else {
+                    vehicle
+                }
+            }
+
+            db.collection("Vehicle")
+                .document(userEmail)
+                .update("vehicles", updatedVehicle)
+                .await()
+            result = true
+
+        } else {
+            result = false
+        }
+        return result
+    }
+
+    override suspend fun deleteFavInterestPlace(placeCoordinate: Coordinate): Boolean {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        var result = false
+        val documentSnapshot = db.collection("InterestPlace")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val interestPlaces =
+                documentSnapshot.get("interestPlaces") as? List<Map<String, Any>> ?: emptyList()
+
+            val foundPlace = (interestPlaces.find { place ->
+                val coordinate = place["coordinate"] as? Map<String, Double>
+                val latitude = coordinate?.get("latitude") ?: 0.0
+                val longitude = coordinate?.get("longitude") ?: 0.0
+
+
+                latitude == placeCoordinate.latitude && longitude == placeCoordinate.longitude
+            }?: throw NotSuchPlaceException("Lugar de interés no encontrado")).toMutableMap()
+
+
+            val updatedInterestPlaces = interestPlaces.map { place ->
+                if (place == foundPlace){
+                    place.toMutableMap().apply {
+                        this["fav"] = false
+                    }
+                } else {
+                    place
+                }
+            }
+
+            db.collection("InterestPlace")
+                .document(userEmail)
+                .update("interestPlaces", updatedInterestPlaces)
+                .await()
+            result = true
+        } else {
+            result = false
+        }
+        return result
+    }
+
+    override suspend fun deleteFavVehicle(plate: String): Boolean {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        var result = false
+        val documentSnapshot = db.collection("Vehicle")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val vehicleList =
+                documentSnapshot.get("vehicles") as? List<Map<String, Any>> ?: emptyList()
+
+            val foundVehicle = (vehicleList.find { vehicle ->
+                val foundVehiclePlate = vehicle["plate"] as? String ?: ""
+
+                plate == foundVehiclePlate
+            }?: throw NotSuchElementException("Vehiculo no encontrado")).toMutableMap()
+
+            val updatedVehicle = vehicleList.map { vehicle ->
+                if (vehicle == foundVehicle){
+                    vehicle.toMutableMap().apply {
+                        this["fav"] = false
+                    }
+                } else {
+                    vehicle
+                }
+            }
+
+            db.collection("Vehicle")
+                .document(userEmail)
+                .update("vehicles", updatedVehicle)
+                .await()
+            result = true
+
+        } else {
+            result = false
+        }
+        return result
+    }
 
 }
 
