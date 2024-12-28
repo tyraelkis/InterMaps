@@ -132,7 +132,8 @@ class RouteServiceTest {
         userService.signOut()
         userService.login(emailEmpty, "123456BB")
         val res = routeService.viewRouteList()
-        userService.login(email, "123456BB")
+        userService.signOut()
+        userService.login(userTest.email, userTest.pswd)
         assertTrue(res.isEmpty())
     }
 

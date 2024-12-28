@@ -16,19 +16,16 @@
       <SelectionState runConfigName="RouteServiceTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="createRoute_E1Valid_routeIsCreated()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="createRouteWithType_E1Valid_routeIsCalculated()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="createRouteWithType_E2Invalid_routeNotCalculated()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="viewRouteList_E2Valido_emptyRouteListViewed()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="setFavouriteInterestPlace_E1Valid_InterestPlaceSetAsFavourite()">
+      <SelectionState runConfigName="RouteTests">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="viewRouteList_E1Valido_RouteListViewed()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
