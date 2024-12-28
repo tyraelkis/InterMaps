@@ -244,7 +244,7 @@ class RouteTests {
         val mockedRoute = Route(
             origin = "Burriana",
             destination = "Castellón de la Plana",
-            trasnportMethod = TransportMethods.VEHICULO,
+            transportMethod = TransportMethods.VEHICULO,
             route = emptyList(),
             distance = 25.0,
             duration = "30 min",
@@ -255,26 +255,15 @@ class RouteTests {
         )
 
         `when`(
-            mockRepository.deleteRoute(
-                origin = mockedRoute.origin,
-                destination = mockedRoute.destination,
-                trasnportMethod = mockedRoute.trasnportMethod,
-                vehiclePlate = mockedRoute.vehiclePlate
-            )
+            mockRepository.deleteRoute(mockedRoute)
         ).thenReturn(true)
 
         val result = routeService.deleteRoute(
-            mockedRoute.origin,
-            mockedRoute.destination,
-            mockedRoute.trasnportMethod,
-            mockedRoute.vehiclePlate
+            mockedRoute
         )
 
         verify(mockRepository).deleteRoute(
-            origin = mockedRoute.origin,
-            destination = mockedRoute.destination,
-            trasnportMethod = mockedRoute.trasnportMethod,
-            vehiclePlate = mockedRoute.vehiclePlate
+            mockedRoute
         )
 
         assertEquals(true, result)

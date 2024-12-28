@@ -10,7 +10,6 @@ import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import kotlinx.coroutines.tasks.await
 import uji.es.intermaps.APIParsers.RouteFeature
-import uji.es.intermaps.APIParsers.RouteGeometry
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
@@ -25,7 +24,6 @@ import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
-import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.Model.VehicleFactory
@@ -656,13 +654,6 @@ class FirebaseRepository: Repository {
         }
     }
 
-    override fun convertToCoordinate(lista: RouteGeometry):List<Coordinate>{
-        var listaCoordenadas: ArrayList<Coordinate> = ArrayList()
-        for (coordenada in lista.coordinates){
-            listaCoordenadas.add(Coordinate(latitude = coordenada[1], longitude = coordenada[0]))
-        }
-        return listaCoordenadas
-    }
 
 
     override suspend fun getAverageFuelPrices(): List<Double> {

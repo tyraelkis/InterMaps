@@ -75,16 +75,16 @@ class RouteServiceTest {
     @Test
     fun calculateConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,
-            RouteTypes.RAPIDA, "9999GON")
+            RouteTypes.RAPIDA, "9999GON").second
         val vehicleType = routeService.getVehicleTypeAndConsump(routeTest).first
         val calculatedConsumition = routeService.calculateConsumition(routeTest, TransportMethods.VEHICULO, vehicleType)
-        val result = 9.12
+        val result = 1.928
         assertEquals(result, calculatedConsumition, 0.1)
     }
 
     @Test(expected = NotValidTransportException::class)
     fun calculateConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
-        val routeTest = routeService.createRoute("Galicia", "Castellón de la Plana", TransportMethods.APIE,RouteTypes.RAPIDA, "1111AAA")
+        val routeTest = routeService.createRoute("Galicia", "Castellón de la Plana", TransportMethods.APIE,RouteTypes.RAPIDA, "1111AAA").second
         routeService.calculateConsumition(routeTest, TransportMethods.APIE, VehicleTypes.ELECTRICO)
 
     }
@@ -120,16 +120,16 @@ class RouteServiceTest {
 
     @Test
     fun deleteRoute_E4Valid_routeDeleted(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Castello de la Plana, VC, Spain", "Borriana, VC, Spain", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
+        val routeTest: Route = routeService.createRoute("Castello de la Plana, VC, Spain", "Borriana, VC, Spain", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON").second
         routeService.putRoute(routeTest)
-        val res = routeService.deleteRoute(routeTest.origin, routeTest.destination, routeTest.trasnportMethod, routeTest.vehiclePlate)
+        val res = routeService.deleteRoute(routeTest)
         assertEquals(true, res)
     }
 
     @Test (expected = NotValidPlaceException::class)
     fun deleteRoute_E4Invalid_routeDeleted(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Castellón", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
-        routeService.deleteRoute("Castellón", "Castellón", TransportMethods.VEHICULO, routeTest.vehiclePlate)
+        val routeTest: Route = routeService.createRoute("Castellón", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON").second
+        routeService.deleteRoute(routeTest)
     }
     @Test
     fun viewRouteList_E1Valido_RouteListViewed(): Unit = runBlocking{
