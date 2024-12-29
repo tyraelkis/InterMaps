@@ -86,14 +86,18 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
     val plates = allVehicles.map { it.plate }
     var routeType by remember { mutableStateOf(RouteTypes.RAPIDA) }
     var transportMethod by remember { mutableStateOf(userViewModel.preferredTransport.value) }
-    var vehicle by remember { mutableStateOf(userViewModel.preferredVehicle.value ?: null as String?) }
+    var vehicle by remember {
+        mutableStateOf(
+            userViewModel.preferredVehicle.value ?: null as String?
+        )
+    }
 
 
-    val isButtonEnabled by remember{
+    val isButtonEnabled by remember {
         derivedStateOf {
-            if(transportMethod == VEHICULO){
+            if (transportMethod == VEHICULO) {
                 origin.isNotEmpty() && destination.isNotEmpty() && vehicle!!.isNotEmpty()
-            }else{
+            } else {
                 origin.isNotEmpty() && destination.isNotEmpty()
             }
         }
@@ -107,7 +111,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 allPlaces = places
                 val vehicles = vehicleService.viewVehicleList()
                 allVehicles = vehicles
-                } catch (e: Exception) {
+            } catch (e: Exception) {
                 allPlaces = emptyList()
                 allVehicles = emptyList()
             }
@@ -129,13 +133,14 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
             textAlign = TextAlign.Center,
 
 
-        )
+            )
 
         //Origen
         Spacer(modifier = Modifier.height(18.dp))
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -206,9 +211,10 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
 
         //Destino
         Spacer(modifier = Modifier.height(18.dp))
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -264,7 +270,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                                 modifier = Modifier
                                     .clickable {
                                         destination = option
-                                        expandedDestination= false
+                                        expandedDestination = false
                                     }
                             )
                         },
@@ -280,9 +286,10 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
 
         //Tipo de ruta
         Spacer(modifier = Modifier.height(18.dp))
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -328,7 +335,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 onDismissRequest = { expandedRoutes = false },
                 modifier = Modifier.background(Color.White)
             ) {
-               RouteTypes.entries.forEach { type ->
+                RouteTypes.entries.forEach { type ->
                     DropdownMenuItem(
                         text = {
                             Text(
@@ -346,15 +353,16 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                         }
                     )
 
-               }
+                }
 
             }
         }
         //Tipo de transporte
         Spacer(modifier = Modifier.height(18.dp))
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -383,7 +391,11 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = (transportMethod.toString()),
+                    text = if (transportMethod == null) {
+                        "Selecciona una opción"
+                    } else {
+                        transportMethod.toString()
+                    },
                     color = Black,
                     modifier = Modifier.weight(1f)
                 )
@@ -423,7 +435,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
             }
         }
         //Vehiculo elegido
-        if(transportMethod == VEHICULO) {
+        if (transportMethod == VEHICULO) {
             Spacer(modifier = Modifier.height(18.dp))
             Row(
                 modifier = Modifier
@@ -456,15 +468,15 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    (if (vehicle == "") {
-                        "Selecciona una opción"
-                    } else vehicle)?.let {
-                        Text(
-                            text = it,
-                            color = Black,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+                    Text(
+                        text = if (vehicle == null) {
+                            "Selecciona una opción"
+                        } else {
+                            vehicle.toString()
+                        },
+                        color = Black,
+                        modifier = Modifier.weight(1f)
+                    )
                     Icon(
                         Icons.Filled.ArrowDropDown,
                         contentDescription = null, tint = Black,
@@ -504,12 +516,24 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
         Spacer(modifier = Modifier.height(32.dp))
         Button(
             onClick = {
-                viewModel.updateRoute(origin, destination, transportMethod, routeType, vehicle.toString())
+                viewModel.updateRoute(
+                    origin,
+                    destination,
+                    transportMethod,
+                    routeType,
+                    vehicle.toString()
+                )
                 navController.navigate(
                     "viewRoute/" +
                             URLEncoder.encode(origin, StandardCharsets.UTF_8.toString()) + "/" +
-                            URLEncoder.encode(destination, StandardCharsets.UTF_8.toString()) + "/" +
-                            URLEncoder.encode(transportMethod.toString(), StandardCharsets.UTF_8.toString()) + "/" +
+                            URLEncoder.encode(
+                                destination,
+                                StandardCharsets.UTF_8.toString()
+                            ) + "/" +
+                            URLEncoder.encode(
+                                transportMethod.toString(),
+                                StandardCharsets.UTF_8.toString()
+                            ) + "/" +
                             URLEncoder.encode(vehicle, StandardCharsets.UTF_8.toString())
                 )
 
