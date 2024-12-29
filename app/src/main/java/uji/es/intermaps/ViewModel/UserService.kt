@@ -1,6 +1,9 @@
 package uji.es.intermaps.ViewModel
 
+import com.mapbox.maps.extension.style.expressions.dsl.generated.featureState
 import uji.es.intermaps.Exceptions.IncorrectDataException
+import uji.es.intermaps.Exceptions.NotSuchTransportException
+import uji.es.intermaps.Exceptions.NotSuchVehicleException
 import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
@@ -75,5 +78,26 @@ class UserService(var repository: Repository) {
        }
         throw UnableToDeleteUserException()
     }
+
+    suspend fun updateUserVehicle(vehiclePlate: String): Boolean{
+        if (vehiclePlate.isBlank()) {
+            throw NotSuchVehicleException()
+        }
+        repository.updateUserAttribute("preferredVehicle", vehiclePlate)
+        return true
+    }
+
+    suspend fun updateUserTransportMethod(transportMethod: String): Boolean{
+        if (transportMethod.isBlank()) {
+            throw NotSuchTransportException()
+        }
+        repository.updateUserAttribute("preferredVehicle", transportMethod)
+        return true
+    }
+
+    suspend fun getUserAttribute(attributeName: String): Any?{
+        return null
+    }
+
 
 }

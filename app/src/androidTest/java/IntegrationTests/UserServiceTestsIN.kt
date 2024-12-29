@@ -14,10 +14,13 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
+import uji.es.intermaps.Exceptions.NotSuchTransportException
+import uji.es.intermaps.Exceptions.NotSuchVehicleException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.ViewModel.UserService
 
@@ -134,6 +137,38 @@ class UserServiceTestsIN {
         doAnswer{throw UnableToDeleteUserException("No se ha podido eliminar el usuario") }
             .`when`(mockRepository).deleteUser(email, password)
         userService.deleteUser(email, password)
+    }
+
+    @Test
+    fun createPreferredVehicle_E1Valido_PreferredVehicleCreated(): Unit = runBlocking {
+        `when`(mockRepository.updateUserAttribute("preferredVehicle", "1111AAA")).thenReturn(Unit)
+        assertEquals(true, userService.updateUserVehicle("1111AAA"))
+        verify(mockRepository).updateUserAttribute("preferredVehicle", "1111AAA")
+
+    }
+
+    @Test(expected = NotSuchVehicleException::class)
+    fun createPreferredVehicle_E2Invalido_PreferredVehicleNotCreated(): Unit = runBlocking {
+        doAnswer{
+            throw NotSuchVehicleException()
+        }.`when`(mockRepository.updateUserAttribute("preferredVehicle", ""))
+
+    }
+
+    @Test
+    fun createPreferredTransport_E1Valido_PreferredTransporteCreated(): Unit = runBlocking {
+        `when`(mockRepository.updateUserAttribute("preferredTransportMethod", "APIE")).thenReturn(Unit)
+        assertEquals(true, userService.updateUserTransportMethod("APIE"))
+        verify(mockRepository).updateUserAttribute("preferredTransportMethod", "APIE")
+
+    }
+
+    @Test(expected = NotSuchTransportException::class)
+    fun createPreferredTransport_E2Invalido_PreferredTransportNotCreated(): Unit = runBlocking {
+        doAnswer{
+            throw NotSuchVehicleException()
+        }.`when`(mockRepository.updateUserAttribute("preferredTransportMethod", ""))
+
     }
 
 

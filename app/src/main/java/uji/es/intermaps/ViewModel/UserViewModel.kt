@@ -11,12 +11,15 @@ import kotlinx.coroutines.launch
 import androidx.navigation.NavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
+import uji.es.intermaps.Model.TransportMethods
 
 
 class UserViewModel(
@@ -32,6 +35,13 @@ class UserViewModel(
 
     private val _showPasswordPopUp = mutableStateOf(false)
     val showPasswordDialog: State<Boolean> get() = _showPasswordPopUp
+
+    private val _preferredTransport = mutableStateOf<TransportMethods?>(null)
+    val preferredTransport: MutableState<TransportMethods?> get() = _preferredTransport
+
+    private val _preferredVehicle = mutableStateOf<String?>(null)
+    val preferredVehicle: MutableState<String?> get() = _preferredVehicle
+
 
 
     private var errorMessageNormal = ""
@@ -65,6 +75,8 @@ class UserViewModel(
     fun hidePasswordPopUp(){
         _showPasswordPopUp.value = false
     }
+
+
 
 
     val user = auth.currentUser
@@ -184,4 +196,6 @@ class UserViewModel(
     fun getErrorMessageNormal(): String{
         return errorMessageNormal
     }
+
+
 }

@@ -55,17 +55,19 @@ import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
+import uji.es.intermaps.Model.TransportMethods.*
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 import uji.es.intermaps.ViewModel.RouteService
 import uji.es.intermaps.ViewModel.RouteViewModel
+import uji.es.intermaps.ViewModel.UserViewModel
 import uji.es.intermaps.ViewModel.VehicleService
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: RouteViewModel) {
+fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: RouteViewModel, userViewModel: UserViewModel) {
     val user = auth.currentUser
     val repository: Repository = FirebaseRepository()
     val interestPlaceService = InterestPlaceService(repository)
@@ -83,19 +85,19 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
     val toponyms = allPlaces.map { it.toponym }
     val plates = allVehicles.map { it.plate }
     var routeType by remember { mutableStateOf(RouteTypes.RAPIDA) }
-    var transportMethod by remember { mutableStateOf(TransportMethods.VEHICULO) }
-    var vehicle by remember { mutableStateOf("") }
+    var transportMethod by remember { mutableStateOf(userViewModel.preferredTransport.value) }
+    var vehicle by remember { mutableStateOf(userViewModel.preferredVehicle.value ?: null as String?) }
+
 
     val isButtonEnabled by remember{
         derivedStateOf {
-            if(transportMethod == TransportMethods.VEHICULO){
-                origin.isNotEmpty() && destination.isNotEmpty() && vehicle.isNotEmpty()
+            if(transportMethod == VEHICULO){
+                origin.isNotEmpty() && destination.isNotEmpty() && vehicle!!.isNotEmpty()
             }else{
                 origin.isNotEmpty() && destination.isNotEmpty()
             }
         }
     }
-
 
 
     LaunchedEffect(user?.email) {
@@ -421,7 +423,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
             }
         }
         //Vehiculo elegido
-        if(transportMethod == TransportMethods.VEHICULO) {
+        if(transportMethod == VEHICULO) {
             Spacer(modifier = Modifier.height(18.dp))
             Row(
                 modifier = Modifier
@@ -454,13 +456,15 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = if (vehicle == "") {
-                            "Selecciona una opción"
-                        } else vehicle,
-                        color = Black,
-                        modifier = Modifier.weight(1f)
-                    )
+                    (if (vehicle == "") {
+                        "Selecciona una opción"
+                    } else vehicle)?.let {
+                        Text(
+                            text = it,
+                            color = Black,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                     Icon(
                         Icons.Filled.ArrowDropDown,
                         contentDescription = null, tint = Black,
@@ -500,12 +504,12 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
         Spacer(modifier = Modifier.height(32.dp))
         Button(
             onClick = {
-                viewModel.updateRoute(origin, destination, transportMethod, routeType, vehicle)
+                viewModel.updateRoute(origin, destination, transportMethod, routeType, vehicle.toString())
                 navController.navigate(
                     "viewRoute/" +
                             URLEncoder.encode(origin, StandardCharsets.UTF_8.toString()) + "/" +
                             URLEncoder.encode(destination, StandardCharsets.UTF_8.toString()) + "/" +
-                            URLEncoder.encode(transportMethod.name, StandardCharsets.UTF_8.toString()) + "/" +
+                            URLEncoder.encode(transportMethod.toString(), StandardCharsets.UTF_8.toString()) + "/" +
                             URLEncoder.encode(vehicle, StandardCharsets.UTF_8.toString())
                 )
 

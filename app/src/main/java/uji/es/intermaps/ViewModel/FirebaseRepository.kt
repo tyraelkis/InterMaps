@@ -3,8 +3,11 @@ package uji.es.intermaps.ViewModel
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.type.LatLng
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
@@ -74,6 +77,7 @@ class FirebaseRepository: Repository {
                 }
         }
     }
+
 
 
     override suspend fun loginUser(email: String, pswd: String): Boolean {
@@ -150,6 +154,14 @@ class FirebaseRepository: Repository {
             }.await()
 
         return result
+    }
+
+    override suspend fun updateUserAttribute(attributeName: String, attributeValue: Any) {
+
+    }
+
+    override suspend fun getUserAttribute(attributeName: String): Any? {
+        return null
     }
 
     override suspend fun deleteUser(email: String, password: String): Boolean {

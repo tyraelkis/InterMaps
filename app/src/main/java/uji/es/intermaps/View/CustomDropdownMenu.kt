@@ -31,7 +31,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 fun CustomDropdownMenu(
     label: String,
     options: List<String>,
-    selectedOption: String,
+    selectedOption: String?,
     onOptionSelected: (String) -> Unit,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit
@@ -54,33 +54,35 @@ fun CustomDropdownMenu(
             expanded = expanded,
             onExpandedChange = onExpandedChange
         ) {
-            TextField(
-                value = selectedOption,
-                onValueChange = { },
-                readOnly = true,
-                modifier = Modifier.menuAnchor()
-                    .width(160.dp)
-                    .padding(0.dp)
-                    .height(48.dp)
-                    .border(1.dp, Color.Black, RoundedCornerShape(8.dp)),
-                trailingIcon = {
-                    Icon(
-                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = null
-                    )
-                },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.Transparent,
-                    cursorColor = Color.Black,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                textStyle = TextStyle(
-                    fontSize = 16.sp,
-                    lineHeight = 20.sp,
-                    textAlign = TextAlign.Center
-                ),
-            )
+            if (selectedOption != null) {
+                TextField(
+                    value = selectedOption,
+                    onValueChange = { },
+                    readOnly = true,
+                    modifier = Modifier.menuAnchor()
+                        .width(160.dp)
+                        .padding(0.dp)
+                        .height(48.dp)
+                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp)),
+                    trailingIcon = {
+                        Icon(
+                            imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                            contentDescription = null
+                        )
+                    },
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.Transparent,
+                        cursorColor = Color.Black,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    textStyle = TextStyle(
+                        fontSize = 16.sp,
+                        lineHeight = 20.sp,
+                        textAlign = TextAlign.Center
+                    ),
+                )
+            }
             ExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { onExpandedChange(false) }

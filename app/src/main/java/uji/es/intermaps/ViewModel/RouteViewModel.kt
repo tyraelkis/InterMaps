@@ -33,13 +33,15 @@ class RouteViewModel(private val routeService: RouteService): ViewModel() {
 
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun updateRoute( origin: String, destination: String, transportMethod: TransportMethods,
+    fun updateRoute( origin: String, destination: String, transportMethod: TransportMethods?,
         routeType: RouteTypes, vehicle: String
     ) {
+        var transport = TransportMethods.VEHICULO
+        if (transportMethod != null){ transport = transportMethod }
         loading = true
         viewModelScope.launch {
             try {
-                val route = routeService.createRoute(origin, destination, transportMethod, routeType, vehicle).second
+                val route = routeService.createRoute(origin, destination, transport, routeType, vehicle).second
                 _route.value = route
             } catch (e: Exception) {
                 Log.e("RouteViewModel", "Error al actualizar la ruta: ${e.message}")

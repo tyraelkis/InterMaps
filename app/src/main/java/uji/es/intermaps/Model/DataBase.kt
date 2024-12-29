@@ -125,4 +125,25 @@ object DataBase {
             false
         }
     }
+
+    suspend fun doesPreferredAttributeExist(attributeName: String, attributeValue: String): Boolean {
+        return try {
+            val userEmail = auth.currentUser?.email?: throw IllegalStateException("No hay un usuario autenticado")
+            val documentSnapshot = db.collection("Default")
+                .document(userEmail)
+                .get()
+                .await()
+
+            if (!documentSnapshot.exists()) {
+                return false
+            }
+
+            val attribute = documentSnapshot.get(attributeName) as? String
+            attribute == attributeValue
+
+        } catch (exception: Exception) {
+            Log.e("doesPreferredAttributeExist", "Error al verificar el atributo preferido: ${exception.message}", exception)
+            false
+        }
+    }
 }

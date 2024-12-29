@@ -7,12 +7,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
+import uji.es.intermaps.Exceptions.NotSuchTransportException
+import uji.es.intermaps.Exceptions.NotSuchVehicleException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.Coordinate
+import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.ViewModel.UserService
 
@@ -102,5 +106,33 @@ class UserServiceTests {
     @Test(expected = UnableToDeleteUserException::class)
     fun deleteUser_E2Invalid_userIsDeleted(): Unit = runBlocking {
         userService.deleteUser(email, password)
+    }
+
+    @Test
+    fun createPrefferedVehicle_E1Valid_PreferredVehicleCreated(): Unit = runBlocking{
+        userService.updateUserVehicle("1111AAA")
+        val res = db.doesPreferredAttributeExist("preferredVehicle", "1111AAA")
+        assertEquals(true, res)
+    }
+
+    @Test (expected = NotSuchVehicleException::class)
+    fun createPrefferedVehicle_E2Inalid_PreferredVehicleNotCreated(): Unit = runBlocking{
+        userService.updateUserVehicle("")
+        val res = db.doesPreferredAttributeExist("preferredVehicle", "2222BBB")
+        assertEquals(true, res)
+    }
+
+    @Test
+    fun createPrefferedTransport_E1Valid_PreferredTransportCreated(): Unit = runBlocking{
+        userService.updateUserTransportMethod("BICICLETA")
+        val res = db.doesPreferredAttributeExist("preferredTransportMethod", "BICICLETA")
+        assertEquals(true, res)
+    }
+
+    @Test (expected = NotSuchTransportException::class)
+    fun createPrefferedTransport_E2Inalid_PreferredTransportNotCreated(): Unit = runBlocking{
+        userService.updateUserVehicle("")
+        val res = db.doesPreferredAttributeExist("preferredTransportMethod", "APIE")
+        assertEquals(true, res)
     }
 }

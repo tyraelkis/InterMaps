@@ -34,7 +34,7 @@ import uji.es.intermaps.ViewModel.RouteService
 import uji.es.intermaps.ViewModel.UserService
 
 @RunWith(AndroidJUnit4::class)
-class RouteTests {
+class RouteServiceTestsIN {
 
 
 

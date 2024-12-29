@@ -112,7 +112,7 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         composable(
             route = "createNewRoute"
         ) {
-            CreateNewRoute(auth,navHostController, viewModelRoute)
+            CreateNewRoute(auth,navHostController, viewModelRoute, viewModelUser)
         }
 
         composable("vehicleList") {

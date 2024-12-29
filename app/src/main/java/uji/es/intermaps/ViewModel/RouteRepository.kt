@@ -3,6 +3,7 @@ package uji.es.intermaps.ViewModel
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +34,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPriceRepository {
+open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPriceRepository{
     val repository = FirebaseRepository()
 
     private val apiKey = "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23"
@@ -100,6 +101,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
     }
 
     override suspend fun calculateRoute(origin: String, destination: String, transportMethod: TransportMethods,routeType: RouteTypes) : RouteFeature {
+
         var route = RouteFeature(geometry ="",
             summary = RouteSummary(distance = 0.0, duration = 0.0)
         )
@@ -142,6 +144,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                         preference = routeTypePreference
                     )
                 )
+
             }
 
             if (call.isSuccessful) {
@@ -166,7 +169,6 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         if (coordinates.isEmpty()) {
             throw IllegalArgumentException("No se generaron coordenadas válidas para la ruta")
         }
-
         val tiempo = route.summary.duration
         val distance = String.format("%.2f", route.summary.distance / 1000).toDouble()
         val horas = (tiempo / 3600).toInt()
@@ -308,29 +310,6 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         }
     }
 
-    private fun saveRouteCostToDatabase(origin: String, destination: String, cost: Double) {
-        val userEmail = auth.currentUser?.email
-            ?: throw IllegalStateException("No hay un usuario autenticado")
-
-        val routesDocument = db.collection("Route").document(userEmail)
-        routesDocument.get().addOnSuccessListener { documentSnapshot ->
-            if (documentSnapshot.exists()) {
-                val routes = documentSnapshot.get("routes") as? MutableList<Map<String, Any>>
-                    ?: throw IllegalArgumentException("No se encontró el campo 'routes' en el documento")
-                val routeId = routes.indexOfFirst {
-                    it["origin"] == origin && it["destination"] == destination
-                }
-
-                if (routeId in routes.indices) {
-                    val updatedRoute = routes[routeId].toMutableMap()
-                    updatedRoute["cost"] = cost
-                    routes[routeId] = updatedRoute
-
-                    routesDocument.update("routes", routes)
-                }
-            }
-        }
-    }
 
     private fun saveFuelCostAverageToDatabase(averages: List<Double>) {
         val fuelPricesDocument = db.collection("FuelPrices").document("mediaPrecios")
