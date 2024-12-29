@@ -8,6 +8,7 @@ import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.User
 
 class UserService(var repository: Repository) {
@@ -97,6 +98,10 @@ class UserService(var repository: Repository) {
 
     suspend fun getUserAttribute(attributeName: String): Any?{
         return repository.getUserAttribute(attributeName)
+    }
+
+    suspend fun updateUserRouteType(routeType: String): Boolean{
+        TODO()
     }
 
 

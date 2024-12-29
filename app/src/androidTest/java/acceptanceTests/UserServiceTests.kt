@@ -9,6 +9,7 @@ import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
 import uji.es.intermaps.Exceptions.NotSuchTransportException
 import uji.es.intermaps.Exceptions.NotSuchVehicleException
+import uji.es.intermaps.Exceptions.NotValidParameterException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Exceptions.UnregistredUserException
@@ -17,6 +18,7 @@ import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
+import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.ViewModel.UserService
 
@@ -118,10 +120,8 @@ class UserServiceTests {
     }
 
     @Test (expected = NotSuchVehicleException::class)
-    fun createPrefferedVehicle_E2Inalid_PreferredVehicleNotCreated(): Unit = runBlocking{
+    fun createPrefferedVehicle_E2Invalid_PreferredVehicleNotCreated(): Unit = runBlocking{
         userService.updateUserVehicle("")
-        val res = db.doesPreferredAttributeExist("preferredVehicle", "2222BBB")
-        assertEquals(true, res)
     }
 
     @Test
@@ -134,10 +134,8 @@ class UserServiceTests {
     }
 
     @Test (expected = NotSuchTransportException::class)
-    fun createPrefferedTransport_E2Inalid_PreferredTransportNotCreated(): Unit = runBlocking{
+    fun createPrefferedTransport_E2Invalid_PreferredTransportNotCreated(): Unit = runBlocking{
         userService.updateUserTransportMethod("")
-        val res = db.doesPreferredAttributeExist("preferredTransportMethod", "APIE")
-        assertEquals(true, res)
     }
 
     @Test
@@ -157,4 +155,19 @@ class UserServiceTests {
         userService.signOut()
         assertEquals(true, res)
     }
+
+    @Test
+    fun createPrefferedRouteType_E1Valid_PreferredRouteTypeCreated(): Unit = runBlocking {
+        userService.login(userTest.email, userTest.pswd)
+        userService.updateUserRouteType(RouteTypes.RAPIDA.toString())
+        val res = db.doesPreferredAttributeExist("preferredRouteType", RouteTypes.RAPIDA.toString())
+        userService.signOut()
+        assertEquals(true, res)
+    }
+
+    @Test (expected = NotValidParameterException::class)
+    fun createPrefferedRouteType_E2Invalid_PreferredVehicleNotCreated(): Unit = runBlocking{
+        userService.updateUserVehicle("bicicleta")
+    }
+
 }

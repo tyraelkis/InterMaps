@@ -16,6 +16,7 @@ import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
 import uji.es.intermaps.Exceptions.NotSuchTransportException
 import uji.es.intermaps.Exceptions.NotSuchVehicleException
+import uji.es.intermaps.Exceptions.NotValidParameterException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Exceptions.UnregistredUserException
@@ -180,5 +181,21 @@ class UserServiceTestsIN {
 
     }
 
+
+    @Test
+    fun createPreferredRouteType_E1Valido_PreferredRouteTypeCreated(): Unit = runBlocking {
+        `when`(mockRepository.updateUserAttribute("preferredRouteType", "RAPIDA")).thenReturn(Unit)
+        assertEquals(true, userService.updateUserRouteType("RAPIDA"))
+        verify(mockRepository).updateUserAttribute("preferredRouteType", "RAPIDA")
+
+    }
+
+    @Test(expected = NotValidParameterException::class)
+    fun createPreferredRouteType_E2Invalido_PreferredRouteTypeNotCreated(): Unit = runBlocking {
+        doAnswer{
+            throw NotValidParameterException()
+        }.`when`(userService.updateUserRouteType( "bicicleta"))
+
+    }
 
 }
