@@ -39,9 +39,13 @@ import uji.es.intermaps.ViewModel.UserService
 @RunWith(AndroidJUnit4::class)
 class RouteServiceTestsIN {
 
+
+
     var mockRepository: Repository = mock(Repository::class.java)
 
+
     var mockRouteRepository: RouteRepository = mock(RouteRepository::class.java)
+
 
     private val userService = UserService(FirebaseRepository())
     private val userTest: User = User("emaildeprueba@gmail.com", "123456BB")

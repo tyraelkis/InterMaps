@@ -7,7 +7,6 @@ import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -89,11 +88,11 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
     val plates = allVehicles.map { it.plate }
     var routeType by remember { mutableStateOf(userViewModel.preferredRouteType.value) }
     var transportMethod by remember { mutableStateOf(userViewModel.preferredTransport.value) }
-    var vehicle by remember { mutableStateOf(
-            userViewModel.preferredVehicle.value ?: null as String?
+    var vehicle by remember {
+        mutableStateOf(
+            userViewModel.preferredVehicle.value ?: ""
         )
     }
-
 
 
     val isButtonEnabled by remember {

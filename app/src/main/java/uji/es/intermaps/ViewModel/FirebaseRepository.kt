@@ -199,8 +199,19 @@ class FirebaseRepository: Repository {
             val user = auth.currentUser
             if (user == null) {
                 Log.e("FirebaseAuth", "No hay un usuario autenticado")
+                return false
             }
-            // Buscar el documento del usuario en Firestore
+
+            val collections = listOf("Default", "InterestPlace", "Route", "Vehicle")
+
+            for (collection in collections) {
+                val success = deleteDocument(collection, email)
+                if (!success) {
+                    Log.e("DeleteUser", "Error al eliminar documentos relacionados en la colección: $collection")
+                }
+            }
+
+            // Buscar el documento del usuario en la colección "Users"
             val querySnapshot = FirebaseFirestore.getInstance()
                 .collection("Users")
                 .whereEqualTo("email", email)
@@ -208,20 +219,21 @@ class FirebaseRepository: Repository {
                 .await()
 
             if (querySnapshot.isEmpty) {
-                Log.d("Firestore", "No se encontró el documento del usuario.")
+                Log.e("Firestore", "No se encontró el documento del usuario en la colección 'Users'.")
+
+            }else {
+                val documentId = querySnapshot.documents[0].id
+                FirebaseFirestore.getInstance()
+                    .collection("Users")
+                    .document(documentId)
+                    .delete()
+                    .await()
+
+                Log.d("DeleteUser", "Documento del usuario eliminado exitosamente.")
             }
 
-            // Eliminar el documento de Firestore
-            val documentId = querySnapshot.documents[0].id
-            FirebaseFirestore.getInstance()
-                .collection("Users")
-                .document(documentId)
-                .delete()
-                .await()
-            Log.d("Firestore", "Documento de usuario eliminado exitosamente.")
-
             // Eliminar el usuario de FirebaseAuth
-            user!!.delete().await()
+            user.delete().await()
             Log.d("FirebaseAuth", "Usuario eliminado exitosamente.")
 
             true
@@ -1017,6 +1029,28 @@ class FirebaseRepository: Repository {
             result = false
         }
         return result
+    }
+
+    private suspend fun deleteDocument(collection: String, documentId: String): Boolean {
+        return try {
+            val documentRef = FirebaseFirestore.getInstance()
+                .collection(collection)
+                .document(documentId) // Acceder directamente al documento por su ID
+
+            val documentSnapshot = documentRef.get().await()
+
+            if (!documentSnapshot.exists()) {
+                Log.d("DeleteUser", "No se encontró un documento con ID $documentId en la colección $collection")
+                return true // Consideramos que no es un error si no existe
+            }
+
+            documentRef.delete().await() // Eliminar el documento
+            Log.d("DeleteUser", "Documento con ID $documentId eliminado de la colección $collection")
+            true
+        } catch (e: Exception) {
+            Log.e("DeleteUser", "Error al eliminar documento con ID $documentId en la colección $collection: ${e.message}", e)
+            false
+        }
     }
 
     override suspend fun setFavRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean {

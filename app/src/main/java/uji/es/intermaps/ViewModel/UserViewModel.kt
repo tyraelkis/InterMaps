@@ -10,6 +10,7 @@ import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -100,33 +101,45 @@ class UserViewModel(
     val user = auth.currentUser
 
 
-    fun deleteUser(navController: NavController){
+    fun deleteUser(navController: NavController) {
         viewModelScope.launch {
+            // Validación de la contraseña
             if (password.isNullOrBlank()) {
-                errorMessage = "Introduce tu contraseña"
+                errorMessage = "Por favor, introduce tu contraseña."
                 return@launch
             }
+
+            // Verificación de que el usuario está autenticado
             if (user != null) {
                 val email = user.email.toString()
                 val credential = EmailAuthProvider.getCredential(email, password)
 
                 try {
+                    // Reautenticación del usuario
                     user.reauthenticate(credential).await()
 
+                    // Llamada al servicio para eliminar el usuario
                     val result = userService.deleteUser(email, password)
+
                     if (result) {
+                        // Si la eliminación es exitosa, ocultar el pop-up y navegar al inicio
                         hideDeletePopUp()
-                        password = ""
-                        navController.navigate("initial")
+                        password = "" // Limpiar la contraseña
+                        navController.navigate("initial") // Navegar a la pantalla inicial
                     } else {
-                        errorMessage = "No se pudo eliminar el usuario. Intenta de nuevo."
-                        password = ""
+                        errorMessage = "No se pudo eliminar el usuario. Intenta de nuevo más tarde."
+                        password = "" // Limpiar la contraseña
                     }
+                } catch (e: FirebaseAuthInvalidCredentialsException) {
+                    errorMessage = "Contraseña incorrecta. Por favor, inténtalo de nuevo."
+                    password = "" // Limpiar la contraseña
                 } catch (e: Exception) {
-                    errorMessage = "Contraseña incorrecta. Inténtalo de nuevo."
-                    password = ""
+                    // Manejo de cualquier otra excepción
+                    errorMessage = "Hubo un error al intentar eliminar el usuario. Intenta nuevamente."
+                    password = "" // Limpiar la contraseña
                 }
             } else {
+                // Usuario no autenticado
                 Log.e("DeleteUser", "Usuario no autenticado")
                 errorMessage = "No se encontró un usuario autenticado."
             }

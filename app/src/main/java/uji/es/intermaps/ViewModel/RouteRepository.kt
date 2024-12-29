@@ -16,6 +16,7 @@ import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
 import uji.es.intermaps.Exceptions.NotValidTransportException
+import uji.es.intermaps.Interfaces.CostStrategy
 import uji.es.intermaps.Interfaces.ElectricityPriceRepository
 import uji.es.intermaps.Interfaces.FuelPriceRepository
 import uji.es.intermaps.Interfaces.ORSRepository
@@ -26,6 +27,12 @@ import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.RetrofitConfig
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
+import uji.es.intermaps.Model.Strategy.BicycleCostStrategy
+import uji.es.intermaps.Model.Strategy.CostCalculator
+import uji.es.intermaps.Model.Strategy.DieselCostStrategy
+import uji.es.intermaps.Model.Strategy.ElectricCostStrategy
+import uji.es.intermaps.Model.Strategy.GasolineCostStrategy
+import uji.es.intermaps.Model.Strategy.WalkingCostStrategy
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.VehicleTypes
 import java.math.BigDecimal
@@ -187,17 +194,18 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             cost = 0.0
         )
 
-        route.cost = if (transportMethod == TransportMethods.VEHICULO) {
+        if (transportMethod == TransportMethods.VEHICULO){
             val vehicleType = routeService.getVehicleTypeAndConsump(route).first
-            calculateConsumition(route, transportMethod, vehicleType)
-        } else {
-            calculateCaloriesConsumition(route, transportMethod)
+            route.cost = calculateConsumition(route, transportMethod, vehicleType)
+        }
+        else{
+            route.cost = calculateCaloriesConsumition(route, transportMethod)
         }
         return route
     }
 
 
-    override suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
+     override suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
         val routeService = RouteService(repository)
         var coste = 0.0
         var costeRounded = 0.0
@@ -237,6 +245,36 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         route.cost = costeRounded
         return costeRounded
     }
+
+    /*override suspend fun calculateConsumition( route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes?
+    ): Double {
+        val routeService = RouteService(repository)
+        val consumo = routeService.getVehicleTypeAndConsump(route).second
+
+        val strategy: CostStrategy = when {
+            transportMethod == TransportMethods.VEHICULO && vehicleType == VehicleTypes.GASOLINA -> {
+                GasolineCostStrategy(routeService, consumo)
+            }
+            transportMethod == TransportMethods.VEHICULO && vehicleType == VehicleTypes.DIESEL -> {
+                DieselCostStrategy(routeService, consumo)
+            }
+            transportMethod == TransportMethods.VEHICULO && vehicleType == VehicleTypes.ELECTRICO -> {
+                ElectricCostStrategy(routeService, consumo)
+            }
+            transportMethod == TransportMethods.APIE && vehicleType == null -> {
+                WalkingCostStrategy()
+            }
+            transportMethod == TransportMethods.BICICLETA && vehicleType == null ->{
+                BicycleCostStrategy()
+            }
+            else -> throw IllegalArgumentException("Método de transporte desconocido")
+        }
+
+        val calculator = CostCalculator(strategy)
+        val cost = calculator.calculate(route)
+        route.cost = cost
+        return cost
+    }*/
 
     override suspend fun calculateFuelCostAverage(): Boolean {
         val openRouteService = RetrofitConfig.createRetrofitFuelPrice()
