@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.R
@@ -62,7 +63,7 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
     var expandedRoutes by remember { mutableStateOf(false) }
     var expandedTransport by remember { mutableStateOf(false) }
 
-    val optionsRoutes = listOf("...", "Rápida", "Corta", "Económica")
+    val optionsRoutes = listOf("Ninguno") + RouteTypes.values().map { it.name }
     val optionsTransportMethods = listOf("Ninguno") + TransportMethods.values().map { it.name }
 
 
@@ -91,10 +92,27 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
                 if (vehicles.isNotEmpty()){
                     plates += vehicles.map { it.plate }
                 }
-                selectedOptionVehicles = viewModel.getPreferredVehicle().toString()
-                selectedOptionTransport = viewModel.getPreferredTransport().toString()
+                if (viewModel.getPreferredVehicle() == null){
+                    selectedOptionVehicles = "Ninguno"
+                }else{
+                    selectedOptionVehicles = viewModel.getPreferredVehicle().toString()
+                }
+
+                if (viewModel.getPreferredRouteType() == null){
+                    selectedOptionRoutes = "Ninguno"
+                }else{
+                    selectedOptionRoutes = viewModel.getPreferredRouteType().toString()
+                }
+
+                if (viewModel.getPreferredTransport() == null){
+                    selectedOptionTransport = "Ninguno"
+                }else{
+                    selectedOptionTransport = viewModel.getPreferredTransport().toString()
+                }
+
                 viewModel.updatePreferredTransport(selectedOptionTransport)
                 viewModel.updatePreferredVehicle(selectedOptionVehicles ?: "Ninguno")
+                viewModel.updatePreferredRouteType(selectedOptionRoutes)
             } catch (e: Exception) {
                 allVehicles = emptyList()
             }
@@ -177,7 +195,10 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
             label = "Ruta pred.",
             options = optionsRoutes,
             selectedOption = selectedOptionRoutes,
-            onOptionSelected = { selectedOptionRoutes = it },
+            onOptionSelected = { selectedOptionRoutes = it
+                coroutineScope.launch {
+                    viewModel.updatePreferredRouteType(selectedOptionRoutes ?: "Ninguno")
+                }},
             expanded = expandedRoutes,
             onExpandedChange = { expandedRoutes = it }
         )
