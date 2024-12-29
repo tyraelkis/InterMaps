@@ -84,21 +84,21 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
     var expandedVehicles by remember { mutableStateOf(false) }
     val toponyms = allPlaces.map { it.toponym }
     val plates = allVehicles.map { it.plate }
-    var routeType by remember { mutableStateOf(RouteTypes.RAPIDA) }
+    var routeType by remember { mutableStateOf(userViewModel.preferredRouteType.value) }
     var transportMethod by remember { mutableStateOf(userViewModel.preferredTransport.value) }
-    var vehicle by remember {
-        mutableStateOf(
+    var vehicle by remember { mutableStateOf(
             userViewModel.preferredVehicle.value ?: null as String?
         )
     }
 
 
+
     val isButtonEnabled by remember {
         derivedStateOf {
             if (transportMethod == VEHICULO) {
-                origin.isNotEmpty() && destination.isNotEmpty() && vehicle!!.isNotEmpty()
+                origin.isNotEmpty() && destination.isNotEmpty() && vehicle.toString().isNotEmpty() && routeType != null && transportMethod != null
             } else {
-                origin.isNotEmpty() && destination.isNotEmpty()
+                origin.isNotEmpty() && destination.isNotEmpty() && routeType != null && transportMethod != null
             }
         }
     }
@@ -318,7 +318,11 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = (routeType.toString()),
+                    text = if (routeType == null) {
+                        "Selecciona una opción"
+                    } else {
+                        routeType.toString()
+                    },
                     color = Black,
                     modifier = Modifier.weight(1f)
                 )
@@ -520,7 +524,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                     origin,
                     destination,
                     transportMethod,
-                    routeType,
+                    routeType!!,
                     vehicle.toString()
                 )
                 navController.navigate(
@@ -534,7 +538,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                                 transportMethod.toString(),
                                 StandardCharsets.UTF_8.toString()
                             ) + "/" +
-                            URLEncoder.encode(vehicle, StandardCharsets.UTF_8.toString())
+                            URLEncoder.encode(vehicle ?: "", StandardCharsets.UTF_8.toString())
                 )
 
             },

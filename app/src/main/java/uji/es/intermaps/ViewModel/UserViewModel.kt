@@ -19,6 +19,7 @@ import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotValidUserData
 import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnregistredUserException
+import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
 
 
@@ -41,6 +42,9 @@ class UserViewModel(
 
     private val _preferredVehicle = mutableStateOf<String?>(null)
     val preferredVehicle: MutableState<String?> get() = _preferredVehicle
+
+    private val _preferredRouteType = mutableStateOf<RouteTypes?>(null)
+    val preferredRouteType: MutableState<RouteTypes?> get() = _preferredRouteType
 
 
 
@@ -84,6 +88,10 @@ class UserViewModel(
     suspend fun updatePreferredVehicle(vehiclePlate: String) {
         _preferredVehicle.value = if (vehiclePlate == "Ninguno") null else vehiclePlate
         userService.updateUserVehicle(vehiclePlate)
+    }
+    suspend fun updatePreferredRouteType(routeType: String) {
+        _preferredRouteType.value = if (routeType == "Ninguno") null else RouteTypes.valueOf(routeType)
+        userService.updateUserRouteType(routeType)
     }
 
     val user = auth.currentUser
@@ -213,4 +221,8 @@ class UserViewModel(
         return userService.getUserAttribute("preferredVehicle")
     }
 
+
+    suspend fun getPreferredRouteType(): Any? {
+        return userService.getUserAttribute("preferredRouteType")
+    }
 }
