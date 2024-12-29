@@ -102,6 +102,15 @@ class UserService(var repository: Repository) {
     }
 
     suspend fun updateUserRouteType(routeType: String): Boolean{
+        if (routeType.equals("Ninguno")) {
+            repository.updateUserAttribute("preferredRouteType", routeType)
+            return true
+        }
+        if (!RouteTypes.entries.any(){it.name == routeType})
+            throw NotValidParameterException()
+        repository.updateUserAttribute("preferredRouteType", routeType)
+        return true
+    }
 
 
 }
