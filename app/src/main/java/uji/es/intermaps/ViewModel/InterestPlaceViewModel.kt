@@ -7,9 +7,7 @@ import uji.es.intermaps.Model.InterestPlace
 import androidx.compose.runtime.*
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import uji.es.intermaps.APIParsers.PossibleCoord
@@ -236,5 +234,23 @@ class InterestPlaceViewModel(
 
     fun getErrorMessage(): String{
         return errorMessage
+    }
+
+    suspend fun setFavInterestPlace(coordinate: Coordinate): Boolean{
+        try {
+            return interestPlaceService.setFavInterestPlace(coordinate)
+        }
+        catch (e: Exception){
+            return false
+        }
+    }
+
+    suspend fun deleteFavInterestPlace(coordinate: Coordinate): Boolean{
+        try {
+            return interestPlaceService.deleteFavInterestPlace(coordinate)
+        }
+        catch (e: Exception){
+            return false
+        }
     }
 }

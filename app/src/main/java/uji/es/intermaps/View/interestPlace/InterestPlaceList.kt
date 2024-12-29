@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +40,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
@@ -66,8 +71,8 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
         }
     }
 
-    val favList = allPlaces.filter { it.fav }
-    val noFavList = allPlaces.filter { !it.fav }
+    val favList by remember(allPlaces) { derivedStateOf { allPlaces.filter { it.fav } } }
+    val noFavList by remember(allPlaces) { derivedStateOf { allPlaces.filter { !it.fav } } }
 
     Column(
         modifier = Modifier
@@ -136,7 +141,18 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                             imageVector = Icons.Default.Star,
                             contentDescription = "Estrella fav",
                             modifier = Modifier
-                                .size(30.dp),
+                                .size(30.dp)
+                                .clickable {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        if (viewModel.deleteFavInterestPlace(place.coordinate)) {
+                                            withContext(Dispatchers.Main) {
+                                                allPlaces = allPlaces.map {
+                                                    if (it == place) it.copy(fav = false) else it
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
                             tint = Color(color = 0XFF007E70)
                         )
                         if(place.alias.isEmpty()) {
@@ -214,7 +230,18 @@ fun InterestPlaceList(auth: FirebaseAuth, navController: NavController, viewMode
                             imageVector = Icons.Default.Star,
                             contentDescription = "Estrella fav",
                             modifier = Modifier
-                                .size(30.dp),
+                                .size(30.dp)
+                                .clickable {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        if (viewModel.setFavInterestPlace(notFavPlace.coordinate)) {
+                                            withContext(Dispatchers.Main) {
+                                                allPlaces = allPlaces.map {
+                                                    if (it == notFavPlace) it.copy(fav = true) else it
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
                             tint = Black
                         )
                         if(notFavPlace.alias.isEmpty()) {
