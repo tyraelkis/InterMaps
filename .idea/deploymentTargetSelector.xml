@@ -16,6 +16,12 @@
       <SelectionState runConfigName="eliminatePrefferedRouteTypeNinguno_E1Valid_PreferredRouteTypeCreated()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="setFavRoute_E3Invalid_errorOnSettingFavRoute()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="RouteServiceTestsIN">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>

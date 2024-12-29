@@ -1023,6 +1023,10 @@ class FirebaseRepository: Repository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun deleteFavRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean {
+        TODO("Not yet implemented")
+    }
+
 }
 
 

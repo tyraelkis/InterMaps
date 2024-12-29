@@ -42,6 +42,5 @@ interface Repository {
     suspend fun updateUserAttribute(attributeName: String, attributeValue: Any)
     suspend fun getUserAttribute(attributeName: String): Any?
     suspend fun setFavRoute (origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean
-
-
+    suspend fun deleteFavRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean
 }

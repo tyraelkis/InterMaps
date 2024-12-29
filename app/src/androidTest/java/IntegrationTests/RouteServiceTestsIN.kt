@@ -279,7 +279,22 @@ class RouteServiceTestsIN {
     @Test (expected = NotSuchElementException::class)
     fun setFavRoute_E3Invalid_errorOnSettingFavRoute(): Unit = runBlocking {
         doAnswer{ throw NotSuchElementException("No existe esa ruta") }
-            .`when`(mockRepository.setFavRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, ""))
+            .`when`(mockRepository.setFavRoute("Burriana", "Castellón de la Plana", TransportMethods.APIE, RouteTypes.RAPIDA, ""))
         routeService.setFavRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "9999GON")
+    }
+
+    @Test
+    fun deleteFavRoute_E1Valid_routeDeleteAsFavourite(): Unit = runBlocking {
+        `when`(mockRepository.deleteFavRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "")).thenReturn(true)
+        val result: Boolean = routeService.deleteFavRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "")
+        Assert.assertEquals(true, result)
+        verify(mockRepository).deleteFavRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "")
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun deleteFavRoute_E3Invalid_errorOnDeletingFavRoute(): Unit = runBlocking {
+        doAnswer{ throw NotSuchElementException("No existe esa ruta") }
+            .`when`(mockRepository.deleteFavRoute("Burriana", "Castellón de la Plana", TransportMethods.APIE, RouteTypes.RAPIDA, ""))
+        routeService.deleteFavRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "9999GON")
     }
 }

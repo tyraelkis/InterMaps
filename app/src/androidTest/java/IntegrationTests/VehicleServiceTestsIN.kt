@@ -135,7 +135,7 @@ class VehicleServiceTestsIN {
     }
 
     @Test (expected = NotSuchElementException::class)
-    fun deleteFavVehicle_E2Invalid_errorOnDeletingFavVehicle(): Unit = runBlocking {
+    fun deleteFavVehicle_E3Invalid_errorOnDeletingFavVehicle(): Unit = runBlocking {
         doAnswer{ throw NotSuchElementException("No existe ese vehículo") }
             .`when`(mockRepository).deleteFavVehicle("8888COD")
         vehicleService.deleteFavVehicle("8888COD")
