@@ -198,11 +198,14 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             val vehicleType = routeService.getVehicleTypeAndConsump(route).first
             route.cost = calculateConsumition(route, transportMethod, vehicleType)
         }
+        else{
+            route.cost = calculateCaloriesConsumition(route, transportMethod)
+        }
         return route
     }
 
 
-     /*suspend fun calculateConsumition1(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
+     override suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
         val routeService = RouteService(repository)
         var coste = 0.0
         var costeRounded = 0.0
@@ -225,7 +228,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
             //saveRouteCostToDatabase(route.origin, route.destination, costeRounded)
         }
         return costeRounded
-    }*/
+    }
 
 
     override suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods): Double {
@@ -243,7 +246,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         return costeRounded
     }
 
-    override suspend fun calculateConsumition( route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes?
+    /*override suspend fun calculateConsumition( route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes?
     ): Double {
         val routeService = RouteService(repository)
         val consumo = routeService.getVehicleTypeAndConsump(route).second
@@ -271,7 +274,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         val cost = calculator.calculate(route)
         route.cost = cost
         return cost
-    }
+    }*/
 
     override suspend fun calculateFuelCostAverage(): Boolean {
         val openRouteService = RetrofitConfig.createRetrofitFuelPrice()

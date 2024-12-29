@@ -55,7 +55,7 @@ open class RouteService(private val repository: Repository){
         return repository.deleteRoute(route)
     }
 
-    suspend fun calculateConsumition1(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
+    suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
         var res = 0.0
         if (transportMethod != TransportMethods.VEHICULO ){
             throw NotValidTransportException()
@@ -65,7 +65,7 @@ open class RouteService(private val repository: Repository){
        return res
     }
 
-    /*suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods ): Double {
+    suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods ): Double {
         var res = 0.0
         if (transportMethod == TransportMethods.VEHICULO ){
             throw NotValidTransportException()
@@ -73,9 +73,9 @@ open class RouteService(private val repository: Repository){
             res = routeRepository.calculateCaloriesConsumition(route, transportMethod)
         }
         return res
-    }*/
+    }
 
-    suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes?): Double {
+    suspend fun calculateConsumition1(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
         val res = routeRepository.calculateConsumition(route, transportMethod, vehicleType)
         return res
     }
