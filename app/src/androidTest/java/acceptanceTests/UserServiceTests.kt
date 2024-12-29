@@ -110,8 +110,10 @@ class UserServiceTests {
 
     @Test
     fun createPrefferedVehicle_E1Valid_PreferredVehicleCreated(): Unit = runBlocking{
+        userService.login(userTest.email, userTest.pswd)
         userService.updateUserVehicle("1111AAA")
         val res = db.doesPreferredAttributeExist("preferredVehicle", "1111AAA")
+        userService.signOut()
         assertEquals(true, res)
     }
 
@@ -124,14 +126,16 @@ class UserServiceTests {
 
     @Test
     fun createPrefferedTransport_E1Valid_PreferredTransportCreated(): Unit = runBlocking{
+        userService.login(userTest.email, userTest.pswd)
         userService.updateUserTransportMethod("BICICLETA")
         val res = db.doesPreferredAttributeExist("preferredTransportMethod", "BICICLETA")
+        userService.signOut()
         assertEquals(true, res)
     }
 
     @Test (expected = NotSuchTransportException::class)
     fun createPrefferedTransport_E2Inalid_PreferredTransportNotCreated(): Unit = runBlocking{
-        userService.updateUserVehicle("")
+        userService.updateUserTransportMethod("")
         val res = db.doesPreferredAttributeExist("preferredTransportMethod", "APIE")
         assertEquals(true, res)
     }

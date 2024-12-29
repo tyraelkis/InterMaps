@@ -76,8 +76,15 @@ class UserViewModel(
         _showPasswordPopUp.value = false
     }
 
+    suspend fun updatePreferredTransport(transportMethod: String) {
+        _preferredTransport.value = if (transportMethod == "Ninguno") null else TransportMethods.valueOf(transportMethod)
+        userService.updateUserTransportMethod(transportMethod)
+    }
 
-
+    suspend fun updatePreferredVehicle(vehiclePlate: String) {
+        _preferredVehicle.value = if (vehiclePlate == "Ninguno") null else vehiclePlate
+        userService.updateUserVehicle(vehiclePlate)
+    }
 
     val user = auth.currentUser
 
@@ -197,5 +204,13 @@ class UserViewModel(
         return errorMessageNormal
     }
 
+
+    suspend fun getPreferredTransport(): Any? {
+        return userService.getUserAttribute("preferredTransportMethod")
+    }
+
+    suspend fun getPreferredVehicle(): Any? {
+        return userService.getUserAttribute("preferredVehicle")
+    }
 
 }

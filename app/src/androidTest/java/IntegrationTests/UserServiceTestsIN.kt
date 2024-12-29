@@ -151,7 +151,7 @@ class UserServiceTestsIN {
     fun createPreferredVehicle_E2Invalido_PreferredVehicleNotCreated(): Unit = runBlocking {
         doAnswer{
             throw NotSuchVehicleException()
-        }.`when`(mockRepository.updateUserAttribute("preferredVehicle", ""))
+        }.`when`(userService.updateUserVehicle( ""))
 
     }
 
@@ -167,7 +167,8 @@ class UserServiceTestsIN {
     fun createPreferredTransport_E2Invalido_PreferredTransportNotCreated(): Unit = runBlocking {
         doAnswer{
             throw NotSuchVehicleException()
-        }.`when`(mockRepository.updateUserAttribute("preferredTransportMethod", ""))
+        }.`when`(userService.updateUserTransportMethod( ""))
+
 
     }
 

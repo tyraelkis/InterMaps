@@ -91,10 +91,10 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
                 if (vehicles.isNotEmpty()){
                     plates += vehicles.map { it.plate }
                 }
-                /*selectedOptionVehicles = viewModel.getPreferredVehicle().toString()
+                selectedOptionVehicles = viewModel.getPreferredVehicle().toString()
                 selectedOptionTransport = viewModel.getPreferredTransport().toString()
                 viewModel.updatePreferredTransport(selectedOptionTransport)
-                viewModel.updatePreferredVehicle(selectedOptionVehicles ?: "Ninguno")*/
+                viewModel.updatePreferredVehicle(selectedOptionVehicles ?: "Ninguno")
             } catch (e: Exception) {
                 allVehicles = emptyList()
             }

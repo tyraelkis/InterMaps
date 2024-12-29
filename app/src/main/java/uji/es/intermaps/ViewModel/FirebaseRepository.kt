@@ -157,11 +157,41 @@ class FirebaseRepository: Repository {
     }
 
     override suspend fun updateUserAttribute(attributeName: String, attributeValue: Any) {
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
 
+        try {
+            val userDocument = db.collection("Default").document(userEmail)
+
+            val documentSnapshot = userDocument.get().await()
+
+            if (documentSnapshot.exists()) {
+                userDocument.update(attributeName, attributeValue).await()
+            } else {
+                val newDocumentData = mapOf(attributeName to attributeValue)
+                userDocument.set(newDocumentData, SetOptions.merge()).await()
+            }
+        } catch (e: Exception) {
+            throw Exception("Error al actualizar el atributo $attributeName: ${e.message}", e)
+        }
     }
 
     override suspend fun getUserAttribute(attributeName: String): Any? {
-        return null
+        val userEmail = auth.currentUser?.email
+            ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        return try {
+            val userDocument = db.collection("Default").document(userEmail)
+            val documentSnapshot = userDocument.get().await()
+
+            if (documentSnapshot.exists()) {
+                documentSnapshot.get(attributeName)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            throw Exception("Error al recuperar el atributo $attributeName: ${e.message}", e)
+        }
     }
 
     override suspend fun deleteUser(email: String, password: String): Boolean {

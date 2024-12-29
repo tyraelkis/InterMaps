@@ -91,12 +91,12 @@ class UserService(var repository: Repository) {
         if (transportMethod.isBlank()) {
             throw NotSuchTransportException()
         }
-        repository.updateUserAttribute("preferredVehicle", transportMethod)
+        repository.updateUserAttribute("preferredTransportMethod", transportMethod)
         return true
     }
 
     suspend fun getUserAttribute(attributeName: String): Any?{
-        return null
+        return repository.getUserAttribute(attributeName)
     }
 
 
