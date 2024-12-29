@@ -172,5 +172,13 @@ class UserServiceTestsIN {
 
     }
 
+    @Test
+    fun createPreferredTransportNinguno_E1Valido_PreferredTransporteCreated(): Unit = runBlocking {
+        `when`(mockRepository.updateUserAttribute("preferredTransportMethod", "Ninguno")).thenReturn(Unit)
+        assertEquals(true, userService.updateUserTransportMethod("Ninguno"))
+        verify(mockRepository).updateUserAttribute("preferredTransportMethod", "Ninguno")
+
+    }
+
 
 }
