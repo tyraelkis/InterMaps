@@ -122,7 +122,8 @@ class UserService(var repository: Repository) {
     }
 
     suspend fun getUserRouteType(): Pair<Boolean,String>{
-        TODO()
+        val attribute = repository.getUserAttribute("preferredRouteType")
+        return Pair(true,attribute.toString())
     }
 
 
