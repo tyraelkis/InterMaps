@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "uji.es.intermaps"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "uji.es.intermaps"
@@ -49,6 +49,7 @@ android {
             excludes += setOf("/META-INF/{AL2.0,LGPL2.1}", "META-INF/LICENSE.md", "META-INF/LICENSE-notice.md")
         }
     }
+
 }
 
 dependencies {
@@ -62,18 +63,13 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.firestore)
-    implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.crashlytics)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.junit.ktx)
-    testImplementation(libs.junit)
+    implementation(libs.play.services.maps)
     testImplementation(project(":app"))
-    testImplementation (libs.junit.jupiter.api)
-    androidTestImplementation(libs.junit.jupiter)
-    testRuntimeOnly (libs.junit.jupiter.engine)
-    androidTestImplementation (libs.junit.jupiter.api)
-    androidTestImplementation (libs.junit.jupiter.engine)
     androidTestImplementation(libs.androidx.junit.ktx.v115)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -82,7 +78,30 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.converter.gson)
     implementation(libs.retrofit)
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.crashlytics)
     implementation(platform(libs.firebase.bom))
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.runtime.livedata)
+    //Mapas
+    implementation(libs.android)
+    implementation(libs.maps.compose)
+
+    //JUnit4
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.junit)
+
+    implementation(libs.okhttp.logging.interceptor)
+    //implementation ("com.mapbox.maps:android:11.8.0")
+    //implementation ("com.mapbox.extension:maps-compose:11.8.0")
+
+    // Mockito core para pruebas unitarias
+    testImplementation(libs.mockito.inline)
+
+    // Mockito-Kotlin para simplificar el uso en Kotlin
+    testImplementation(libs.mockito.kotlin)
+
+    // Mockito para pruebas instrumentadas
+    androidTestImplementation(libs.mockito.android)
+    implementation ("androidx.work:work-runtime-ktx:2.10.0")
+
+
 }

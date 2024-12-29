@@ -1,7 +1,14 @@
-package uji.es.intermaps.Model
+package uji.es.intermaps.ViewModel
 
+import com.mapbox.maps.extension.style.expressions.dsl.generated.featureState
+import uji.es.intermaps.Exceptions.IncorrectDataException
+import uji.es.intermaps.Exceptions.NotSuchTransportException
+import uji.es.intermaps.Exceptions.NotSuchVehicleException
 import uji.es.intermaps.Exceptions.NotValidUserData
-
+import uji.es.intermaps.Exceptions.SessionNotStartedException
+import uji.es.intermaps.Exceptions.UnableToDeleteUserException
+import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.User
 
 class UserService(var repository: Repository) {
 
@@ -47,27 +54,50 @@ class UserService(var repository: Repository) {
         return repository.signOut()
     }
 
-    fun editUserData(newPassword:String): Boolean{
+    suspend fun editUserData(newPassword:String): Boolean{
         if (newPassword.isBlank()) {
             throw NotValidUserData("El correo electrónico y la contraseña no pueden estar vacíos.")
-            return false
         }
         if (newPassword.length < 8) {
-            throw IllegalArgumentException("La contraseña debe tener al menos 8 caracteres.")
-            return false
+            throw IncorrectDataException()
         }
         repository.editUserData(newPassword)
         return true
     }
 
     suspend fun viewUserData(email: String): Boolean{
-        return repository.viewUserData(email)
+        if (repository.viewUserData(email))
+            return true
+        throw SessionNotStartedException()
 
     }
 
-    fun deleteUser(email: String, password: String): Boolean{
-        return repository.deleteUser(email, password)
-
+    suspend fun deleteUser(email: String, password: String): Boolean{
+       if (repository.deleteUser(email,password)) {
+           return true
+       }
+        throw UnableToDeleteUserException()
     }
+
+    suspend fun updateUserVehicle(vehiclePlate: String): Boolean{
+        if (vehiclePlate.isBlank()) {
+            throw NotSuchVehicleException()
+        }
+        repository.updateUserAttribute("preferredVehicle", vehiclePlate)
+        return true
+    }
+
+    suspend fun updateUserTransportMethod(transportMethod: String): Boolean{
+        if (transportMethod.isBlank()) {
+            throw NotSuchTransportException()
+        }
+        repository.updateUserAttribute("preferredTransportMethod", transportMethod)
+        return true
+    }
+
+    suspend fun getUserAttribute(attributeName: String): Any?{
+        return repository.getUserAttribute(attributeName)
+    }
+
 
 }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -27,15 +26,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import uji.es.intermaps.R
 
 @Composable
-fun InitialScreen (navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Unit = {}){
+fun InitialScreen (navController: NavController){
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(
-                Color.White
+                White
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -56,7 +56,9 @@ fun InitialScreen (navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Uni
             textAlign = TextAlign.Left)
         Spacer(modifier = Modifier.height(8.dp))
         Button(
-            onClick = { navigateToLogin() },
+            onClick = {
+                navController.navigate("logIn")
+                      },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
@@ -76,13 +78,15 @@ fun InitialScreen (navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Uni
             textAlign = TextAlign.Left)
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedButton(
-            onClick = { navigateToSignUp() },
+            onClick = {
+                navController.navigate("signUp")
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp)
                 .padding(horizontal = 32.dp),
             colors = ButtonDefaults.buttonColors(containerColor = White),
-            border = BorderStroke(2.dp, Color.Black),
+            border = BorderStroke(2.dp, Black),
             shape = RoundedCornerShape(10.dp)
         ) {
             Text(text = "Crear Cuenta", color = Black, fontSize = 18.sp, fontWeight = FontWeight.Bold)
