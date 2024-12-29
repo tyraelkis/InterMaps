@@ -139,7 +139,7 @@ class UserServiceTests {
     }
 
     @Test
-    fun eliminatePrefferedVehicle_E1Valid_PreferredVehicleCreated(): Unit = runBlocking{
+    fun eliminatePrefferedVehicle_E1Valid_PreferredVehicleEliminated(): Unit = runBlocking{
         userService.login(userTest.email, userTest.pswd)
         userService.updateUserVehicle("Ninguno")
         val res = db.doesPreferredAttributeExist("preferredVehicle", "Ninguno")
@@ -148,7 +148,7 @@ class UserServiceTests {
     }
 
     @Test
-    fun eliminatePrefferedTransport_E1Valid_PreferredTransportCreated(): Unit = runBlocking{
+    fun eliminatePrefferedTransport_E1Valid_PreferredTransportEliminated(): Unit = runBlocking{
         userService.login(userTest.email, userTest.pswd)
         userService.updateUserTransportMethod("Ninguno")
         val res = db.doesPreferredAttributeExist("preferredTransportMethod", "Ninguno")
@@ -156,6 +156,21 @@ class UserServiceTests {
         assertEquals(true, res)
     }
 
+    @Test
+    fun seePrefferedVehicle_E1Valid_PreferredVehicleViewed(): Unit = runBlocking{
+        userService.login(userTest.email, userTest.pswd)
+        val res = userService.getUserVehicle().first
+        userService.signOut()
+        assertEquals(true, res)
+    }
+
+    @Test
+    fun seePrefferedTransport_E1Valid_PreferredTransportViewed(): Unit = runBlocking {
+        userService.login(userTest.email, userTest.pswd)
+        val res = userService.getUserTransportMethod().first
+        userService.signOut()
+        assertEquals(true, res)
+    }
     @Test
     fun createPrefferedRouteType_E1Valid_PreferredRouteTypeCreated(): Unit = runBlocking {
         userService.login(userTest.email, userTest.pswd)
@@ -171,7 +186,7 @@ class UserServiceTests {
     }
 
     @Test
-    fun eliminatePrefferedRouteType_E1Valid_PreferredRouteTypeCreated(): Unit = runBlocking{
+    fun eliminatePrefferedRouteType_E1Valid_PreferredRouteTypeEliminated(): Unit = runBlocking{
         userService.login(userTest.email, userTest.pswd)
         userService.updateUserRouteType("Ninguno")
         val res = db.doesPreferredAttributeExist("preferredRouteType", "Ninguno")
@@ -180,4 +195,13 @@ class UserServiceTests {
     }
 
 
+
+    @Test
+    fun seePrefferedRouteType_E1Valid_PreferredRouteTypeViewed(): Unit = runBlocking {
+        userService.login(userTest.email, userTest.pswd)
+        val res = userService.getUserRouteType().first
+        userService.signOut()
+        assertEquals(true, res)
+
+    }
 }
