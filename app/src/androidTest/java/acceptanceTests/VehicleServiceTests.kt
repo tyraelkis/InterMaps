@@ -123,7 +123,7 @@ class VehicleServiceTests {
     }
 
     @Test (expected = NotSuchElementException::class)
-    fun deleteFavVehicle_E2Invalid_errorOnDeletingFavVehicle(): Unit = runBlocking {
+    fun deleteFavVehicle_E3Invalid_errorOnDeletingFavVehicle(): Unit = runBlocking {
         vehicleService.deleteFavVehicle("8888COD")
     }
 

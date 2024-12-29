@@ -137,6 +137,8 @@ open class RouteService(private val repository: Repository){
         TODO()
     }
 
-
+    suspend fun deleteFavRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean {
+        TODO()
+    }
 
 }

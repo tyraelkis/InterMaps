@@ -174,4 +174,15 @@ class RouteServiceTest {
         routeService.setFavRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "9999GON")
     }
 
+    @Test
+    fun deleteFavRoute_E1Valid_routeDeleteAsFavourite(): Unit = runBlocking {
+        val result: Boolean = routeService.deleteFavRoute("Galicia", "Alicante", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "9999GON")
+        assertEquals(true, result)
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun deleteFavRoute_E3Invalid_errorOnDeletingFavRoute(): Unit = runBlocking {
+        routeService.deleteFavRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "9999GON")
+    }
+
 }
