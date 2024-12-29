@@ -1019,6 +1019,10 @@ class FirebaseRepository: Repository {
         return result
     }
 
+    override suspend fun setFavRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean {
+        TODO("Not yet implemented")
+    }
+
 }
 
 

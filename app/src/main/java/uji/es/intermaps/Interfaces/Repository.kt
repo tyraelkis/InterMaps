@@ -19,12 +19,7 @@ interface Repository {
     suspend fun editUserData(newPassword: String): Boolean
     suspend fun deleteUser(email: String, password: String): Boolean
     suspend fun setAlias(interestPlace: InterestPlace, newAlias: String): Boolean
-    suspend fun createInterestPlace(
-        coordinate: Coordinate,
-        toponym: String,
-        alias: String
-    ): InterestPlace
-
+    suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace
     suspend fun viewInterestPlaceData(coordinate: Coordinate): InterestPlace
     suspend fun viewInterestPlaceList(): List<InterestPlace>
     suspend fun deleteInterestPlace(coordinate: Coordinate): Boolean
@@ -46,6 +41,7 @@ interface Repository {
     suspend fun deleteFavVehicle(plate: String): Boolean
     suspend fun updateUserAttribute(attributeName: String, attributeValue: Any)
     suspend fun getUserAttribute(attributeName: String): Any?
+    suspend fun setFavRoute (origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean
 
 
 }

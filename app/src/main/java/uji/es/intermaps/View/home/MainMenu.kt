@@ -366,13 +366,13 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { navController.navigate("vehicleList") }, //TODO Ir a vehículos
+                            .clickable { navController.navigate("vehicleList") },
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            navController.navigate("vehicleList") //TODO Ir a vehículos
+                            navController.navigate("vehicleList")
                         },
                         modifier = Modifier
                             .height(40.dp)
@@ -405,14 +405,12 @@ fun MainMenu(auth: FirebaseAuth, navController: NavController, viewModel: Intere
                         ),
                         contentDescription = "",
                         modifier = Modifier.size(40.dp)
-                            .clickable { showMenu = false
-                                        navController.navigate("routeList") },
+                            .clickable { navController.navigate("routeList") },
                         contentScale = ContentScale.Crop
                     )
 
                     Button(//Texto con enlace
                         onClick = {
-                            showMenu = false
                             navController.navigate("routeList")
                         },
                         modifier = Modifier

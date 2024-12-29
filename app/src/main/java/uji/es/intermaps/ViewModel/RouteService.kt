@@ -133,6 +133,10 @@ open class RouteService(private val repository: Repository){
         return routeRepository.getRoute(origin, destination, transportMethod, vehiclePlate)
     }
 
+    suspend fun setFavRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean {
+        TODO()
+    }
+
 
 
 }

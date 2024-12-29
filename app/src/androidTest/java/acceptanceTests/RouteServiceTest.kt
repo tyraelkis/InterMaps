@@ -9,6 +9,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import uji.es.intermaps.Exceptions.NoValidTypeException
+import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.Repository
@@ -20,7 +21,6 @@ import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.VehicleTypes
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
-import uji.es.intermaps.ViewModel.RouteRepository
 import uji.es.intermaps.ViewModel.RouteService
 import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.ViewModel.VehicleService
@@ -30,7 +30,7 @@ class RouteServiceTest {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
     private var email: String = "prueba@uji.es"
-    private var password: String = "123456AA" // Cambiar en las pruebas de aceptacion para que cumpla los requisitos de las contraseñas
+    private var password: String = "123456AA"
     private var userService: UserService = UserService(repository)
     private var userTest: User = User("emaildeprueba@gmail.com", "123456BB")
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
@@ -160,6 +160,18 @@ class RouteServiceTest {
     @Test(expected = NoValidTypeException::class)
     fun createRouteWithType_E2Invalid_routeNotCalculated(): Unit = runBlocking {
         routeService.createTypeRoute("-0.085748,39.888399", "-0.037787,39.987142", TransportMethods.VEHICULO,null)
+    }
+
+
+    @Test
+    fun setFavRoute_E1Valid_routeIsFav(): Unit = runBlocking {
+        val result: Boolean = routeService.setFavRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "")
+        assertEquals(true, result)
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun setFavRoute_E3Invalid_errorOnSettingFavRoute(): Unit = runBlocking {
+        routeService.setFavRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "9999GON")
     }
 
 }

@@ -5,11 +5,13 @@ import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
@@ -18,6 +20,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.APIParsers.RouteSummary
+import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase
@@ -36,13 +39,9 @@ import uji.es.intermaps.ViewModel.UserService
 @RunWith(AndroidJUnit4::class)
 class RouteServiceTestsIN {
 
-
-
     var mockRepository: Repository = mock(Repository::class.java)
 
-
     var mockRouteRepository: RouteRepository = mock(RouteRepository::class.java)
-
 
     private val userService = UserService(FirebaseRepository())
     private val userTest: User = User("emaildeprueba@gmail.com", "123456BB")
@@ -267,5 +266,20 @@ class RouteServiceTestsIN {
         )
 
         assertEquals(true, result)
+    }
+
+    @Test
+    fun setFavRoute_E1Valid_routeIsFav(): Unit = runBlocking {
+        `when`(mockRepository.setFavRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "")).thenReturn(true)
+        val result: Boolean = routeService.setFavRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "")
+        Assert.assertEquals(true, result)
+        verify(mockRepository).setFavRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "")
+    }
+
+    @Test (expected = NotSuchElementException::class)
+    fun setFavRoute_E3Invalid_errorOnSettingFavRoute(): Unit = runBlocking {
+        doAnswer{ throw NotSuchElementException("No existe esa ruta") }
+            .`when`(mockRepository.setFavRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, ""))
+        routeService.setFavRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "9999GON")
     }
 }
