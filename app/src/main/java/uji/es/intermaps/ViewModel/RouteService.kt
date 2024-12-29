@@ -2,10 +2,6 @@ package uji.es.intermaps.ViewModel
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.google.android.gms.maps.model.PolylineOptions
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.Exceptions.NoValidTypeException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
@@ -59,7 +55,7 @@ open class RouteService(private val repository: Repository){
         return repository.deleteRoute(route)
     }
 
-    suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
+    suspend fun calculateConsumition1(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
         var res = 0.0
         if (transportMethod != TransportMethods.VEHICULO ){
             throw NotValidTransportException()
@@ -69,13 +65,18 @@ open class RouteService(private val repository: Repository){
        return res
     }
 
-    suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods ): Double {
+    /*suspend fun calculateCaloriesConsumition(route: Route, transportMethod: TransportMethods ): Double {
         var res = 0.0
         if (transportMethod == TransportMethods.VEHICULO ){
             throw NotValidTransportException()
         } else {
             res = routeRepository.calculateCaloriesConsumition(route, transportMethod)
         }
+        return res
+    }*/
+
+    suspend fun calculateConsumition(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes?): Double {
+        val res = routeRepository.calculateConsumition(route, transportMethod, vehicleType)
         return res
     }
 

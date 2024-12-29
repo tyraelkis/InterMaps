@@ -88,7 +88,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
     var transportMethod by remember { mutableStateOf(userViewModel.preferredTransport.value) }
     var vehicle by remember {
         mutableStateOf(
-            userViewModel.preferredVehicle.value ?: null as String?
+            userViewModel.preferredVehicle.value ?: ""
         )
     }
 
@@ -154,7 +154,8 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
         Spacer(modifier = Modifier.height(12.dp))
 
         Box(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
             Row(
@@ -228,7 +229,8 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
         Spacer(modifier = Modifier.height(12.dp))
 
         Box(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
             Row(
@@ -303,7 +305,8 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
         Spacer(modifier = Modifier.height(12.dp))
 
         Box(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
             Row(
@@ -376,7 +379,8 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
         Spacer(modifier = Modifier.height(12.dp))
 
         Box(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
             Row(
@@ -454,7 +458,8 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
             Spacer(modifier = Modifier.height(12.dp))
 
             Box(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {
                 Row(
@@ -469,7 +474,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (vehicle == null) {
+                        text = if (vehicle == "") {
                             "Selecciona una opción"
                         } else {
                             vehicle.toString()

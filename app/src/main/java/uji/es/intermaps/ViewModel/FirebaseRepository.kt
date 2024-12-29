@@ -200,6 +200,15 @@ class FirebaseRepository: Repository {
             if (user == null) {
                 Log.e("FirebaseAuth", "No hay un usuario autenticado")
             }
+
+            val collections = listOf("Default", "InterestPlace", "Route", "Vehicle")
+            for (collection in collections){
+                val success = deleteDocument(collection, email)
+                if (!success){
+                    Log.e("DeleteUser", "Error al eliminar documentos relacionados en la colección: $collection")
+                    return false
+                }
+            }
             // Buscar el documento del usuario en Firestore
             val querySnapshot = FirebaseFirestore.getInstance()
                 .collection("Users")
@@ -210,16 +219,13 @@ class FirebaseRepository: Repository {
             if (querySnapshot.isEmpty) {
                 Log.d("Firestore", "No se encontró el documento del usuario.")
             }
-
             // Eliminar el documento de Firestore
             val documentId = querySnapshot.documents[0].id
-            FirebaseFirestore.getInstance()
-                .collection("Users")
-                .document(documentId)
-                .delete()
-                .await()
-            Log.d("Firestore", "Documento de usuario eliminado exitosamente.")
-
+            val userDeleted = deleteDocument("Users", documentId)
+            if (!userDeleted){
+                Log.e("DeleteUser", "Error al eliminar el documento del usuario")
+                return false
+            }
             // Eliminar el usuario de FirebaseAuth
             user!!.delete().await()
             Log.d("FirebaseAuth", "Usuario eliminado exitosamente.")
@@ -1017,6 +1023,21 @@ class FirebaseRepository: Repository {
             result = false
         }
         return result
+    }
+
+    private suspend fun deleteDocument(collection: String, documentId: String): Boolean {
+        return try {
+            FirebaseFirestore.getInstance()
+                .collection(collection)
+                .document(documentId)
+                .delete()
+                .await()
+            Log.d("Firestore", "Documento de $collection eliminado exitosamente.")
+            true
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error al eliminar el documento de $collection: ${e.message}", e)
+            false
+        }
     }
 
 }

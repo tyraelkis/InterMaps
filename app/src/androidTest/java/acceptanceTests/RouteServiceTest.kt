@@ -20,7 +20,6 @@ import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.VehicleTypes
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
-import uji.es.intermaps.ViewModel.RouteRepository
 import uji.es.intermaps.ViewModel.RouteService
 import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.ViewModel.VehicleService
@@ -91,7 +90,7 @@ class RouteServiceTest {
     @Test
     fun calculateCaloriesConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Burriana", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "").second
-        val calculatedConsumition = routeService.calculateCaloriesConsumition(routeTest, TransportMethods.APIE)
+        val calculatedConsumition = routeService.calculateConsumition(routeTest, TransportMethods.APIE, null)
         val result = 13835.9
         assertEquals(result, calculatedConsumition, 0.1)
     }
@@ -99,7 +98,7 @@ class RouteServiceTest {
     @Test (expected = NotValidTransportException::class)
     fun calculateCaloriesConsumition_E4Invalid_consumitionNotCalculated(): Unit = runBlocking {
         val routeTest = routeService.createRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "").second
-        routeService.calculateCaloriesConsumition(routeTest, TransportMethods.VEHICULO)
+        routeService.calculateConsumition(routeTest, TransportMethods.VEHICULO, null)
 
     }
 
