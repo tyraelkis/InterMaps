@@ -13,16 +13,10 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="createPreferredRouteType_E1Valido_PreferredRouteTypeCreated()">
+      <SelectionState runConfigName="RouteServiceTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="createPreferredRouteType_E2Invalido_PreferredRouteTypeNotCreated()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="createPrefferedRouteType_E1Valid_PreferredRouteTypeCreated()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="createPrefferedRouteType_E2Invalid_PreferredVehicleNotCreated()">
+      <SelectionState runConfigName="RouteTests">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
