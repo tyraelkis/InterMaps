@@ -188,8 +188,19 @@ class UserServiceTestsIN {
         verify(mockRepository).updateUserAttribute("preferredVehicle", "Ninguno")
 
     }
+    @Test
+    fun getUserTransportMethod_E1Valido_TransportMethodRetrieved(): Unit = runBlocking {
+        `when`(mockRepository.getUserAttribute("preferredTransportMethod")).thenReturn("APIE")
+        assertEquals("APIE", userService.getUserTransportMethod().second)
+        verify(mockRepository).getUserAttribute("preferredTransportMethod")
+    }
 
-
+    @Test
+    fun getUserVehicle_E1Valido_VehicleRetrieved(): Unit = runBlocking {
+        `when`(mockRepository.getUserAttribute("preferredVehicle")).thenReturn("1111AAA")
+        assertEquals("1111AAA", userService.getUserVehicle().second)
+        verify(mockRepository).getUserAttribute("preferredVehicle")
+    }
     @Test
     fun createPreferredRouteType_E1Valido_PreferredRouteTypeCreated(): Unit = runBlocking {
         `when`(mockRepository.updateUserAttribute("preferredRouteType", "RAPIDA")).thenReturn(Unit)
@@ -212,6 +223,15 @@ class UserServiceTestsIN {
         assertEquals(true, userService.updateUserRouteType("Ninguno"))
         verify(mockRepository).updateUserAttribute("preferredRouteType", "Ninguno")
 
+    }
+
+
+
+    @Test
+    fun getUserRouteType_E1Valido_RouteTypeRetrieved(): Unit = runBlocking {
+        `when`(mockRepository.getUserAttribute("preferredRouteType")).thenReturn("RAPIDA")
+        assertEquals("RAPIDA", userService.getUserRouteType().second)
+        verify(mockRepository).getUserAttribute("preferredRouteType")
     }
 
 

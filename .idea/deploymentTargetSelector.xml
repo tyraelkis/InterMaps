@@ -13,7 +13,13 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="eliminatePrefferedRouteTypeNinguno_E1Valid_PreferredRouteTypeCreated()">
+      <SelectionState runConfigName="seePrefferedVehicle_E1Valid_PreferredVehicleViewed()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="getUserTransportMethod_E1Valido_TransportMethodRetrieved()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="getUserVehicle_E1Valido_VehicleRetrieved()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

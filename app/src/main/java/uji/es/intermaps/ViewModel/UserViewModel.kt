@@ -214,15 +214,15 @@ class UserViewModel(
 
 
     suspend fun getPreferredTransport(): Any? {
-        return userService.getUserAttribute("preferredTransportMethod")
+        return userService.getUserTransportMethod()
     }
 
     suspend fun getPreferredVehicle(): Any? {
-        return userService.getUserAttribute("preferredVehicle")
+        return userService.getUserVehicle()
     }
 
 
     suspend fun getPreferredRouteType(): Any? {
-        return userService.getUserAttribute("preferredRouteType")
+        return userService.getUserRouteType()
     }
 }
