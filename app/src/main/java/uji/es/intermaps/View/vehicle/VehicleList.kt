@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +38,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.ViewModel.VehicleViewModel
 import java.net.URLEncoder
@@ -53,8 +58,8 @@ fun VehicleList(auth: FirebaseAuth, navController: NavController, viewModel: Veh
         }
     }
 
-    val favList = allVehicles.filter { it.fav }
-    val noFavList = allVehicles.filter { !it.fav }
+    val favList by remember(allVehicles) { derivedStateOf { allVehicles.filter { it.fav } } }
+    val noFavList by remember(allVehicles) { derivedStateOf { allVehicles.filter { !it.fav } } }
 
     Column(
         modifier = Modifier
@@ -140,7 +145,7 @@ fun VehicleList(auth: FirebaseAuth, navController: NavController, viewModel: Veh
 
                             modifier = Modifier
                                 .size(30.dp)
-                                .clickable { //TODO revisar
+                                .clickable {
                                     viewModel.updateVehicle(vehicle)
                                     val encodedPlate = URLEncoder.encode(vehicle.plate, StandardCharsets.UTF_8.toString())
                                     navController.navigate("vehicleEditDelete/$encodedPlate")
@@ -191,7 +196,18 @@ fun VehicleList(auth: FirebaseAuth, navController: NavController, viewModel: Veh
                             imageVector = Icons.Default.Star,
                             contentDescription = "Estrella fav",
                             modifier = Modifier
-                                .size(30.dp),
+                                .size(30.dp)
+                                .clickable {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        if (viewModel.setFavVehicle(notFavVehicle.plate)) {
+                                            withContext(Dispatchers.Main) {
+                                                allVehicles = allVehicles.map {
+                                                    if (it == notFavVehicle) viewModel.cloneWithFav(notFavVehicle, true) else it
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
                             tint = Black
                         )
 
@@ -209,7 +225,7 @@ fun VehicleList(auth: FirebaseAuth, navController: NavController, viewModel: Veh
 
                             modifier = Modifier
                                 .size(30.dp)
-                                .clickable { //TODO revisar
+                                .clickable {
                                     viewModel.updateVehicle(notFavVehicle)
                                     val encodedPlate = URLEncoder.encode(notFavVehicle.plate, StandardCharsets.UTF_8.toString())
                                     navController.navigate("vehicleEditDelete/$encodedPlate")
