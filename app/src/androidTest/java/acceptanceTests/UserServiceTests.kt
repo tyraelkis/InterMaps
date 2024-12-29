@@ -139,4 +139,22 @@ class UserServiceTests {
         val res = db.doesPreferredAttributeExist("preferredTransportMethod", "APIE")
         assertEquals(true, res)
     }
+
+    @Test
+    fun createPrefferedVehicleNinguno_E1Valid_PreferredVehicleCreated(): Unit = runBlocking{
+        userService.login(userTest.email, userTest.pswd)
+        userService.updateUserVehicle("Ninguno")
+        val res = db.doesPreferredAttributeExist("preferredVehicle", "Ninguno")
+        userService.signOut()
+        assertEquals(true, res)
+    }
+
+    @Test
+    fun createPrefferedTransportNinguno_E1Valid_PreferredTransportCreated(): Unit = runBlocking{
+        userService.login(userTest.email, userTest.pswd)
+        userService.updateUserTransportMethod("Ninguno")
+        val res = db.doesPreferredAttributeExist("preferredTransportMethod", "Ninguno")
+        userService.signOut()
+        assertEquals(true, res)
+    }
 }
