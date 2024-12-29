@@ -128,7 +128,18 @@ fun VehicleList(auth: FirebaseAuth, navController: NavController, viewModel: Veh
                             imageVector = Icons.Default.Star,
                             contentDescription = "Estrella fav",
                             modifier = Modifier
-                                .size(30.dp),
+                                .size(30.dp)
+                                .clickable {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        if (viewModel.deleteFavVehicle(vehicle.plate)) {
+                                            withContext(Dispatchers.Main) {
+                                                allVehicles = allVehicles.map {
+                                                    if (it == vehicle) viewModel.cloneWithFav(vehicle, false) else it
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
                             tint = Color(color = 0XFF007E70)
                         )
                         Text(

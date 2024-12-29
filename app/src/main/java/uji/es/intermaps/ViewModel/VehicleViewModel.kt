@@ -106,6 +106,14 @@ class VehicleViewModel {
         }
     }
 
+    suspend fun deleteFavVehicle(plate: String): Boolean{
+        try {
+            return vehicleService.deleteFavVehicle(plate)
+        }
+        catch (e: Exception){
+            return false
+        }
+    }
 
     fun cloneWithFav(vehicle: Vehicle, fav: Boolean): Vehicle {
         return vehicleFactory.cloneWithFav(vehicle, fav)
