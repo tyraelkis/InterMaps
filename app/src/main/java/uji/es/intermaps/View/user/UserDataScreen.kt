@@ -92,23 +92,11 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
                 if (vehicles.isNotEmpty()){
                     plates += vehicles.map { it.plate }
                 }
-                if (viewModel.getPreferredVehicle() == null){
-                    selectedOptionVehicles = "Ninguno"
-                }else{
-                    selectedOptionVehicles = viewModel.getPreferredVehicle().toString()
-                }
+                selectedOptionVehicles = viewModel.getPreferredVehicle()
 
-                if (viewModel.getPreferredRouteType() == null){
-                    selectedOptionRoutes = "Ninguno"
-                }else{
-                    selectedOptionRoutes = viewModel.getPreferredRouteType().toString()
-                }
+                selectedOptionRoutes = viewModel.getPreferredRouteType()
 
-                if (viewModel.getPreferredTransport() == null){
-                    selectedOptionTransport = "Ninguno"
-                }else{
-                    selectedOptionTransport = viewModel.getPreferredTransport().toString()
-                }
+                selectedOptionTransport = viewModel.getPreferredTransport()
 
                 viewModel.updatePreferredTransport(selectedOptionTransport)
                 viewModel.updatePreferredVehicle(selectedOptionVehicles ?: "Ninguno")

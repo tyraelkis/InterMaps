@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -46,6 +47,8 @@ class UserViewModel(
     private val _preferredRouteType = mutableStateOf<RouteTypes?>(null)
     val preferredRouteType: MutableState<RouteTypes?> get() = _preferredRouteType
 
+    var loading by mutableStateOf(false)
+        private set
 
 
     private var errorMessageNormal = ""
@@ -82,8 +85,8 @@ class UserViewModel(
 
     suspend fun updatePreferredTransport(transportMethod: String) {
         _preferredTransport.value = if (transportMethod == "Ninguno") null else TransportMethods.valueOf(transportMethod)
-        userService.updateUserTransportMethod(transportMethod)
-    }
+            userService.updateUserTransportMethod(transportMethod)
+        }
 
     suspend fun updatePreferredVehicle(vehiclePlate: String) {
         _preferredVehicle.value = if (vehiclePlate == "Ninguno") null else vehiclePlate

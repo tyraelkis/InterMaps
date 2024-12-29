@@ -25,6 +25,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -67,6 +68,7 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
     val endLong = endPoint?.longitude ?: 0.0
     val endLat = endPoint?.latitude ?: 0.0
     val routes by viewModel.routes.observeAsState(emptyList())
+
 
 
 
