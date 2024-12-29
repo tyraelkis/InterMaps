@@ -174,10 +174,18 @@ class UserServiceTestsIN {
     }
 
     @Test
-    fun createPreferredTransportNinguno_E1Valido_PreferredTransporteCreated(): Unit = runBlocking {
+    fun eliminatePreferredTransport_E1Valido_PreferredTransporteCreated(): Unit = runBlocking {
         `when`(mockRepository.updateUserAttribute("preferredTransportMethod", "Ninguno")).thenReturn(Unit)
         assertEquals(true, userService.updateUserTransportMethod("Ninguno"))
         verify(mockRepository).updateUserAttribute("preferredTransportMethod", "Ninguno")
+
+    }
+
+    @Test
+    fun eliminatePreferredVehiculo_E1Valido_PreferredTransporteCreated(): Unit = runBlocking {
+        `when`(mockRepository.updateUserAttribute("preferredVehicle", "Ninguno")).thenReturn(Unit)
+        assertEquals(true, userService.updateUserVehicle("Ninguno"))
+        verify(mockRepository).updateUserAttribute("preferredVehicle", "Ninguno")
 
     }
 
@@ -197,5 +205,15 @@ class UserServiceTestsIN {
         }.`when`(userService.updateUserRouteType( "bicicleta"))
 
     }
+
+    @Test
+    fun eliminatePreferredRouteType_E1Valido_PreferredRouteTypeCreated(): Unit = runBlocking {
+        `when`(mockRepository.updateUserAttribute("preferredRouteType", "Ninguno")).thenReturn(Unit)
+        assertEquals(true, userService.updateUserRouteType("Ninguno"))
+        verify(mockRepository).updateUserAttribute("preferredRouteType", "Ninguno")
+
+    }
+
+
 
 }

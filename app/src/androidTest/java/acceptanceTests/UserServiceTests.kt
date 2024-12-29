@@ -139,7 +139,7 @@ class UserServiceTests {
     }
 
     @Test
-    fun createPrefferedVehicleNinguno_E1Valid_PreferredVehicleCreated(): Unit = runBlocking{
+    fun eliminatePrefferedVehicle_E1Valid_PreferredVehicleCreated(): Unit = runBlocking{
         userService.login(userTest.email, userTest.pswd)
         userService.updateUserVehicle("Ninguno")
         val res = db.doesPreferredAttributeExist("preferredVehicle", "Ninguno")
@@ -148,7 +148,7 @@ class UserServiceTests {
     }
 
     @Test
-    fun createPrefferedTransportNinguno_E1Valid_PreferredTransportCreated(): Unit = runBlocking{
+    fun eliminatePrefferedTransport_E1Valid_PreferredTransportCreated(): Unit = runBlocking{
         userService.login(userTest.email, userTest.pswd)
         userService.updateUserTransportMethod("Ninguno")
         val res = db.doesPreferredAttributeExist("preferredTransportMethod", "Ninguno")
@@ -166,8 +166,18 @@ class UserServiceTests {
     }
 
     @Test (expected = NotValidParameterException::class)
-    fun createPrefferedRouteType_E2Invalid_PreferredVehicleNotCreated(): Unit = runBlocking{
+    fun createPrefferedRouteType_E3Invalid_PreferredVehicleNotCreated(): Unit = runBlocking{
         userService.updateUserRouteType("bicicleta")
     }
+
+    @Test
+    fun eliminatePrefferedRouteType_E1Valid_PreferredRouteTypeCreated(): Unit = runBlocking{
+        userService.login(userTest.email, userTest.pswd)
+        userService.updateUserRouteType("Ninguno")
+        val res = db.doesPreferredAttributeExist("preferredRouteType", "Ninguno")
+        userService.signOut()
+        assertEquals(true, res)
+    }
+
 
 }
