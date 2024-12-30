@@ -176,7 +176,7 @@ class RouteServiceTest {
 
     @Test
     fun deleteFavRoute_E1Valid_routeDeleteAsFavourite(): Unit = runBlocking {
-        val result: Boolean = routeService.deleteFavRoute("Galicia", "Alicante", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "9999GON")
+        val result: Boolean = routeService.deleteFavRoute("Galicia", "Alicante", TransportMethods.APIE, RouteTypes.RAPIDA, "")
         assertEquals(true, result)
     }
 
