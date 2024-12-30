@@ -147,8 +147,15 @@ class InterestPlaceViewModel(
     suspend fun deleteInterestPlace (coordinate: Coordinate){
         try {
             interestPlaceService.deleteInterestPlace(coordinate)
-
-        }catch (e: UnableToDeletePlaceException){}
+            errorMessage = ""
+            updateErrorMessage("")
+        } catch (e: UnableToDeletePlaceException){
+            errorMessage = e.message.toString()
+            updateErrorMessage(e.message.toString())
+        } catch (e: Exception){
+            errorMessage = e.message.toString()
+            updateErrorMessage(e.message.toString())
+        }
     }
 
 
@@ -252,5 +259,12 @@ class InterestPlaceViewModel(
         catch (e: Exception){
             return false
         }
+    }
+
+    private val _errorM = mutableStateOf("")
+    val errorM: State<String> = _errorM
+
+    fun updateErrorMessage(message: String) {
+        _errorM.value = message
     }
 }

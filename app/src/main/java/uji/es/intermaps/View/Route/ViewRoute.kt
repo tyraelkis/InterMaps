@@ -6,6 +6,7 @@ import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.ViewModel.RouteViewModel
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -26,10 +27,16 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -65,6 +72,8 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
     val startLat = startPoint?.latitude ?: 0.0
     val endLong = endPoint?.longitude ?: 0.0
     val endLat = endPoint?.latitude ?: 0.0
+
+    var showPopupDeleteConfirm by remember { mutableStateOf(false) }
 
 
     if (loading) {
@@ -184,8 +193,26 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                 if (routeInDataBase) {
                     Button(
                         onClick = {
+                            showPopupDeleteConfirm = true
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Black),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "Eliminar ruta",
+                            color = White,
+                            fontSize = 18.sp
+                        )
+                    }
+                } else{
+                    // Botón Guardar ruta
+                    Button(
+                        onClick = {
                             viewModel.route.value?.let { currentRoute ->
-                                viewModel.deleteRoute(route)
+                                viewModel.saveRoute(currentRoute)
                             }
                             viewModel.updateRouteList()
                             navController.navigate("routeList")
@@ -193,38 +220,83 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                        colors = ButtonDefaults.buttonColors(containerColor = Black),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            text = "Eliminar ruta",
-                            color = Color.White,
+                            text = "Guardar ruta",
+                            color = White,
                             fontSize = 18.sp
                         )
                     }
-                } else{
-                // Botón Guardar ruta
-                Button(
-                    onClick = {
-                        viewModel.route.value?.let { currentRoute ->
-                            viewModel.saveRoute(currentRoute)
-                        }
-                        viewModel.updateRouteList()
-                        navController.navigate("routeList")
-                    },
+                }
+            }
+
+            if (showPopupDeleteConfirm) {
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
-                    shape = RoundedCornerShape(8.dp)
+                        .padding(horizontal = 16.dp, vertical = 350.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0XFF007E70))
                 ) {
-                    Text(
-                        text = "Guardar ruta",
-                        color = Color.White,
-                        fontSize = 18.sp
-                    )
-                }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Text(
+                            text = "¿Estas seguro de eliminar la ruta?",
+                            color = White,
+                            fontSize = 26.sp,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.SemiBold,
+                            lineHeight = 36.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(40.dp))
+
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        ) {
+                            Button(
+                                onClick = {
+                                    showPopupDeleteConfirm = false
+                                },
+                                modifier = Modifier.weight(1f)
+                                    .padding(16.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Black),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text(text = "No", fontSize = 16.sp)
+                            }
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            Button(
+                                onClick = {
+                                    viewModel.route.value?.let { _ ->
+                                        viewModel.deleteRoute(route)
+                                    }
+                                    viewModel.updateRouteList()
+                                    navController.navigate("routeList")
+                                },
+                                modifier = Modifier.weight(1f)
+                                    .padding(16.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Black),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text(text = "Sí", fontSize = 16.sp)
+                            }
+                        }
                     }
+                }
             }
         }
     }

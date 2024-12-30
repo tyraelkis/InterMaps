@@ -316,6 +316,8 @@ fun VehicleEditDelete(navController: NavController, viewModel: VehicleViewModel,
                                     errorMessage = viewModel.getErrorMessage()
                                     if (errorMessage.isEmpty())
                                         navController.navigate("vehicleList")
+                                    else
+                                        showPopupDeleteConfirm = false
                                 }
                             }
                         },

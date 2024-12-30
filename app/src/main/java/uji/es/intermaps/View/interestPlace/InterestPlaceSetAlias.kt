@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -61,6 +62,7 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
     ModificationInterestPlacePopUp(viewModel)
     ModificationInterestPlaceErrorPopUp(viewModel)
 
+    val errorMessage = viewModel.errorM.value
 
     LaunchedEffect(Unit) {
         viewModel.getInterestPlaceByToponym(toponym)
@@ -186,7 +188,19 @@ fun InterestPlaceSetAlias(navController: NavController, viewModel: InterestPlace
                     shape = RoundedCornerShape(8.dp)
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = errorMessage,
+                color = Red,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp),
+                textAlign = TextAlign.Left
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 

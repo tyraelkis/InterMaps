@@ -11,6 +11,8 @@ import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.SessionNotStartedException
+import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
+import uji.es.intermaps.Exceptions.UnableToDeleteVehicleException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
 import uji.es.intermaps.Interfaces.Repository
@@ -440,6 +442,15 @@ class FirebaseRepository: Repository {
                 if (placeIndex == -1) {
                     throw NotSuchPlaceException("Lugar de interés no encontrado")
                 }
+
+                //Mira el topónimo del lugar para ver si se usa en alguna ruta e impedir su borrado si es el caso
+                val toponym = interestPlaces[placeIndex]["toponym"] as? String
+                    ?: throw IllegalStateException("No se ha encontrado el topónimo del lugar")
+
+                if (checkUsedPlace(toponym)){
+                    throw UnableToDeletePlaceException("Este lugar está siendo usado en una de las rutas por lo que no se puede borrar")
+                }
+
                 interestPlaces.removeAt(placeIndex)
 
                 db.collection("InterestPlace")
@@ -458,6 +469,29 @@ class FirebaseRepository: Repository {
             Log.e("deleteInterestPlace", "Error eliminando lugar: ${e.message}", e)
             false
         }
+    }
+
+    private suspend fun checkUsedPlace(toponym: String): Boolean {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        val documentSnapshot = db.collection("Route")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val routes = documentSnapshot.get("routes") as? MutableList<Map<String, Any>> ?: mutableListOf()
+
+            routes.find { route ->
+                val routeOrigin = route["origin"] as? String ?: ""
+                val routeDestination = route["destination"] as? String ?: ""
+
+                toponym == routeOrigin || toponym == routeDestination
+            }?: return false
+        } else {
+            return false
+        }
+        return true
     }
 
     override suspend fun createVehicle(plate: String, type: String, consumption: Double): Vehicle {
@@ -531,7 +565,12 @@ class FirebaseRepository: Repository {
 
             if (placeIndex == -1) {
                 throw NotSuchElementException("Vehículo no encontrado")
-            } //La excepción no tiene que ser cazada en este metodo sino en el servicio
+            }
+
+            //Se mira que no se use el vehículo en una ruta y si lo está no se puede borrar
+            if (checkUsedVehicle(plate)){
+                throw UnableToDeleteVehicleException("Este vehículo está siendo usado en una de las rutas por lo que no se puede borrar")
+            }
 
             vehicles.removeAt(placeIndex)
 
@@ -544,6 +583,28 @@ class FirebaseRepository: Repository {
         } else {
             return false
         }
+    }
+
+    private suspend fun checkUsedVehicle(plate: String): Boolean {
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+
+        val documentSnapshot = db.collection("Route")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val routes = documentSnapshot.get("routes") as? MutableList<Map<String, Any>> ?: mutableListOf()
+
+            routes.find { route ->
+                val routeVehiclePlate = route["vehiclePlate"] as? String ?: ""
+
+                plate == routeVehiclePlate
+            }?: return false
+        } else {
+            return false
+        }
+        return true
     }
 
     override suspend fun viewVehicleList(): List<Vehicle> {
