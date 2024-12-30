@@ -20,7 +20,7 @@ open class InterestPlaceService(private val repository: Repository) {
         if (alias.length > 30) {
             throw NotValidAliasException("El alias tiene un máximo de 30 caracteres.")
         }
-        val aliasRegex = "^[A-Za-z0-9\\s]+$".toRegex()
+        val aliasRegex = "^[A-Za-z0-9\\s]*$".toRegex()
         if (!alias.matches(aliasRegex)) {
             throw NotValidAliasException("El alias no tiene un formato válido.")
         }

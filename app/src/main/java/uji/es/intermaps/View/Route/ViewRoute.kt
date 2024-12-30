@@ -1,6 +1,5 @@
 package uji.es.intermaps.View.Route
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import uji.es.intermaps.Model.Coordinate
@@ -16,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -25,9 +26,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -67,9 +65,6 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
     val startLat = startPoint?.latitude ?: 0.0
     val endLong = endPoint?.longitude ?: 0.0
     val endLat = endPoint?.latitude ?: 0.0
-    val routes by viewModel.routes.observeAsState(emptyList())
-
-
 
 
     if (loading) {
@@ -82,11 +77,12 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
         val pointsToMap = routePoints!!.map { coordinate ->
             fromLngLat(coordinate.longitude, coordinate.latitude)
         }
-        Scaffold() { paddingValues ->
+        Scaffold { paddingValues ->
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
                     .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
             ) {
                 //Mapa con la ruta
                 Box(
@@ -102,7 +98,7 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                         mapViewportState = rememberMapViewportState {
                             setCameraOptions {
                                 zoom(11.0)
-                                center(fromLngLat(startLong!!, startLat!!))
+                                center(fromLngLat(startLong, startLat))
                                 pitch(0.0)
                                 bearing(0.0)
                             }
@@ -119,7 +115,7 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                         //Marcador inicial
                         ViewAnnotation(
                             options = viewAnnotationOptions {
-                                geometry(fromLngLat(startLong!!, startLat!!))
+                                geometry(fromLngLat(startLong, startLat))
                                 allowOverlap(true)
                             }
                         ) {
@@ -131,7 +127,7 @@ fun ViewRoute(navController: NavController, viewModel: RouteViewModel) {
                         }
                         ViewAnnotation(
                             options = viewAnnotationOptions {
-                                geometry(fromLngLat(endLong!!, endLat!!))
+                                geometry(fromLngLat(endLong, endLat))
                                 allowOverlap(true)
                             }
                         ) {

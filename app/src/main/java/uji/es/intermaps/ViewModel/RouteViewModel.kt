@@ -21,7 +21,6 @@ class RouteViewModel(private val routeService: RouteService): ViewModel() {
     private val _route = MutableLiveData<Route?>()
     val route: MutableLiveData<Route?> = _route
 
-
     private val _routes = MutableLiveData<List<Route>>()
     val routes: LiveData<List<Route>> = _routes
 
@@ -29,7 +28,6 @@ class RouteViewModel(private val routeService: RouteService): ViewModel() {
         private set
 
     var routeInDataBase by mutableStateOf(false)
-        private set
 
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -74,7 +72,7 @@ class RouteViewModel(private val routeService: RouteService): ViewModel() {
             } catch (e: Exception) {
                 Log.e("RouteViewModel", "Error al obtener la ruta: ${e.message}")
             } finally {
-                routeInDataBase = _route.value != null
+                //routeInDataBase = _route.value != null
                 loading = false
             }
         }
@@ -105,8 +103,15 @@ class RouteViewModel(private val routeService: RouteService): ViewModel() {
 
     suspend fun setFavRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean {
         try {
-            return routeService.setFavRoute(origin, destination, transportMethod, routeType, vehiclePlate
-            )
+            return routeService.setFavRoute(origin, destination, transportMethod, routeType, vehiclePlate)
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    suspend fun deleteFavRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean {
+        try {
+            return routeService.deleteFavRoute(origin, destination, transportMethod, routeType, vehiclePlate)
         } catch (e: Exception) {
             return false
         }

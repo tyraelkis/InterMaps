@@ -1,7 +1,6 @@
 package uji.es.intermaps.View.Route
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
@@ -48,9 +47,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.ViewModel.InterestPlaceService
@@ -59,8 +55,6 @@ import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.TransportMethods.*
 import uji.es.intermaps.Model.Vehicle
-import uji.es.intermaps.ViewModel.InterestPlaceViewModel
-import uji.es.intermaps.ViewModel.RouteService
 import uji.es.intermaps.ViewModel.RouteViewModel
 import uji.es.intermaps.ViewModel.UserViewModel
 import uji.es.intermaps.ViewModel.VehicleService
@@ -74,7 +68,6 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
     val repository: Repository = FirebaseRepository()
     val interestPlaceService = InterestPlaceService(repository)
     val vehicleService = VehicleService(repository)
-    val routeService = RouteService(repository)
     val loading = viewModel.loading
     var allPlaces by remember { mutableStateOf<List<InterestPlace>>(emptyList()) }
     var allVehicles by remember { mutableStateOf<List<Vehicle>>(emptyList()) }
@@ -181,7 +174,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(32.dp)
-                        .background(Color.White)
+                        .background(White)
                         .border(width = 1.dp, color = Color.Gray)
                         .clip(RoundedCornerShape(16.dp))
                         .clickable { expandedOrigin = true }
@@ -205,7 +198,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 DropdownMenu(
                     expanded = expandedOrigin,
                     onDismissRequest = { expandedOrigin = false },
-                    modifier = Modifier.background(Color.White)
+                    modifier = Modifier.background(White)
                 ) {
                     toponyms.forEach { option ->
                         DropdownMenuItem(
@@ -255,7 +248,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(32.dp)
-                        .background(Color.White)
+                        .background(White)
                         .border(width = 1.dp, color = Color.Gray)
                         .clip(RoundedCornerShape(16.dp))
                         .clickable { expandedDestination = true }
@@ -280,7 +273,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 DropdownMenu(
                     expanded = expandedDestination,
                     onDismissRequest = { expandedDestination = false },
-                    modifier = Modifier.background(Color.White)
+                    modifier = Modifier.background(White)
                 ) {
                     toponyms.forEach { option ->
                         DropdownMenuItem(
@@ -330,7 +323,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(32.dp)
-                        .background(Color.White)
+                        .background(White)
                         .border(width = 1.dp, color = Color.Gray)
                         .clip(RoundedCornerShape(16.dp))
                         .clickable { expandedRoutes = true }
@@ -357,7 +350,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 DropdownMenu(
                     expanded = expandedRoutes,
                     onDismissRequest = { expandedRoutes = false },
-                    modifier = Modifier.background(Color.White)
+                    modifier = Modifier.background(White)
                 ) {
                     RouteTypes.entries.forEach { type ->
                         DropdownMenuItem(
@@ -407,7 +400,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(32.dp)
-                        .background(Color.White)
+                        .background(White)
                         .border(width = 1.dp, color = Color.Gray)
                         .clip(RoundedCornerShape(16.dp))
                         .clickable { expandedTransport = true }
@@ -434,7 +427,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 DropdownMenu(
                     expanded = expandedTransport,
                     onDismissRequest = { expandedTransport = false },
-                    modifier = Modifier.background(Color.White)
+                    modifier = Modifier.background(White)
                 ) {
                     TransportMethods.entries.forEach { type ->
                         DropdownMenuItem(
@@ -485,7 +478,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(32.dp)
-                            .background(Color.White)
+                            .background(White)
                             .border(width = 1.dp, color = Color.Gray)
                             .clip(RoundedCornerShape(16.dp))
                             .clickable { expandedVehicles = true }
@@ -512,7 +505,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                     DropdownMenu(
                         expanded = expandedVehicles,
                         onDismissRequest = { expandedVehicles = false },
-                        modifier = Modifier.background(Color.White)
+                        modifier = Modifier.background(White)
                     ) {
                         plates.forEach { plate ->
                             DropdownMenuItem(
@@ -547,6 +540,7 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                         routeType!!,
                         vehicle.toString()
                     )
+                    viewModel.routeInDataBase = false
                     navController.navigate(
                         "viewRoute/" +
                                 URLEncoder.encode(origin, StandardCharsets.UTF_8.toString()) + "/" +

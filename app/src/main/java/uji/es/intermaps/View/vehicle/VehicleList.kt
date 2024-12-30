@@ -1,9 +1,11 @@
 package uji.es.intermaps.View.vehicle
 
+import androidx.compose.foundation.Image
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Star
@@ -32,6 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -43,6 +50,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Model.Vehicle
+import uji.es.intermaps.R
 import uji.es.intermaps.ViewModel.VehicleViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -66,10 +74,31 @@ fun VehicleList(auth: FirebaseAuth, navController: NavController, viewModel: Veh
             .fillMaxSize()
             .background(
                 Color.White
-            ),
+            )
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(50.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp)
+        ) {
+            Image(
+                painter = painterResource(
+                    id = R.drawable.icono_cerrar
+                ),
+                contentDescription = "",
+                modifier = Modifier
+                    .size(25.dp)
+                    .clickable { navController.navigate("mainMenu") },
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        Spacer(modifier = Modifier.height(30.dp))
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -80,17 +109,17 @@ fun VehicleList(auth: FirebaseAuth, navController: NavController, viewModel: Veh
             Text(
                 text = buildAnnotatedString {
                     append("Lista de vehículos de\n")
-                    append("\n")
                     append(email?.substringBefore("@") ?: "Usuario")
                 },
                 color = Black,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                style = TextStyle(lineHeight = 35.sp)
             )
         }
 
-        Spacer(modifier = Modifier.height(25.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
         Row(
             modifier = Modifier
