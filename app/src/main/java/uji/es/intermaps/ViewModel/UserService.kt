@@ -98,17 +98,22 @@ class UserService(var repository: Repository) {
     }
 
     suspend fun getUserTransportMethod(): Pair<Boolean,String>{
-        val attribute = repository.getUserAttribute("preferredTransportMethod")
+        var attribute = repository.getUserAttribute("preferredTransportMethod")
+        if (attribute == null){
+            attribute = "Ninguno"
+        }
         return Pair(true,attribute.toString())
     }
 
     suspend fun getUserVehicle(): Pair<Boolean,String>{
-        val attribute = repository.getUserAttribute("preferredVehicle")
+        var attribute = repository.getUserAttribute("preferredVehicle")
+        if (attribute == null){
+            attribute = "Ninguno"
+        }
         return Pair(true,attribute.toString())
 
 
     }
-
 
     suspend fun updateUserRouteType(routeType: String): Boolean{
         if (routeType.equals("Ninguno")) {
@@ -117,12 +122,16 @@ class UserService(var repository: Repository) {
         }
         if (!RouteTypes.entries.any(){it.name == routeType})
             throw NotValidParameterException()
+
         repository.updateUserAttribute("preferredRouteType", routeType)
         return true
     }
 
     suspend fun getUserRouteType(): Pair<Boolean,String>{
-        val attribute = repository.getUserAttribute("preferredRouteType")
+        var attribute = repository.getUserAttribute("preferredRouteType")
+        if (attribute == null){
+            attribute = "Ninguno"
+        }
         return Pair(true,attribute.toString())
     }
 
