@@ -1054,7 +1054,49 @@ class FirebaseRepository: Repository {
     }
 
     override suspend fun setFavRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean {
-        TODO("Not yet implemented")
+        val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
+        var result = false
+
+        val documentSnapshot = db.collection("Route")
+            .document(userEmail)
+            .get()
+            .await()
+
+        if (documentSnapshot.exists()) {
+            val routes = documentSnapshot.get("routes") as? MutableList<Map<String, Any>> ?: mutableListOf()
+
+            val foundRoute = (routes.find { route ->
+                val routeOrigin = route["origin"] as? String ?: ""
+                val routeDestination = route["destination"] as? String ?: ""
+                val routeTransportMethod = route["transportMethod"] as? String ?: ""
+                val routeTypeFound = route["routeType"] as? String ?: ""
+                val routeVehiclePlate = route["vehiclePlate"] as? String ?: ""
+
+                origin == routeOrigin && destination == routeDestination &&
+                        transportMethod.toString() == routeTransportMethod &&
+                        routeType.toString() == routeTypeFound && vehiclePlate == routeVehiclePlate
+            }?: throw NotSuchElementException("Ruta no encontrada")).toMutableMap()
+
+            val updatedRoute = routes.map { route ->
+                if (route == foundRoute){
+                    route.toMutableMap().apply {
+                        this["fav"] = true
+                    }
+                } else {
+                    route
+                }
+            }
+
+            db.collection("Route")
+                .document(userEmail)
+                .update("routes", updatedRoute)
+                .await()
+            result = true
+
+        } else {
+            result = false
+        }
+        return result
     }
 
     override suspend fun deleteFavRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean {
