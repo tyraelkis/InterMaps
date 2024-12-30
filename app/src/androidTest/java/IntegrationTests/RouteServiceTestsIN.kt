@@ -2,9 +2,7 @@ package IntegrationTests
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -12,62 +10,42 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.doAnswer
-import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
-import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
-import uji.es.intermaps.Model.User
 import uji.es.intermaps.Model.VehicleTypes
-import uji.es.intermaps.ViewModel.FirebaseRepository
-import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.RouteRepository
 import uji.es.intermaps.ViewModel.RouteService
-import uji.es.intermaps.ViewModel.UserService
 
 @RunWith(AndroidJUnit4::class)
 class RouteServiceTestsIN {
+    @Mock
+    private var mockRepository: Repository = mock(Repository::class.java)
+    private var mockRouteRepository: RouteRepository = mock(RouteRepository::class.java)
+    private lateinit var routeService: RouteService
 
-
-
-    var mockRepository: Repository = mock(Repository::class.java)
-
-
-    var mockRouteRepository: RouteRepository = mock(RouteRepository::class.java)
-
-
-    private val userService = UserService(FirebaseRepository())
-    private val userTest: User = User("emaildeprueba@gmail.com", "123456BB")
-    lateinit private var routeService: RouteService
     private val route = Route("","", emptyList(), 0.0, 0.0.toString(),0.0,  RouteTypes.RAPIDA, false, TransportMethods.VEHICULO, "")
 
     @Before
-    fun setup():Unit = runBlocking() {
-        userService.login(userTest.email, userTest.pswd)
+    fun setup():Unit = runBlocking {
         routeService = RouteService(mockRepository)
-        routeService.routeRepository = mockRouteRepository // Usamos el mock para la base de datos
-    }
-
-    @After
-    fun tearDown():Unit = runBlocking() {
-        userService.signOut()
+        routeService.routeRepository = mockRouteRepository
     }
 
     @Test
-    fun createRoute_E1Valid_routeIsCreated():Unit = runBlocking() {
+    fun createRoute_E1Valid_routeIsCreated():Unit = runBlocking {
         // Mockear la creación de la ruta
-        var mockedRoute = Route(
+        val mockedRoute = Route(
             origin = "Burriana",
             destination = "Castellón de la Plana",
             transportMethod = TransportMethods.VEHICULO,
@@ -283,8 +261,8 @@ class RouteServiceTestsIN {
     @Test (expected = NotSuchElementException::class)
     fun setFavRoute_E3Invalid_errorOnSettingFavRoute(): Unit = runBlocking {
         doAnswer{ throw NotSuchElementException("No existe esa ruta") }
-            .`when`(mockRepository.setFavRoute("Burriana", "Castellón de la Plana", TransportMethods.APIE, RouteTypes.RAPIDA, ""))
-        routeService.setFavRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "9999GON")
+            .`when`(mockRepository).setFavRoute("Burriana", "Castellón de la Plana", TransportMethods.APIE, RouteTypes.RAPIDA, "")
+        routeService.setFavRoute("Burriana", "Castellón de la Plana", TransportMethods.APIE, RouteTypes.RAPIDA, "")
     }
 
     @Test
@@ -298,7 +276,7 @@ class RouteServiceTestsIN {
     @Test (expected = NotSuchElementException::class)
     fun deleteFavRoute_E3Invalid_errorOnDeletingFavRoute(): Unit = runBlocking {
         doAnswer{ throw NotSuchElementException("No existe esa ruta") }
-            .`when`(mockRepository.deleteFavRoute("Burriana", "Castellón de la Plana", TransportMethods.APIE, RouteTypes.RAPIDA, ""))
-        routeService.deleteFavRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "9999GON")
+            .`when`(mockRepository).deleteFavRoute("Burriana", "Castellón de la Plana", TransportMethods.APIE, RouteTypes.RAPIDA, "")
+        routeService.deleteFavRoute("Burriana", "Castellón de la Plana", TransportMethods.APIE, RouteTypes.RAPIDA, "")
     }
 }
