@@ -206,9 +206,9 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
             expanded = expandedTransport,
             onExpandedChange = { expandedTransport = it }
         )
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(120.dp))
 
-        Button(
+        /*Button(
             onClick = {
             },
             modifier = Modifier
@@ -220,7 +220,7 @@ fun UserDataScreen(auth: FirebaseAuth, navController: NavController, viewModel: 
         ) {
             Text(text = "Guardar Datos", color = White, fontSize = 20.sp)
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))*/
 
         Button(
             onClick = {

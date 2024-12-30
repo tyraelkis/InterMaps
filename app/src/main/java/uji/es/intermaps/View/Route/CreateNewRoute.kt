@@ -87,8 +87,8 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
     var expandedVehicles by remember { mutableStateOf(false) }
     val toponyms = allPlaces.map { it.toponym }
     val plates = allVehicles.map { it.plate }
-    var routeType by remember { mutableStateOf(userViewModel.preferredRouteType.value) }
-    var transportMethod by remember { mutableStateOf(userViewModel.preferredTransport.value) }
+    var routeType by remember { mutableStateOf(userViewModel.preferredRouteType.value ?: null) }
+    var transportMethod by remember { mutableStateOf(userViewModel.preferredTransport.value ?: null) }
     var vehicle by remember {
         mutableStateOf(
             userViewModel.preferredVehicle.value ?: ""
@@ -119,8 +119,13 @@ fun CreateNewRoute(auth: FirebaseAuth, navController: NavController, viewModel: 
                 allVehicles = emptyList()
             }
             vehicle = userViewModel.getPreferredVehicle()
-            routeType = RouteTypes.valueOf(userViewModel.getPreferredRouteType())
-            transportMethod = TransportMethods.valueOf(userViewModel.getPreferredTransport())
+            routeType = userViewModel.getPreferredRouteType()
+                .takeUnless { it == "Ninguno" }
+                ?.let { RouteTypes.valueOf(it) }
+
+            transportMethod = userViewModel.getPreferredTransport()
+                .takeUnless { it == "Ninguno" }
+                ?.let { TransportMethods.valueOf(it) }
         }
 
     }

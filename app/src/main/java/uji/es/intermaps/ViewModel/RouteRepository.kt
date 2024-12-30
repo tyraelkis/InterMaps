@@ -149,7 +149,6 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
                         preference = routeTypePreference
                     )
                 )
-
             }
 
             if (call.isSuccessful) {

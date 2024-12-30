@@ -38,8 +38,8 @@ class UserViewModel(
 
     private val _showPasswordPopUp = mutableStateOf(false)
     val showPasswordDialog: State<Boolean> get() = _showPasswordPopUp
-
     private val _preferredTransport = mutableStateOf<TransportMethods?>(null)
+
     val preferredTransport: MutableState<TransportMethods?> get() = _preferredTransport
 
     private val _preferredVehicle = mutableStateOf<String?>(null)
