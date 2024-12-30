@@ -103,4 +103,12 @@ class RouteViewModel(private val routeService: RouteService): ViewModel() {
         }
     }
 
+    suspend fun setFavRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String): Boolean {
+        try {
+            return routeService.setFavRoute(origin, destination, transportMethod, routeType, vehiclePlate
+            )
+        } catch (e: Exception) {
+            return false
+        }
+    }
 }

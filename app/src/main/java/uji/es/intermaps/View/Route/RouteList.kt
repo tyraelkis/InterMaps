@@ -2,7 +2,6 @@
 
 package uji.es.intermaps.View.Route
 
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,12 +24,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,13 +38,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import uji.es.intermaps.ViewModel.FirebaseRepository
-import uji.es.intermaps.ViewModel.InterestPlaceService
-import uji.es.intermaps.Interfaces.Repository
-import uji.es.intermaps.Model.Route
-import uji.es.intermaps.Model.TransportMethods
-import uji.es.intermaps.ViewModel.InterestPlaceViewModel
-import uji.es.intermaps.ViewModel.RouteService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uji.es.intermaps.ViewModel.RouteViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -55,20 +49,13 @@ import java.nio.charset.StandardCharsets
 @Composable
 fun RouteList(auth: FirebaseAuth, navController: NavController, viewModel: RouteViewModel) {
     val user = auth.currentUser
-    val repository: Repository = FirebaseRepository()
     val allRoutes by viewModel.routes.observeAsState(emptyList())
     val emailPrefix = user?.email?.substringBefore("@") ?: "Usuario"
 
-
     viewModel.updateRouteList()
-    Log.i("Lista de rutas", allRoutes.toString() )
 
-    val favList = allRoutes.filter { it.fav }
-    Log.i("Lista de rutas", allRoutes.toString() )
-
-    val noFavList = allRoutes.filter { !it.fav }
-    Log.i("Lista de rutas", allRoutes.toString() )
-
+    val favList by remember(allRoutes) { derivedStateOf { allRoutes.filter { it.fav } } }
+    val noFavList by remember(allRoutes) { derivedStateOf { allRoutes.filter { !it.fav } } }
 
     Column(
         modifier = Modifier
@@ -211,7 +198,16 @@ fun RouteList(auth: FirebaseAuth, navController: NavController, viewModel: Route
                             imageVector = Icons.Default.Star,
                             contentDescription = "Estrella fav",
                             modifier = Modifier
-                                .size(30.dp),
+                                .size(30.dp)
+                                .clickable {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        if (viewModel.setFavRoute(notFavRoute.origin, notFavRoute.destination, notFavRoute.transportMethod, notFavRoute.routeType, notFavRoute.vehiclePlate)) {
+                                            withContext(Dispatchers.Main) {
+                                                viewModel.updateRouteList()
+                                            }
+                                        }
+                                    }
+                                },
                             tint = Black
                         )
 
