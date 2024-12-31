@@ -16,8 +16,6 @@ import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.Interfaces.Repository
-import uji.es.intermaps.Model.Coordinate
-import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.ViewModel.UserService
@@ -27,7 +25,7 @@ class UserServiceTests {
     private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
     private var email: String = "prueba@uji.es"
-    private var password: String = "123456AA" // Cambiar en las pruebas de aceptacion para que cumpla los requisitos de las contraseñas
+    private var password: String = "123456AA"
     private var userService: UserService = UserService(repository)
     private var userTest: User = User("emaildeprueba@gmail.com", "123456BB")
 

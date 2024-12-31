@@ -23,7 +23,7 @@ import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 @Composable
 fun CreateInterestPlaceErrorPopUp (
     viewModel: InterestPlaceViewModel,
-){
+){//TODO ESTA CLASE NO SE USA PARA NADA MIRAR DE BORRAR
     val showDialog = viewModel.showCreateInterestPlaceErrorPopUp.value
     if (showDialog) {
         Dialog(

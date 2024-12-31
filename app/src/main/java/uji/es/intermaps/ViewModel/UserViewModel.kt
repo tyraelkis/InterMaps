@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.compose.runtime.*
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -13,8 +12,6 @@ import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
@@ -47,10 +44,6 @@ class UserViewModel(
 
     private val _preferredRouteType = mutableStateOf<RouteTypes?>(null)
     val preferredRouteType: MutableState<RouteTypes?> get() = _preferredRouteType
-
-    var loading by mutableStateOf(false)
-        private set
-
 
     private var errorMessageNormal = ""
 

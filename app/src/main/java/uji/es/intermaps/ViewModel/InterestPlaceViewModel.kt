@@ -64,10 +64,6 @@ class InterestPlaceViewModel(
         private set
     var newAlias by mutableStateOf("")
 
-    fun putInterestPlace(interestPlace: InterestPlace) {
-        this.interestPlace = interestPlace
-    }
-
     fun showDeleteInterestPlacePopUp(){
         _showDeletePopUp.value = true
     }
@@ -76,11 +72,6 @@ class InterestPlaceViewModel(
         _showDeletePopUp.value = false
     }
 
-
-
-    fun showCreateInterestPlaceCorrectPopUp(){
-        _showCreateInterestPlaceCorrectPopUp.value = true
-    }
     fun hideCreateInterestPlaceCorrectPopUp(){
         _showCreateInterestPlaceCorrectPopUp.value = false
     }
@@ -111,7 +102,7 @@ class InterestPlaceViewModel(
         loading = true
         viewModelScope.launch {
             interestPlace = interestPlaceService.getInterestPlaceByToponym(toponym)
-            if (interestPlace!= null){
+            if (interestPlace != null){
                 loading = false
             }
         }

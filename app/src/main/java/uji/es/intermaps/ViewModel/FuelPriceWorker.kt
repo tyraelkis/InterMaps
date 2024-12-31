@@ -1,9 +1,7 @@
 package uji.es.intermaps.ViewModel
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.work.CoroutineWorker
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -12,11 +10,10 @@ import uji.es.intermaps.Model.CachePrecioLuz
 import uji.es.intermaps.Model.ConsultorPreciLuz
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import uji.es.intermaps.ViewModel.FirebaseRepository
 
 
 class FuelPriceWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
-    val routeService = RouteService(FirebaseRepository(), CachePrecioLuz(ConsultorPreciLuz()))
+    private val routeService = RouteService(FirebaseRepository(), CachePrecioLuz(ConsultorPreciLuz()))
     override suspend fun doWork(): Result {
         return try {
             routeService.putFuelCostAverage()

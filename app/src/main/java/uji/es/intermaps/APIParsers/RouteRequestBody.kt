@@ -9,8 +9,3 @@ data class RouteRequestBody(
     val language: String = "es",
     val extra_info: List<String>? = null
 )
-
-data class AlternativeRoutes(
-    val target_count: Int = 2,
-    val weight_factor: Double = 1.6
-)

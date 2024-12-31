@@ -1,7 +1,5 @@
 package uji.es.intermaps.ViewModel
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.Exceptions.NoValidTypeException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
@@ -61,7 +59,7 @@ open class RouteService(private val repository: Repository, private val servicio
         if (transportMethod != TransportMethods.VEHICULO ){
             throw NotValidTransportException()
         } else {
-            res = routeRepository.calculateConsumition(route, transportMethod, vehicleType,)
+            res = routeRepository.calculateConsumition(route, transportMethod, vehicleType)
         }
        return res
     }

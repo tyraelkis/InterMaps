@@ -28,9 +28,8 @@ class VehicleServiceTests {
     private var vehicle: Vehicle = GasolineVehicle("9999GON", VehicleTypes.GASOLINA.type,9.0, false)
     private var vehicleEditable: Vehicle = GasolineVehicle("7777SOD", VehicleTypes.GASOLINA.type,9.0, false)
     private var vehicleService: VehicleService = VehicleService(repository)
-    private var email: String = "emaildeprueba@gmail.com" //Usuario con lista de lugares. Hay que añadirle un lugar
-    private var emailEmpty: String = "emaildepruebaempty@gmail.com" //Usuario sin lista de lugares
-    val userService = UserService(FirebaseRepository())
+    private var emailEmpty: String = "emaildepruebaempty@gmail.com"
+    private val userService = UserService(FirebaseRepository())
     private val userTest: User = User("emaildeprueba@gmail.com", "123456BB")
 
     @Before

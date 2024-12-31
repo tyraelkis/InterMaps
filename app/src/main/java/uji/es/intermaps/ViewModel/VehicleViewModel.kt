@@ -3,7 +3,6 @@ package uji.es.intermaps.ViewModel
 import androidx.lifecycle.MutableLiveData
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
-import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.Model.VehicleFactory
 import uji.es.intermaps.Model.VehicleTypes

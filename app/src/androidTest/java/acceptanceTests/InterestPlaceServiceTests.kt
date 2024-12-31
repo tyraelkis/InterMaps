@@ -8,8 +8,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.anyString
-import org.mockito.Mockito.doAnswer
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
@@ -29,8 +27,8 @@ class InterestPlaceServiceTests {
     private var repository: Repository = FirebaseRepository()
     private var interestPlace: InterestPlace = InterestPlace(Coordinate(-18.665695, 35.529562), "Mozambique", "Moz", false)
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
-    private var email: String = "emaildeprueba@gmail.com" //Usuario con lista de lugares. Hay que añadirle un lugar
-    private var emailEmpty: String = "emaildepruebaempty@gmail.com" //Usuario sin lista de lugares
+    private var email: String = "emaildeprueba@gmail.com"
+    private var emailEmpty: String = "emaildepruebaempty@gmail.com"
     private val userService = UserService(FirebaseRepository())
     private val userTest: User = User("emaildeprueba@gmail.com", "123456BB")
 

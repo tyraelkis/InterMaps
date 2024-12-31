@@ -2,7 +2,6 @@ package uji.es.intermaps.Interfaces
 
 import retrofit2.http.GET
 import retrofit2.http.Query
-import retrofit2.Call
 import uji.es.intermaps.APIParsers.ElectricityCostAverageORSAPIResponse
 
 interface PrecioLuzAPI {

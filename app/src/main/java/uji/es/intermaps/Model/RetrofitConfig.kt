@@ -1,8 +1,5 @@
 package uji.es.intermaps.Model
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -29,9 +26,9 @@ object RetrofitConfig {
 
         // Construcción de Retrofit
         val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.openrouteservice.org/") // Base URL
+            .baseUrl("https://api.openrouteservice.org/")
             .client(httpClient) // Cliente HTTP con configuración personalizada
-            .addConverterFactory(GsonConverterFactory.create()) // Conversión JSON
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
 
         // Creación del servicio
@@ -39,12 +36,6 @@ object RetrofitConfig {
     }
 
     fun createRetrofitPrecioLuz(): PrecioLuzAPI {
-        /*val okHttpsClient = OkHttpClient.Builder()
-            .connectTimeout(60, TimeUnit.SECONDS)  // Ajusta según sea necesario
-            .readTimeout(60, TimeUnit.SECONDS)
-            .writeTimeout(60, TimeUnit.SECONDS)
-            .build()*/
-
         val retrofit = Retrofit.Builder()
             .baseUrl("https://apidatos.ree.es/")
             .addConverterFactory(GsonConverterFactory.create())
@@ -61,12 +52,4 @@ object RetrofitConfig {
         return retrofit.create(FuelPriceAPI::class.java)
 
     }
-
-    fun getRetrofit():Retrofit{
-        return Retrofit.Builder()
-            .baseUrl("https://api.openrouteservice.org/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
 }
