@@ -1,7 +1,6 @@
 package uji.es.intermaps.ViewModel
 
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
-import kotlinx.coroutines.*
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
@@ -10,7 +9,6 @@ import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.CachePrecioLuz
 import uji.es.intermaps.Model.ConsultorPreciLuz
 import uji.es.intermaps.Model.Coordinate
-import uji.es.intermaps.Model.RetrofitConfig
 
 open class InterestPlaceService(private val repository: Repository) {
     var routeRepository = RouteRepository(CachePrecioLuz(ConsultorPreciLuz()))
@@ -50,7 +48,7 @@ open class InterestPlaceService(private val repository: Repository) {
         if (coordinate == Coordinate(0.0, 0.0)) {
             throw NotSuchPlaceException()
         }
-        var result = repository.createInterestPlace(coordinate, toponym, "")
+        val result = repository.createInterestPlace(coordinate, toponym, "")
         // Crear el lugar de interés
         return result
     }
@@ -88,7 +86,7 @@ open class InterestPlaceService(private val repository: Repository) {
     }
 
     suspend fun searchInterestPlaceByToponym(toponym: String) : InterestPlace{
-        var result = routeRepository.searchInterestPlaceByToponym(toponym)
+        val result = routeRepository.searchInterestPlaceByToponym(toponym)
         return result
     }
 

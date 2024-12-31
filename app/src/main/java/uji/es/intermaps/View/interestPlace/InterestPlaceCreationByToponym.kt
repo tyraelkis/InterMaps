@@ -175,7 +175,7 @@ fun InterestPlaceCreationByToponym(navController: NavController, viewModel: Inte
                     onClick = {
                         CoroutineScope(Dispatchers.IO).launch {
                             viewModel.createInterestPlaceFromToponym(selectToponym)
-                            var errorMessage = viewModel.getErrorMessage()
+                            val errorMessage = viewModel.getErrorMessage()
                             withContext(Dispatchers.Main) {
                                 if (errorMessage.isEmpty())
                                     showPopupCreateSucces = true

@@ -12,7 +12,6 @@ import com.google.firebase.auth.FirebaseAuth
 import uji.es.intermaps.View.Route.CreateNewRoute
 import uji.es.intermaps.View.Route.RouteList
 import uji.es.intermaps.View.Route.ViewRoute
-import uji.es.intermaps.View.home.HomeScreen
 import uji.es.intermaps.View.home.InitialScreen
 import uji.es.intermaps.View.home.MainMenu
 import uji.es.intermaps.View.interestPlace.InterestPlaceCreation
@@ -53,12 +52,6 @@ fun NavigationWrapper(navHostController: NavHostController, auth: FirebaseAuth, 
         }
         composable("signUp") {
             SignUpScreen(
-                navHostController,
-                viewModelUser
-            )
-        }
-        composable("home") {
-            HomeScreen (
                 navHostController,
                 viewModelUser
             )

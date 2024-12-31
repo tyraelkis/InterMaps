@@ -18,8 +18,6 @@ import uji.es.intermaps.Interfaces.ElectricityPriceRepository
 import uji.es.intermaps.Interfaces.FuelPriceRepository
 import uji.es.intermaps.Interfaces.ORSRepository
 import uji.es.intermaps.Interfaces.ProxyService
-import uji.es.intermaps.Model.CachePrecioLuz
-import uji.es.intermaps.Model.ConsultorPreciLuz
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase.auth
 import uji.es.intermaps.Model.DataBase.db
@@ -41,10 +39,9 @@ import java.time.format.DateTimeFormatter
 
 open class RouteRepository (val servicioLuz: ProxyService): ORSRepository, FuelPriceRepository, ElectricityPriceRepository{
     val repository = FirebaseRepository()
-    //val servicioLuz: ProxyService = CachePrecioLuz(ConsultorPreciLuz())
 
     private val apiKey = "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23"
-    val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
+    private val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
     override suspend fun searchInterestPlaceByCoordinates(coordinate: Coordinate): InterestPlace {
         if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){
             throw NotValidCoordinatesException("Las coordenadas no son válidas")
@@ -166,7 +163,7 @@ open class RouteRepository (val servicioLuz: ProxyService): ORSRepository, FuelP
         return route
     }
 
-    override suspend fun createRoute( origin: String, destination: String, transportMethod: TransportMethods,
+    override suspend fun createRoute( origin: String, destination: String, transportMethods: TransportMethods,
                                       routeType: RouteTypes, vehiclePlate: String, route: RouteFeature
     ): Route {
         val routeService = RouteService(repository, servicioLuz)
@@ -186,18 +183,18 @@ open class RouteRepository (val servicioLuz: ProxyService): ORSRepository, FuelP
             route = coordinates,
             distance = distance,
             duration = duration,
-            transportMethod = transportMethod,
+            transportMethod = transportMethods,
             routeType = routeType,
             vehiclePlate = vehiclePlate,
             cost = 0.0
         )
 
-        if (transportMethod == TransportMethods.VEHICULO){
+        if (transportMethods == TransportMethods.VEHICULO){
             val vehicleType = routeService.getVehicleTypeAndConsump(route).first
-            route.cost = calculateConsumition(route, transportMethod, vehicleType)
+            route.cost = calculateConsumition(route, transportMethods, vehicleType)
         }
         else{
-            route.cost = calculateCaloriesConsumition(route, transportMethod)
+            route.cost = calculateCaloriesConsumition(route, transportMethods)
         }
         return route
     }
@@ -246,7 +243,7 @@ open class RouteRepository (val servicioLuz: ProxyService): ORSRepository, FuelP
         val openRouteService = RetrofitConfig.createRetrofitFuelPrice()
 
         val list : List<Double>
-        return try {
+        try {
             val response = openRouteService.getFuelCostAverage()
             val fuelStations = response.listaEstaciones
             var gasolina95Total = 0.0
@@ -280,7 +277,7 @@ open class RouteRepository (val servicioLuz: ProxyService): ORSRepository, FuelP
     override suspend fun calculateElectricityCost(): Boolean {
         val openRouteService = RetrofitConfig.createRetrofitPrecioLuz()
 
-        return try {
+        try {
             val dateformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
 
             val jsonFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")

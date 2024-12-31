@@ -16,7 +16,6 @@ import uji.es.intermaps.Interfaces.ProxyService
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.CachePrecioLuz
 import uji.es.intermaps.Model.ConsultorPreciLuz
-import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
@@ -30,18 +29,14 @@ import uji.es.intermaps.ViewModel.VehicleService
 
 @RunWith(AndroidJUnit4::class)
 class RouteServiceTest {
-    private var db: DataBase = DataBase
     private var repository: Repository = FirebaseRepository()
-    private var email: String = "prueba@uji.es"
-    private var password: String = "123456AA"
     private var userService: UserService = UserService(repository)
     private var userTest: User = User("emaildeprueba@gmail.com", "123456BB")
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
     private val servicioLuz: ProxyService = CachePrecioLuz(ConsultorPreciLuz())
     private var routeService: RouteService = RouteService(repository, servicioLuz)
     private var vehicleService: VehicleService = VehicleService(repository)
-    var routeTest: Route? = null
-    private var emailEmpty: String = "emaildepruebaempty@gmail.com" //Usuario sin lista de lugares
+    private var emailEmpty: String = "emaildepruebaempty@gmail.com"
 
 
     @Before

@@ -13,10 +13,7 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="RouteServiceTestsIN">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="RouteServiceTest">
+      <SelectionState runConfigName="Tests in 'acceptanceTests'">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

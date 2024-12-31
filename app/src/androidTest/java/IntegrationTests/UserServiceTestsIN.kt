@@ -21,7 +21,6 @@ import uji.es.intermaps.Exceptions.SessionNotStartedException
 import uji.es.intermaps.Exceptions.UnableToDeleteUserException
 import uji.es.intermaps.Exceptions.UnregistredUserException
 import uji.es.intermaps.Interfaces.Repository
-import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.ViewModel.UserService
 

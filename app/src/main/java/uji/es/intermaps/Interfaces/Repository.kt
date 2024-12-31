@@ -1,7 +1,5 @@
 package uji.es.intermaps.Interfaces
 
-import androidx.navigation.ActivityNavigator
-import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Model.Route

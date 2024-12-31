@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 fun NavBar(
     currentRoute: String,
     onNavigate: (String) -> Unit
-) {
+) { //TODO ESTA CLASE NO SE USA PARA NADA MIRAR DE BORRAR
     val items = listOf("home", "userDataScreen")
 
     NavigationBar {

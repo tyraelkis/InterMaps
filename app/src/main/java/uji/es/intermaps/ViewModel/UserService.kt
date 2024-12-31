@@ -1,6 +1,5 @@
 package uji.es.intermaps.ViewModel
 
-import com.mapbox.maps.extension.style.expressions.dsl.generated.featureState
 import uji.es.intermaps.Exceptions.IncorrectDataException
 import uji.es.intermaps.Exceptions.NotSuchTransportException
 import uji.es.intermaps.Exceptions.NotSuchVehicleException
@@ -120,7 +119,7 @@ class UserService(var repository: Repository) {
             repository.updateUserAttribute("preferredRouteType", routeType)
             return true
         }
-        if (!RouteTypes.entries.any(){it.name == routeType})
+        if (!RouteTypes.entries.any{it.name == routeType})
             throw NotValidParameterException()
 
         repository.updateUserAttribute("preferredRouteType", routeType)
