@@ -12,7 +12,10 @@ import uji.es.intermaps.Exceptions.NoValidTypeException
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.NotValidTransportException
+import uji.es.intermaps.Interfaces.ProxyService
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.CachePrecioLuz
+import uji.es.intermaps.Model.ConsultorPreciLuz
 import uji.es.intermaps.Model.DataBase
 import uji.es.intermaps.Model.Route
 import uji.es.intermaps.Model.RouteTypes
@@ -34,7 +37,8 @@ class RouteServiceTest {
     private var userService: UserService = UserService(repository)
     private var userTest: User = User("emaildeprueba@gmail.com", "123456BB")
     private var interestPlaceService: InterestPlaceService = InterestPlaceService(repository)
-    private var routeService: RouteService = RouteService(repository)
+    private val servicioLuz: ProxyService = CachePrecioLuz(ConsultorPreciLuz())
+    private var routeService: RouteService = RouteService(repository, servicioLuz)
     private var vehicleService: VehicleService = VehicleService(repository)
     var routeTest: Route? = null
     private var emailEmpty: String = "emaildepruebaempty@gmail.com" //Usuario sin lista de lugares

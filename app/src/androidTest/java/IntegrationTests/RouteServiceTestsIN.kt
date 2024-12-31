@@ -17,6 +17,7 @@ import org.mockito.Mockito.`when`
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchElementException
+import uji.es.intermaps.Interfaces.ProxyService
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.InterestPlace
@@ -32,13 +33,14 @@ class RouteServiceTestsIN {
     @Mock
     private var mockRepository: Repository = mock(Repository::class.java)
     private var mockRouteRepository: RouteRepository = mock(RouteRepository::class.java)
+    private var mockServicioLuz: ProxyService = mock(ProxyService::class.java)
     private lateinit var routeService: RouteService
 
     private val route = Route("","", emptyList(), 0.0, 0.0.toString(),0.0,  RouteTypes.RAPIDA, false, TransportMethods.VEHICULO, "")
 
     @Before
     fun setup():Unit = runBlocking {
-        routeService = RouteService(mockRepository)
+        routeService = RouteService(mockRepository, mockServicioLuz)
         routeService.routeRepository = mockRouteRepository
     }
 

@@ -3,7 +3,6 @@ package uji.es.intermaps.ViewModel
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.utils.PolylineUtils
 import kotlinx.coroutines.Dispatchers
@@ -11,15 +10,16 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.APIParsers.RouteRequestBody
-import uji.es.intermaps.APIParsers.RouteResponse
 import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchPlaceException
 import uji.es.intermaps.Exceptions.NotValidCoordinatesException
-import uji.es.intermaps.Exceptions.NotValidTransportException
 import uji.es.intermaps.Interfaces.CostStrategy
 import uji.es.intermaps.Interfaces.ElectricityPriceRepository
 import uji.es.intermaps.Interfaces.FuelPriceRepository
 import uji.es.intermaps.Interfaces.ORSRepository
+import uji.es.intermaps.Interfaces.ProxyService
+import uji.es.intermaps.Model.CachePrecioLuz
+import uji.es.intermaps.Model.ConsultorPreciLuz
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.DataBase.auth
 import uji.es.intermaps.Model.DataBase.db
@@ -39,8 +39,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPriceRepository{
+open class RouteRepository (val servicioLuz: ProxyService): ORSRepository, FuelPriceRepository, ElectricityPriceRepository{
     val repository = FirebaseRepository()
+    //val servicioLuz: ProxyService = CachePrecioLuz(ConsultorPreciLuz())
 
     private val apiKey = "5b3ce3597851110001cf6248d49685f8848445039a3bcb7f0da42f23"
     val openRouteService = RetrofitConfig.createRetrofitOpenRouteService()
@@ -168,7 +169,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
     override suspend fun createRoute( origin: String, destination: String, transportMethod: TransportMethods,
                                       routeType: RouteTypes, vehiclePlate: String, route: RouteFeature
     ): Route {
-        val routeService = RouteService(repository)
+        val routeService = RouteService(repository, servicioLuz)
         val coordinates = decodeAndMapToCoordenadas(route.geometry)
         if (coordinates.isEmpty()) {
             throw IllegalArgumentException("No se generaron coordenadas válidas para la ruta")
@@ -219,7 +220,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
 
     override suspend fun calculateConsumition( route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes
     ): Double {
-        val routeService = RouteService(repository)
+        val routeService = RouteService(repository, servicioLuz)
         val consumo = routeService.getVehicleTypeAndConsump(route).second
 
         val strategy: CostStrategy = when {
@@ -274,7 +275,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
 
     }
 
-
+    //Ya no se usa pero si lo comento indica que no se implementa un método de la interfaz que implementa
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun calculateElectricityCost(): Boolean {
         val openRouteService = RetrofitConfig.createRetrofitPrecioLuz()
@@ -353,7 +354,7 @@ open class RouteRepository (): ORSRepository, FuelPriceRepository, ElectricityPr
         transportMethod: TransportMethods,
         vehiclePlate: String
     ): Route? {
-        val routeService = RouteService(repository)
+        val routeService = RouteService(repository, servicioLuz)
 
         val userEmail = auth.currentUser?.email ?: throw IllegalStateException("No hay un usuario autenticado")
         return try {

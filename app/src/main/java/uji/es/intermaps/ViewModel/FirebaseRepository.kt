@@ -786,6 +786,7 @@ class FirebaseRepository: Repository {
         }
     }
 
+    //Ya no se usa pero si lo comento indica que no se implementa un método de la interfaz que implementa
     override suspend fun getElectricPrice(): Double {
         try {
             val userDocument = db.collection("ElectricityPrices").document("precios").get().await()

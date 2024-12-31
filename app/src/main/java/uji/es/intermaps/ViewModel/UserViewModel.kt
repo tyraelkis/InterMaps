@@ -86,7 +86,7 @@ class UserViewModel(
 
     suspend fun updatePreferredTransport(transportMethod: String) {
         _preferredTransport.value = if (transportMethod == "Ninguno") null else TransportMethods.valueOf(transportMethod)
-            userService.updateUserTransportMethod(transportMethod)
+        userService.updateUserTransportMethod(transportMethod)
         }
 
     suspend fun updatePreferredVehicle(vehiclePlate: String) {

@@ -7,11 +7,13 @@ import uji.es.intermaps.Exceptions.NotValidAliasException
 import uji.es.intermaps.Exceptions.UnableToDeletePlaceException
 import uji.es.intermaps.Model.InterestPlace
 import uji.es.intermaps.Interfaces.Repository
+import uji.es.intermaps.Model.CachePrecioLuz
+import uji.es.intermaps.Model.ConsultorPreciLuz
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.RetrofitConfig
 
 open class InterestPlaceService(private val repository: Repository) {
-    var routeRepository = RouteRepository()
+    var routeRepository = RouteRepository(CachePrecioLuz(ConsultorPreciLuz()))
 
     suspend fun createInterestPlace(coordinate: Coordinate, toponym: String, alias: String): InterestPlace {
         if (coordinate.latitude < -90 || coordinate.latitude > 90 || coordinate.longitude < -180 || coordinate.longitude > 180){

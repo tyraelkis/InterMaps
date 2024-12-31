@@ -8,13 +8,15 @@ import androidx.work.CoroutineWorker
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import uji.es.intermaps.Model.CachePrecioLuz
+import uji.es.intermaps.Model.ConsultorPreciLuz
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import uji.es.intermaps.ViewModel.FirebaseRepository
 
 
 class FuelPriceWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
-    val routeService = RouteService(FirebaseRepository())
+    val routeService = RouteService(FirebaseRepository(), CachePrecioLuz(ConsultorPreciLuz()))
     override suspend fun doWork(): Result {
         return try {
             routeService.putFuelCostAverage()
@@ -26,8 +28,9 @@ class FuelPriceWorker(context: Context, workerParams: WorkerParameters) : Corout
     }
 }
 
+/* Ya no se usa
 class ElectricPriceWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
-    val routeService = RouteService(FirebaseRepository())
+    val routeService = RouteService(FirebaseRepository(), CachePrecioLuz(ConsultorPreciLuz()))
     @RequiresApi(Build.VERSION_CODES.O)
     override suspend fun doWork(): Result {
         return try {
@@ -39,6 +42,7 @@ class ElectricPriceWorker(context: Context, workerParams: WorkerParameters) : Co
         }
     }
 }
+*/
 
 fun scheduleFuelPriceUpdate() {
     val calendar = Calendar.getInstance()
@@ -57,6 +61,7 @@ fun scheduleFuelPriceUpdate() {
     WorkManager.getInstance().enqueue(workRequest)
 }
 
+/* Ya no se usa
 fun scheduleElectricPriceUpdate() {
     val calendar = Calendar.getInstance()
     calendar.set(Calendar.MINUTE, 0)
@@ -72,3 +77,4 @@ fun scheduleElectricPriceUpdate() {
 
     WorkManager.getInstance().enqueue(workRequest)
 }
+*/

@@ -19,16 +19,17 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import uji.es.intermaps.Interfaces.ProxyService
+import uji.es.intermaps.Model.CachePrecioLuz
+import uji.es.intermaps.Model.ConsultorPreciLuz
 import uji.es.intermaps.ViewModel.FirebaseRepository
 import uji.es.intermaps.ViewModel.InterestPlaceService
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
-import uji.es.intermaps.ViewModel.RouteRepository
 import uji.es.intermaps.ViewModel.RouteService
 import uji.es.intermaps.ViewModel.RouteViewModel
 import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.ViewModel.UserViewModel
 import uji.es.intermaps.ViewModel.VehicleViewModel
-import uji.es.intermaps.ViewModel.scheduleElectricPriceUpdate
 import uji.es.intermaps.ViewModel.scheduleFuelPriceUpdate
 import uji.es.intermaps.ui.theme.InterMapsTheme
 
@@ -40,7 +41,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         FirebaseFirestore.setLoggingEnabled(true)
         scheduleFuelPriceUpdate()
-        scheduleElectricPriceUpdate()
+        //scheduleElectricPriceUpdate() Ya no se usa
         auth = Firebase.auth
         enableEdgeToEdge()
         setContent {
@@ -48,7 +49,8 @@ class MainActivity : ComponentActivity() {
             val repository = FirebaseRepository()
             val interestPlaceService = InterestPlaceService(repository)
             val userService = UserService(repository)
-            val routeService = RouteService(repository)
+            val servicioLuz: ProxyService = CachePrecioLuz(ConsultorPreciLuz())
+            val routeService = RouteService(repository, servicioLuz)
             InterMapsTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(

@@ -6,6 +6,7 @@ import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.Exceptions.NoValidTypeException
 import uji.es.intermaps.Exceptions.NotValidPlaceException
 import uji.es.intermaps.Exceptions.NotValidTransportException
+import uji.es.intermaps.Interfaces.ProxyService
 import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.Coordinate
 import uji.es.intermaps.Model.Route
@@ -13,8 +14,8 @@ import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
 import uji.es.intermaps.Model.VehicleTypes
 
-open class RouteService(private val repository: Repository){
-    public var routeRepository = RouteRepository()
+open class RouteService(private val repository: Repository, private val servicioLuz: ProxyService){
+    var routeRepository = RouteRepository(servicioLuz)
 
     suspend fun createRoute(origin: String, destination: String, transportMethod: TransportMethods, routeType: RouteTypes, vehiclePlate: String):Pair<Boolean,Route> {
         if (origin.isEmpty() or destination.isEmpty()){
@@ -75,10 +76,12 @@ open class RouteService(private val repository: Repository){
         return res
     }
 
+    /* No se usa
     suspend fun calculateConsumition1(route: Route, transportMethod: TransportMethods, vehicleType: VehicleTypes): Double {
         val res = routeRepository.calculateConsumition(route, transportMethod, vehicleType)
         return res
     }
+    */
 
     suspend fun putRoute(route: Route): Boolean {
         if (route.origin.isEmpty() or route.destination.isEmpty()){
@@ -94,24 +97,25 @@ open class RouteService(private val repository: Repository){
 
 
     suspend fun putFuelCostAverage():Boolean {
-        val routeRepository = RouteRepository()
         val cost: Boolean = routeRepository.calculateFuelCostAverage()
         return cost
     }
 
+    /* Ya no se usa
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun putElectricityCost():Boolean {
-        val routeRepository = RouteRepository()
         val cost: Boolean = routeRepository.calculateElectricityCost()
         return cost
     }
+    */
 
     suspend fun getFuelCostAverage(): List<Double> {
         return repository.getAverageFuelPrices()
     }
 
     suspend fun getElctricCost():Double {
-        return repository.getElectricPrice()
+        return servicioLuz.getLightPrice()//TODO
+        //return repository.getElectricPrice()//TODO
     }
 
     suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double> {
