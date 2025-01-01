@@ -18,12 +18,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @Composable
 fun CreateInterestPlaceErrorPopUp (
     viewModel: InterestPlaceViewModel,
-){//TODO ESTA CLASE NO SE USA PARA NADA MIRAR DE BORRAR
+    navController: NavController
+){
     val showDialog = viewModel.showCreateInterestPlaceErrorPopUp.value
     if (showDialog) {
         Dialog(
@@ -38,7 +40,7 @@ fun CreateInterestPlaceErrorPopUp (
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "El nuevo lugar de interes se ha añadido de manera correcta",
+                    text = "El nuevo lugar de interes no ha se ha añadido de manera correcta",
                     color = Color.White,
                     fontSize = 20.sp,
                     textAlign = TextAlign.Center,
@@ -51,7 +53,8 @@ fun CreateInterestPlaceErrorPopUp (
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Button(
-                    onClick = { viewModel.hideCreateInterestPlaceErrorPopUp() },
+                    onClick = { viewModel.hideCreateInterestPlaceErrorPopUp()
+                              navController.navigate("interestPlaceList")},
                     modifier = Modifier,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Black

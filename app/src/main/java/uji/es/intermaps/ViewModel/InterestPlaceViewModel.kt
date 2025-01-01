@@ -98,6 +98,10 @@ class InterestPlaceViewModel(
         _showUpdateInterestPlaceErrorPopUp.value = false
     }
 
+    fun showCreateInterestPlaceCorrectPopUp(){
+        _showCreateInterestPlaceCorrectPopUp.value = true
+    }
+
     fun getInterestPlaceByToponym(toponym: String) {
         loading = true
         viewModelScope.launch {

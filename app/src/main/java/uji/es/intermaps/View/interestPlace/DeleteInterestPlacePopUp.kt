@@ -59,7 +59,7 @@ fun DeleteInterestPlacePopUp (viewModel: InterestPlaceViewModel, navController: 
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
-                        text = "¿Estas seguro de eliminar la ruta?",
+                        text = "¿Estas seguro de eliminar el lugar de interés seleccionado?",
                         color = White,
                         fontSize = 26.sp,
                         textAlign = TextAlign.Center,

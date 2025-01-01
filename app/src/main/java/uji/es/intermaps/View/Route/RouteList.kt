@@ -173,12 +173,14 @@ fun RouteList(auth: FirebaseAuth, navController: NavController, viewModel: Route
                                 .padding(horizontal = 15.dp)
                         )
 
-                        Icon(
-                            imageVector = Icons.Default.Edit,
+                        Image(
+                            painter = painterResource(
+                                id = R.drawable.eye_icon
+                            ),
                             contentDescription = "Ver",
 
                             modifier = Modifier
-                                .size(30.dp)
+                                .size(50.dp)
                                 .clickable {
                                     viewModel.getRoute(route.origin, route.destination, route.transportMethod, route.vehiclePlate)
                                     viewModel.routeInDataBase = true
@@ -190,9 +192,8 @@ fun RouteList(auth: FirebaseAuth, navController: NavController, viewModel: Route
                                                 URLEncoder.encode(route.vehiclePlate, StandardCharsets.UTF_8.toString())
                                     )
 
-                                },
-
-                            tint = Color(color = 0XFF007E70)
+                                }
+                                .background(Color.Transparent),
                         )
                     }
                     Spacer(modifier = Modifier.height(10.dp))
@@ -258,12 +259,15 @@ fun RouteList(auth: FirebaseAuth, navController: NavController, viewModel: Route
                                 .padding(horizontal = 8.dp)
                         )
 
-                        Icon(
-                            imageVector = Icons.Default.Edit,
+
+                        Image(
+                            painter = painterResource(
+                                id = R.drawable.eye_icon
+                            ),
                             contentDescription = "Ver",
 
                             modifier = Modifier
-                                .size(30.dp)
+                                .size(50.dp)
                                 .clickable {
 
                                     viewModel.getRoute(notFavRoute.origin, notFavRoute.destination, notFavRoute.transportMethod, notFavRoute.vehiclePlate)
@@ -276,8 +280,9 @@ fun RouteList(auth: FirebaseAuth, navController: NavController, viewModel: Route
                                                 URLEncoder.encode(notFavRoute.vehiclePlate, StandardCharsets.UTF_8.toString())
                                     ) //val encodedToponym = URLEncoder.encode(notFavPlace.toponym, StandardCharsets.UTF_8.toString())
                                     //navController.navigate("interestPlaceSetAlias/$encodedToponym")
-                                },
-                            tint = Black
+                                }
+                                .background(Color.Transparent),
+
                         )
                     }
                 }

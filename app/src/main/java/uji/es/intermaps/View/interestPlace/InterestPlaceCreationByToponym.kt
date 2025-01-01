@@ -65,7 +65,8 @@ fun InterestPlaceCreationByToponym(navController: NavController, viewModel: Inte
     var sePuedeAñadir by remember { mutableStateOf(false) }
 
 
-    CreateInterestPlaceCorrectPopUp(viewModel)
+    CreateInterestPlaceCorrectPopUp(viewModel, navController)
+    CreateInterestPlaceErrorPopUp(viewModel, navController)
 
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
@@ -178,7 +179,7 @@ fun InterestPlaceCreationByToponym(navController: NavController, viewModel: Inte
                             val errorMessage = viewModel.getErrorMessage()
                             withContext(Dispatchers.Main) {
                                 if (errorMessage.isEmpty())
-                                    showPopupCreateSucces = true
+                                    viewModel.showCreateInterestPlaceCorrectPopUp()
                                 else
                                     viewModel.showCreateInterestPlaceErrorPopUp()
                             }
@@ -241,63 +242,6 @@ fun InterestPlaceCreationByToponym(navController: NavController, viewModel: Inte
                             }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                }
-            }
-        }
-    }
-    if (showPopupCreateSucces) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp)
-                .background(Color(0x80FFFFFF)),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .height(250.dp)
-                    .width(395.dp)
-                    .background(Color(0XFF007E70), shape = RoundedCornerShape(10.dp))
-                    .clip(RoundedCornerShape(10.dp))
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "El lugar de interés se ha añadido correctamente",
-                        color = White,
-                        fontSize = 26.sp,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-                    Spacer(modifier = Modifier.height(50.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Button(
-                            onClick = {
-                                navController.navigate("interestPlaceList")
-                            },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Black
-                            )
-                        ) {
-                            Text(
-                                text = "Aceptar",
-                                fontSize = 16.sp,
-                            )
-                        }
-                    }
                 }
             }
         }

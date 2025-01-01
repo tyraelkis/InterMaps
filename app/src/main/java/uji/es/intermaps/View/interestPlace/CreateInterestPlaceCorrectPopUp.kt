@@ -18,11 +18,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import uji.es.intermaps.ViewModel.InterestPlaceViewModel
 
 @Composable
 fun CreateInterestPlaceCorrectPopUp (
     viewModel: InterestPlaceViewModel,
+    navController: NavController
 ){
     val showDialog = viewModel.showCreateInterestPlaceCorrectPopUp.value
     if (showDialog) {
@@ -51,7 +53,9 @@ fun CreateInterestPlaceCorrectPopUp (
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Button(
-                    onClick = { viewModel.hideCreateInterestPlaceCorrectPopUp() },
+                    onClick = { viewModel.hideCreateInterestPlaceCorrectPopUp()
+                                navController.navigate("interestPlaceList")
+                    },
                     modifier = Modifier,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Black
