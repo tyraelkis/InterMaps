@@ -29,6 +29,7 @@ import uji.es.intermaps.ViewModel.RouteService
 import uji.es.intermaps.ViewModel.RouteViewModel
 import uji.es.intermaps.ViewModel.UserService
 import uji.es.intermaps.ViewModel.UserViewModel
+import uji.es.intermaps.ViewModel.VehicleService
 import uji.es.intermaps.ViewModel.VehicleViewModel
 import uji.es.intermaps.ViewModel.scheduleFuelPriceUpdate
 import uji.es.intermaps.ui.theme.InterMapsTheme
@@ -49,6 +50,7 @@ class MainActivity : ComponentActivity() {
             val repository = FirebaseRepository()
             val interestPlaceService = InterestPlaceService(repository)
             val userService = UserService(repository)
+            val vehicleService = VehicleService(repository)
             val servicioLuz: ProxyService = CachePrecioLuz(ConsultorPreciLuz())
             val routeService = RouteService(repository, servicioLuz)
             InterMapsTheme {
@@ -61,7 +63,7 @@ class MainActivity : ComponentActivity() {
                         auth,
                         InterestPlaceViewModel(interestPlaceService),
                         UserViewModel(userService, auth),
-                        VehicleViewModel(),
+                        VehicleViewModel(vehicleService),
                         RouteViewModel(routeService = routeService )
                     )
 

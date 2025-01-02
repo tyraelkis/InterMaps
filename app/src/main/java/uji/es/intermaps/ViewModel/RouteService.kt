@@ -112,8 +112,7 @@ open class RouteService(private val repository: Repository, private val servicio
     }
 
     suspend fun getElctricCost():Double {
-        return servicioLuz.getLightPrice()//TODO
-        //return repository.getElectricPrice()//TODO
+        return servicioLuz.getLightPrice()
     }
 
     suspend fun getVehicleTypeAndConsump(route: Route): Pair<VehicleTypes, Double> {

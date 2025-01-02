@@ -1,16 +1,15 @@
 package uji.es.intermaps.ViewModel
 
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
 import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.Model.VehicleFactory
 import uji.es.intermaps.Model.VehicleTypes
 
-class VehicleViewModel {
+class VehicleViewModel(private val vehicleService: VehicleService): ViewModel() {
     private val vehicleFactory = VehicleFactory
-    private val repository = FirebaseRepository()
-    private val vehicleService = VehicleService(repository)
 
     private var showPopupEditSucces: Boolean = false
     private var showPopupCreateSucces: Boolean = false

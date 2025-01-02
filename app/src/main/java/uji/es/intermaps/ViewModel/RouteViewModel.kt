@@ -16,7 +16,6 @@ import uji.es.intermaps.Model.RouteTypes
 import uji.es.intermaps.Model.TransportMethods
 
 class RouteViewModel(private val routeService: RouteService): ViewModel() {
-    val repository = FirebaseRepository()
 
     private val _route = MutableLiveData<Route?>()
     val route: MutableLiveData<Route?> = _route
