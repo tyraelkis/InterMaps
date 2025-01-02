@@ -10,7 +10,7 @@ Integramos APIs de servicios públicos para datos de rutas, geolocalización y c
 
 
 
-![Logo](logo.jpeg)
+![Logo](app/src/main/res/drawable/logo.jpeg)
 
 
 ## Licencia
