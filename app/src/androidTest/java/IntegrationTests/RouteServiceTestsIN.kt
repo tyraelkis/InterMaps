@@ -14,6 +14,7 @@ import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.junit.MockitoJUnitRunner
 import uji.es.intermaps.APIParsers.RouteFeature
 import uji.es.intermaps.APIParsers.RouteSummary
 import uji.es.intermaps.Exceptions.NotSuchElementException
@@ -28,7 +29,7 @@ import uji.es.intermaps.Model.VehicleTypes
 import uji.es.intermaps.ViewModel.RouteRepository
 import uji.es.intermaps.ViewModel.RouteService
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(MockitoJUnitRunner::class)
 class RouteServiceTestsIN {
     @Mock
     private var mockRepository: Repository = mock(Repository::class.java)
@@ -57,7 +58,7 @@ class RouteServiceTestsIN {
             cost = 0.0,
             routeType = RouteTypes.RAPIDA,
             fav = false,
-            vehiclePlate = "9999GON",
+            vehiclePlate = "1234GON",
         )
 
         val mockedCall = RouteFeature(
@@ -89,13 +90,13 @@ class RouteServiceTestsIN {
         doReturn(mockedRoute).`when`(mockRouteRepository).createRoute(
             origin = "Burriana",
             destination = "Castellón de la Plana",
-            transportMethod = TransportMethods.VEHICULO,
+            transportMethods = TransportMethods.VEHICULO,
             routeType = RouteTypes.RAPIDA,
-            vehiclePlate = "9999GON",
+            vehiclePlate = "1234GON",
             route = mockedCall
         )
 
-        val routeTest = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON").second
+        val routeTest = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "1234GON").second
         // Comprobamos que la ruta fue creada correctamente
         assertEquals(mockedRoute, routeTest)
         verify(mockRepository).getInterestPlaceByToponym("Burriana")
@@ -103,9 +104,9 @@ class RouteServiceTestsIN {
         verify(mockRouteRepository).calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", transportMethod = TransportMethods.VEHICULO,RouteTypes.RAPIDA)
         verify(mockRouteRepository).createRoute(origin = "Burriana",
             destination = "Castellón de la Plana",
-            transportMethod = TransportMethods.VEHICULO,
+            transportMethods = TransportMethods.VEHICULO,
             routeType = RouteTypes.RAPIDA,
-            vehiclePlate = "9999GON",
+            vehiclePlate = "1234GON",
             route = mockedCall
         )
 

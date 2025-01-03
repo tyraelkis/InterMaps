@@ -15,6 +15,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnitRunner
 import uji.es.intermaps.Exceptions.NotSuchElementException
 import uji.es.intermaps.Exceptions.VehicleAlreadyExistsException
 import uji.es.intermaps.Interfaces.Repository
@@ -23,7 +24,7 @@ import uji.es.intermaps.Model.Vehicle
 import uji.es.intermaps.Model.VehicleTypes
 import uji.es.intermaps.ViewModel.VehicleService
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(MockitoJUnitRunner::class)
 class VehicleServiceTestsIN {
     @Mock
     var mockRepository: Repository = mock(Repository::class.java)
