@@ -7,11 +7,13 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mock
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.junit.MockitoJUnitRunner
 import uji.es.intermaps.Exceptions.AccountAlreadyRegistredException
 import uji.es.intermaps.Exceptions.IncorrectDataException
 import uji.es.intermaps.Exceptions.NotSuchTransportException
@@ -24,13 +26,14 @@ import uji.es.intermaps.Interfaces.Repository
 import uji.es.intermaps.Model.User
 import uji.es.intermaps.ViewModel.UserService
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(MockitoJUnitRunner::class)
 class UserServiceTestsIN {
+    @Mock
     private lateinit var mockRepository: Repository
     private lateinit var userService: UserService
 
     private var email: String = "prueba@uji.es"
-    private var password: String = "123456AA" // Cambiar en las pruebas de aceptacion para que cumpla los requisitos de las contraseñas
+    private var password: String = "123456AA"
     private var userTest: User = User("emaildeprueba@gmail.com", "123456BB")
 
     @Before
@@ -149,8 +152,7 @@ class UserServiceTestsIN {
 
     @Test(expected = NotSuchVehicleException::class)
     fun createPreferredVehicle_E2Invalido_PreferredVehicleNotCreated(): Unit = runBlocking {
-        doAnswer{
-            throw NotSuchVehicleException()
+        doAnswer{ throw NotSuchVehicleException()
         }.`when`(userService.updateUserVehicle( ""))
 
     }
@@ -167,9 +169,8 @@ class UserServiceTestsIN {
     fun createPreferredTransport_E2Invalido_PreferredTransportNotCreated(): Unit = runBlocking {
         doAnswer{
             throw NotSuchVehicleException()
-        }.`when`(userService.updateUserTransportMethod( ""))
-
-
+        }.`when`(mockRepository).updateUserAttribute("preferredTransportMethod","")
+        userService.updateUserTransportMethod( "")
     }
 
     @Test
@@ -212,8 +213,8 @@ class UserServiceTestsIN {
     fun createPreferredRouteType_E2Invalido_PreferredRouteTypeNotCreated(): Unit = runBlocking {
         doAnswer{
             throw NotValidParameterException()
-        }.`when`(userService.updateUserRouteType( "bicicleta"))
-
+        }.`when`(mockRepository).updateUserAttribute("preferredRouteType","bicicleta")
+        userService.updateUserRouteType( "bicicleta")
     }
 
     @Test

@@ -46,7 +46,7 @@ class RouteServiceTest {
         interestPlaceService.createInterestPlaceFromToponym("Vila-real")
         interestPlaceService.createInterestPlaceFromToponym("Burriana")
         interestPlaceService.createInterestPlaceFromToponym("Castellón de la Plana")
-        vehicleService.createVehicle("9999GON", "gasolina",9.0)
+        vehicleService.createVehicle("1234GON", "gasolina",9.0)
     }
 
     @After
@@ -55,25 +55,25 @@ class RouteServiceTest {
         interestPlaceService.deleteInterestPlace(interestPlaceService.getInterestPlaceByToponym("Vila-real").coordinate)
         interestPlaceService.deleteInterestPlace(interestPlaceService.getInterestPlaceByToponym("Burriana").coordinate)
         interestPlaceService.deleteInterestPlace(interestPlaceService.getInterestPlaceByToponym("Castellón de la Plana").coordinate)
-        vehicleService.deleteVehicle("9999GON")
+        vehicleService.deleteVehicle("1234GON")
         userService.signOut()
     }
 
     @Test
     fun createRoute_E1Valid_routeIsCreated(): Unit = runBlocking {
-        val res = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON").first
+        val res = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "1234GON").first
         assertEquals(true, res)
     }
 
     @Test(expected = NotValidPlaceException::class)
     fun createRoute_E4Invalid_routeNotCreated(): Unit = runBlocking {
-        routeService.createRoute("Borriol", "Madrid", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON")
+        routeService.createRoute("Borriol", "Madrid", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "1234GON")
     }
 
     @Test
     fun calculateConsumition_E4Valid_consumitionCalculated(): Unit = runBlocking {
         val routeTest: Route = routeService.createRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO,
-            RouteTypes.RAPIDA, "9999GON").second
+            RouteTypes.RAPIDA, "1234GON").second
         val vehicleType = routeService.getVehicleTypeAndConsump(routeTest).first
         val calculatedConsumition = routeService.calculateConsumition(routeTest, TransportMethods.VEHICULO, vehicleType)
         val result = 1.928
@@ -104,7 +104,7 @@ class RouteServiceTest {
 
     @Test
     fun saveRoute_E4Valid_routeSaved(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Castellón de la Plana", "Burriana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON").second
+        val routeTest: Route = routeService.createRoute("Castellón de la Plana", "Burriana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "1234GON").second
         val res = routeService.putRoute(routeTest)
         assertEquals(true, res)
         routeService.deleteRoute(routeTest)
@@ -112,13 +112,13 @@ class RouteServiceTest {
 
     @Test (expected = NotValidPlaceException::class)
     fun saveRoute_E4Invalid_noRouteSaved(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Valencia", "Valencia", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON").second
+        val routeTest: Route = routeService.createRoute("Valencia", "Valencia", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "1234GON").second
         routeService.putRoute(routeTest)
     }
 
     @Test
     fun deleteRoute_E4Valid_routeDeleted(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Castellón de la Plana", "Burriana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON").second
+        val routeTest: Route = routeService.createRoute("Castellón de la Plana", "Burriana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "1234GON").second
         routeService.putRoute(routeTest)
         val res = routeService.deleteRoute(routeTest)
         assertEquals(true, res)
@@ -126,12 +126,12 @@ class RouteServiceTest {
 
     @Test (expected = NotValidPlaceException::class)
     fun deleteRoute_E4Invalid_routeDeleted(): Unit = runBlocking {
-        val routeTest: Route = routeService.createRoute("Castellón", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON").second
+        val routeTest: Route = routeService.createRoute("Castellón", "Castellón", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "1234GON").second
         routeService.deleteRoute(routeTest)
     }
     @Test
     fun viewRouteList_E1Valido_RouteListViewed(): Unit = runBlocking{
-        val routeTest: Route = routeService.createRoute("Castellón de la Plana", "Burriana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "9999GON").second
+        val routeTest: Route = routeService.createRoute("Castellón de la Plana", "Burriana", TransportMethods.VEHICULO,RouteTypes.RAPIDA, "1234GON").second
         routeService.putRoute(routeTest)
         val res = routeService.viewRouteList()
         assertTrue(res.isNotEmpty())
@@ -170,7 +170,7 @@ class RouteServiceTest {
 
     @Test (expected = NotSuchElementException::class)
     fun setFavRoute_E3Invalid_errorOnSettingFavRoute(): Unit = runBlocking {
-        routeService.setFavRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "9999GON")
+        routeService.setFavRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "1234GON")
     }
 
     @Test
@@ -181,7 +181,7 @@ class RouteServiceTest {
 
     @Test (expected = NotSuchElementException::class)
     fun deleteFavRoute_E3Invalid_errorOnDeletingFavRoute(): Unit = runBlocking {
-        routeService.deleteFavRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "9999GON")
+        routeService.deleteFavRoute("Burriana", "Castellón de la Plana", TransportMethods.VEHICULO, RouteTypes.RAPIDA, "1234GON")
     }
 
 }
