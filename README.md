@@ -67,6 +67,7 @@ Instala la APK en tu dispositivo movil.
 - Elige dos puntos de interés y **crea una ruta** según tus preferencias. ¡Puedes guardarla si te ha gustado!
 - Disfruta de la experiencia :)
 
+- **Tests:** Si quieres ejecutar los tests del proyecto, debido a las limitaciones de firebase hay que ejecutar cada clase de forma individual.
 
 ## Autores
 
