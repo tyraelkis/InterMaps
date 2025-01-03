@@ -52,7 +52,7 @@ Integramos APIs de servicios públicos para datos de rutas, geolocalización y c
     Retrofit
 ## Instalación
 
-Descarga la APK de InterMaps: [Enlace APK //falta poner el enlace de la versión final]()
+Descarga la APK de InterMaps: [Enlace APK](https://drive.google.com/file/d/1FPb14ANET_CqQphbQPwAgS9vmW6MfT1g/view?usp=sharing)
 
 Instala la APK en tu dispositivo movil. 
 

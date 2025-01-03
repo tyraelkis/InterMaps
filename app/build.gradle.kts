@@ -94,7 +94,6 @@ dependencies {
     //implementation ("com.mapbox.extension:maps-compose:11.8.0")
 
     // Mockito core para pruebas unitarias
-    testImplementation(libs.mockito.inline)
 
     // Mockito-Kotlin para simplificar el uso en Kotlin
     testImplementation(libs.mockito.kotlin)
