@@ -89,7 +89,7 @@ class RouteServiceTestsIN {
         doReturn(mockedRoute).`when`(mockRouteRepository).createRoute(
             origin = "Burriana",
             destination = "Castellón de la Plana",
-            transportMethods = TransportMethods.VEHICULO,
+            transportMethod = TransportMethods.VEHICULO,
             routeType = RouteTypes.RAPIDA,
             vehiclePlate = "9999GON",
             route = mockedCall
@@ -103,7 +103,7 @@ class RouteServiceTestsIN {
         verify(mockRouteRepository).calculateRoute("-0.085748,39.888399", "-0.037787,39.987142", transportMethod = TransportMethods.VEHICULO,RouteTypes.RAPIDA)
         verify(mockRouteRepository).createRoute(origin = "Burriana",
             destination = "Castellón de la Plana",
-            transportMethods = TransportMethods.VEHICULO,
+            transportMethod = TransportMethods.VEHICULO,
             routeType = RouteTypes.RAPIDA,
             vehiclePlate = "9999GON",
             route = mockedCall
