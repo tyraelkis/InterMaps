@@ -25,21 +25,6 @@ class FuelPriceWorker(context: Context, workerParams: WorkerParameters) : Corout
     }
 }
 
-/* Ya no se usa
-class ElectricPriceWorker(context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
-    val routeService = RouteService(FirebaseRepository(), CachePrecioLuz(ConsultorPreciLuz()))
-    @RequiresApi(Build.VERSION_CODES.O)
-    override suspend fun doWork(): Result {
-        return try {
-            routeService.putElectricityCost()
-            Result.success()
-        } catch (e: Exception) {
-            Log.e("ElectricPriceWorker", "Error al actualizar los precios: ${e.message}")
-            Result.failure()
-        }
-    }
-}
-*/
 
 fun scheduleFuelPriceUpdate() {
     val calendar = Calendar.getInstance()
@@ -57,21 +42,3 @@ fun scheduleFuelPriceUpdate() {
 
     WorkManager.getInstance().enqueue(workRequest)
 }
-
-/* Ya no se usa
-fun scheduleElectricPriceUpdate() {
-    val calendar = Calendar.getInstance()
-    calendar.set(Calendar.MINUTE, 0)
-    calendar.set(Calendar.SECOND, 0)
-
-    val initialDelay = calendar.timeInMillis - System.currentTimeMillis()
-
-    val delay = if (initialDelay > 0) initialDelay else initialDelay + TimeUnit.HOURS.toMillis(1)
-
-    val workRequest = PeriodicWorkRequestBuilder<ElectricPriceWorker>(1, TimeUnit.HOURS)
-        .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-        .build()
-
-    WorkManager.getInstance().enqueue(workRequest)
-}
-*/
